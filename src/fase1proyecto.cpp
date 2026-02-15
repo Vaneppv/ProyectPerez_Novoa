@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iomanip>
+#include <cstring>
 #include <limits>
 
 using namespace std;
@@ -89,7 +90,13 @@ struct Tienda {
 // Funcion de Inicialización
 void inicializarTienda(Tienda* tienda, const char* nombre, const char* rif){
     
-    // Inicializar los arreglos con la capacidad inicial
+    // Informacion de la tienda 
+    strncpy(tienda->nombre, nombre, 99);
+    tienda->nombre[99] = '\0'; 
+    strncpy(tienda->rif, rif, 19);
+    tienda->rif[19] = '\0';
+
+    // Reservar capacidad inicial en los arreglos
     tienda->proveedores = new Proveedor [5];
     tienda->clientes = new Cliente [5];
     tienda->productos = new Producto [5];
@@ -102,12 +109,12 @@ void inicializarTienda(Tienda* tienda, const char* nombre, const char* rif){
     tienda->numTransacciones = 0;
 
     // Inicializar IDs Autoincrementales
-    tienda->siguienteIdTransaccion = 0;
-    tienda->siguienteIdCliente = 0;
-    tienda->siguienteIdProducto = 0;
-    tienda->siguienteIdProveedor = 0;
+    tienda->siguienteIdTransaccion = 1;
+    tienda->siguienteIdCliente = 1;
+    tienda->siguienteIdProducto = 1;
+    tienda->siguienteIdProveedor = 1;
 
-    // Inicializar contadores en la capacidad inicial 5
+    // Establecer capacidades iniciales
     tienda->capacidadClientes = 5;
     tienda->capacidadProductos = 5;
     tienda->capacidadProveedores = 5;
@@ -118,7 +125,7 @@ void inicializarTienda(Tienda* tienda, const char* nombre, const char* rif){
 
 // Funcion de Liberación
 void liberarTienda(Tienda* tienda){
-    
+
     // Liberar arreglos dinámicos para evitar fugas de memoria
     delete[] tienda->clientes;
     delete[] tienda->proveedores;
