@@ -1,29 +1,31 @@
 #include <iostream>
+#include <iomanip>
+#include <limits>
 
 using namespace std;
 
 
 // Estructura Producto
 struct Producto {
-    int id;                    
-    char codigo[20];           
-    char nombre[100];          
-    char descripcion[200];     
-    int idProveedor;           
-    float precio;              
-    int stock;                 
+    int id;
+    char codigo[20];
+    char nombre[100];
+    char descripcion[200];
+    int idProveedor;
+    float precio;
+    int stock;
     char fechaRegistro[11];
 };
 
 
 // Estructura Proveedor
 struct Proveedor {
-    int id;                    
-    char nombre[100];          
-    char rif[20];              
-    char telefono[20];         
-    char email[100];           
-    char direccion[200];       
+    int id;
+    char nombre[100];
+    char rif[20];         
+    char telefono[20];
+    char email[100];       
+    char direccion[200];   
     char fechaRegistro[11];
 };
 
@@ -86,12 +88,65 @@ struct Tienda {
 
 // Funcion de Inicialización
 void inicializarTienda(Tienda* tienda, const char* nombre, const char* rif){
+    
+    // Inicializar los arreglos con la capacidad inicial
+    tienda->proveedores = new Proveedor [5];
+    tienda->clientes = new Cliente [5];
+    tienda->productos = new Producto [5];
+    tienda->transacciones = new Transaccion [5];
+
+    // Inicializar contadores de cantidad (stock) en 0
+    tienda->numProductos = 0;
+    tienda->numProveedores = 0;
+    tienda->numClientes = 0;
+    tienda->numTransacciones = 0;
+
+    // Inicializar IDs Autoincrementales
+    tienda->siguienteIdTransaccion = 0;
+    tienda->siguienteIdCliente = 0;
+    tienda->siguienteIdProducto = 0;
+    tienda->siguienteIdProveedor = 0;
+
+    // Inicializar contadores en la capacidad inicial 5
+    tienda->capacidadClientes = 5;
+    tienda->capacidadProductos = 5;
+    tienda->capacidadProveedores = 5;
+    tienda->capacidadTransacciones = 5;
 
 }
 
 
 // Funcion de Liberación
 void liberarTienda(Tienda* tienda){
+    
+    // Liberar arreglos dinámicos para evitar fugas de memoria
+    delete[] tienda->clientes;
+    delete[] tienda->proveedores;
+    delete[] tienda->productos;
+    delete[] tienda->transacciones;
+
+    // Apuntar a NULL para evitar punteros colgantes
+    tienda->clientes = nullptr;
+    tienda->proveedores = nullptr;
+    tienda->productos = nullptr;
+    tienda->transacciones = nullptr;
+    
+    // Reiniciar contadores de cantidad y capacidad 
+    tienda->numProductos = 0;
+    tienda->numProveedores = 0;
+    tienda->numClientes = 0;
+    tienda->numTransacciones = 0;
+
+    tienda->capacidadClientes = 0;
+    tienda->capacidadProductos = 0;
+    tienda->capacidadProveedores = 0;
+    tienda->capacidadTransacciones = 0;
+
+    // Reiniciar IDs Autoincrementales
+    tienda->siguienteIdTransaccion = 0;
+    tienda->siguienteIdCliente = 0;
+    tienda->siguienteIdProducto = 0;
+    tienda->siguienteIdProveedor = 0;
 
 }
 
