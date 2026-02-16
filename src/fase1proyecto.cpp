@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cstring>
+#include <ctime>
 #include <limits>
 
 using namespace std;
@@ -59,8 +60,8 @@ struct Transaccion {
 
 // Estructura Principal: Tienda
 struct Tienda {
-    char nombre[100];          // Nombre de la tienda
-    char rif[20];              // RIF de la tienda
+    char nombre[100]; // Nombre de la tienda
+    char rif[20];     // RIF de la tienda
     
     // Arrays dinámicos de entidades
     Producto* productos;
@@ -91,10 +92,17 @@ struct Tienda {
 void inicializarTienda(Tienda* tienda, const char* nombre, const char* rif){
     
     // Informacion de la tienda 
-    strncpy(tienda->nombre, nombre, 99);
-    tienda->nombre[99] = '\0'; 
-    strncpy(tienda->rif, rif, 19);
-    tienda->rif[19] = '\0';
+    for (int i = 0; i < 99 && nombre[i] != '\0' ; i++)
+    {
+        tienda->nombre[i] = nombre[i];
+        tienda->nombre[i + 1] = '\0';
+    }
+    for (int i = 0; i < 19 && rif[i] != '\0'; i++)
+    {
+        tienda->rif[i] = rif[i];
+        tienda->rif[i + 1] = '\0'; 
+    }
+    
 
     // Reservar capacidad inicial en los arreglos
     tienda->proveedores = new Proveedor [5];
@@ -294,22 +302,62 @@ void cancelarTransaccion(Tienda* tienda){
 
 // Redimensionamiento de Arrays
 void redimensionarProductos(Tienda* tienda){
+    int nuevaCapacidad = tienda->capacidadProductos * 2;
+    Producto* nuevoArray = new Producto[nuevaCapacidad];
 
+    for (int i = 0; i < tienda->numProductos; i++)
+    {
+        nuevoArray[i] = tienda->productos[i];
+    }
+    
+    delete[] tienda->productos;
+    tienda->capacidadProductos = nuevaCapacidad;
+    tienda->productos = nuevoArray;
 }
 
 
 void redimensionarProveedores(Tienda* tienda){
+    int nuevaCapacidad = tienda->capacidadProveedores * 2;
+    Proveedor* nuevoArray = new Proveedor[nuevaCapacidad];
 
+    for (int i = 0; i < tienda->numProveedores; i++)
+    {
+        nuevoArray[i] = tienda->proveedores[i];
+    }
+    
+    delete[] tienda->proveedores;
+    tienda->capacidadProveedores = nuevaCapacidad;
+    tienda->proveedores = nuevoArray;
 }
 
 
 void redimensionarClientes(Tienda* tienda){
+    int nuevaCapacidad = tienda->capacidadClientes * 2;
+    Cliente* nuevoArray = new Cliente[nuevaCapacidad];
 
+    for (int i = 0; i < tienda->numClientes; i++)
+    {
+        nuevoArray[i] = tienda->clientes[i];
+    }
+    
+    delete[] tienda->clientes;
+    tienda->capacidadClientes = nuevaCapacidad;
+    tienda->clientes = nuevoArray;
 }
 
 
 void redimensionarTransacciones(Tienda* tienda){
+    int nuevaCapacidad = tienda->capacidadTransacciones * 2;
+    Transaccion* nuevoArray = new Transaccion[nuevaCapacidad];
 
+    for (int i = 0; i < tienda->numTransacciones; i++)
+    {
+        nuevoArray[i] = tienda->transacciones[i];
+    }
+    
+    delete[] tienda->transacciones;
+    tienda->capacidadTransacciones = nuevaCapacidad;
+    tienda->transacciones = nuevoArray;
 }
 
 
