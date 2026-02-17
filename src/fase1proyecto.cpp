@@ -92,16 +92,11 @@ struct Tienda {
 void inicializarTienda(Tienda* tienda, const char* nombre, const char* rif){
     
     // Informacion de la tienda 
-    for (int i = 0; i < 99 && nombre[i] != '\0' ; i++)
-    {
-        tienda->nombre[i] = nombre[i];
-        tienda->nombre[i + 1] = '\0';
-    }
-    for (int i = 0; i < 19 && rif[i] != '\0'; i++)
-    {
-        tienda->rif[i] = rif[i];
-        tienda->rif[i + 1] = '\0'; 
-    }
+    strncpy(tienda->nombre, nombre, 99);
+    tienda->nombre[99] = '\0';
+
+    strncpy(tienda->rif, rif, 19);
+    tienda->rif[19] = '\0';
     
 
     // Reservar capacidad inicial en los arreglos
