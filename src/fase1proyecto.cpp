@@ -265,7 +265,10 @@ void eliminarCliente(Tienda* tienda){
 
 // Registrar Compra (a Proveedor)
 void registrarCompra(Tienda* tienda){
-
+    if (tienda == nullptr){
+        return;
+    }
+    
 }
 
 
