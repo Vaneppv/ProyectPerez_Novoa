@@ -390,7 +390,7 @@ bool validarEmail(const char* email){
 
 bool validarFecha(const char* fecha) {
 
-    if (strlen(fecha) != 10) return false; // Validar de tamaño de caracteres (YYYY-MM-DD)
+    if (strlen(fecha) != 10) return false; // Validar el tamaño de caracteres (YYYY-MM-DD)
     if (fecha[4] != '-' || fecha[7] != '-') return false; // Validar de caracteres en posicion 4 y 5 (deben ser '-')
 
     // Validar que sean numeros excepto los '-'
