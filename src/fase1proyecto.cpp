@@ -267,25 +267,179 @@ void registrarCompra(Tienda* tienda){
     if (tienda == nullptr){ // Validacion de seguridad
         return;
     }
+    if (tienda->numTransacciones >= tienda->capacidadTransacciones) // Verificacion del tamaño del arreglo
+    {
+        redimensionarTransacciones(tienda);
+    }
     
+    int ProdID, ProveedorID, cantidad;
+    float costoUni;
+
+    cout << endl << "===== REGISTRAR COMPRA A PROVEEDOR =====" << endl;
+
+    // Validar existencia del producto y del proveedor
+    cout << "Ingrese ID del producto: ";
+    cin >> ProdID;
+    if (existeProducto(tienda, ProdID) == false){
+        cout << "Error: El producto no existe." << endl;
+        return;
+    }
+    int IndiceProducto = buscarProductoPorId(tienda, ProdID);
+
+    cout << "Ingrese ID del proveedor: ";
+    cin >> ProveedorID;
+    if (existeProveedor(tienda, ProveedorID) == false)
+    {
+        cout << "Error: El proveedor no existe." << endl;
+        return;
+    }
+
+    // Datos de Transaccion
+    cout << "Ingrese cantidad de productos: ";
+    cin >> cantidad;
+    cout << "Ingrese costo del producto por unidad: ";
+    cin >> costoUni;
+
+    // Llenar la transaccion en el indice actual
+    int i = tienda->numTransacciones;
+    tienda->transacciones[i].id = tienda->siguienteIdTransaccion++;
+    strcpy(tienda->transacciones[i].tipo, "COMPRA");
+    tienda->transacciones[i].cantidad = cantidad;
+    tienda->transacciones[i].idProducto = ProdID;
+    tienda->transacciones[i].idRelacionado = ProveedorID;
+    tienda->transacciones[i].precioUnitario = costoUni;
+    tienda->transacciones[i].total = cantidad*costoUni;
     
+    obtenerFechaActual(tienda->transacciones[i].fecha);
+
+    cout << "Descripción: ";
+    cin.ignore();  // Limpieza del buffer
+    cin.getline(tienda->transacciones[i].descripcion, 200);
+
+    char confirmar;
+    cout << "¿Desea confirmar y guardar esta Compra? (S/N) ";
+    cin >> confirmar;
+
+    if (confirmar == 'S' || confirmar == 's')
+    {
+    // Actualizar Stock del producto
+    tienda->productos[IndiceProducto].stock += cantidad;
+    // Actualizacion del contador
+    tienda->numTransacciones++;
+    
+    cout << endl << "Compra registrada con exito! \n Nuevo Stock de: ";
+    cout << tienda->productos[IndiceProducto].nombre << ": " << tienda->productos[IndiceProducto].stock;
+    } else {
+        tienda->siguienteIdTransaccion--; // Revertimos el ID autoincremental;
+        cout << endl << "Compra cancelada.";
+    }   
 }
 
 
 // Registrar Venta (a Cliente)
 void registrarVenta(Tienda* tienda){
+   if (tienda == nullptr){ // Validacion de seguridad
+        return;
+    }
+    if (tienda->numTransacciones >= tienda->capacidadTransacciones) // Verificacion del tamaño del arreglo
+    {
+        redimensionarTransacciones(tienda);
+    }
+    
+    int ProdID, clienteID, cantidad;
 
+    cout << endl << "===== REGISTRAR VENTA A CLIENTE =====" << endl;
+
+    // Validar existencia del producto y del proveedor
+    cout << "Ingrese ID del producto: ";
+    cin >> ProdID;
+    int IndiceProducto = buscarProductoPorId(tienda, ProdID);
+    
+    if (IndiceProducto == -1)
+    {
+        cout << "Error: El producto no existe.";
+        return;
+    }
+    
+
+    cout << "Ingrese ID del Cliente: ";
+    cin >> clienteID;
+    if (existeCliente(tienda, clienteID) == false)
+    {
+        cout << "Error: El cliente no existe.";
+        return;
+    }
+
+    // Datos de Transaccion
+    cout << "Ingrese cantidad de productos: ";
+    cin >> cantidad;
+
+    // Validacion de Stock
+    if (cantidad > tienda->productos[IndiceProducto].stock)
+    {
+        cout << "Error: Stock insuficiente. \n Stock Disponible: " << tienda->productos[IndiceProducto].stock << endl;
+        return;
+    }
+
+    // Llenar la transaccion en el indice actual
+    int i = tienda->numTransacciones;
+    tienda->transacciones[i].id = tienda->siguienteIdTransaccion++;
+    strcpy(tienda->transacciones[i].tipo, "VENTA");
+    tienda->transacciones[i].cantidad = cantidad;
+    tienda->transacciones[i].idProducto = ProdID;
+    tienda->transacciones[i].idRelacionado = clienteID;
+    
+    tienda->transacciones[i].precioUnitario = tienda->productos[IndiceProducto].precio;
+    tienda->transacciones[i].total = tienda->transacciones[i].precioUnitario * cantidad;
+
+    obtenerFechaActual(tienda->transacciones[i].fecha);
+
+    cout << "Descripción: ";
+    cin.ignore();  // Limpieza del buffer
+    cin.getline(tienda->transacciones[i].descripcion, 200);
+
+    cout << endl << "===== Resumen de compra =====" << endl;
+    cout << "Cantidad: " << tienda->transacciones[i].cantidad << endl;
+    cout << "Producto: " << tienda->productos[IndiceProducto].nombre << endl;
+    cout << "Total a pagar: " << tienda->transacciones[i].total << endl;
+
+    char confirmar;
+    cout << "¿Desea confirmar y guardar esta Venta? (S/N) ";
+    cin >> confirmar;
+
+    if (confirmar == 'S' || confirmar == 's')
+    {
+    // Actualizar Stock del producto
+    tienda->productos[IndiceProducto].stock -= cantidad;
+    // Actualizacion del contador
+    tienda->numTransacciones++;
+
+    cout << endl << "Venta registrada con exito! \n Nuevo Stock de: ";
+    cout << tienda->productos[IndiceProducto].nombre << ": " << tienda->productos[IndiceProducto].stock;
+    } 
+    else
+    {
+        tienda->siguienteIdTransaccion--; // Revertimos el ID autoincremental;
+        cout << endl << "Venta cancelada.";
+    }   
 }
 
 
 // Buscar Transacciones
 void buscarTransacciones(Tienda* tienda){
-
+    if (tienda == nullptr){ // Validacion de seguridad
+        return;
+    }
+    
 }
 
 
 // Listar Transacciones
 void listarTransacciones(Tienda* tienda){
+if (tienda == nullptr){ // Validacion de seguridad
+        return;
+    }
+
 
 }
 
