@@ -6,8 +6,75 @@
 
 using namespace std;
 
+struct Producto;
+struct Proveedor;
+struct Cliente;
+struct Transaccion;
+struct Tienda;
 
-// Estructura Producto
+// PROTOTIPO DE FUNCIONES
+
+// Inicialización y Liberación
+void inicializarTienda(Tienda* tienda, const char* nombre, const char* rif);
+void liberarTienda(Tienda* tienda);
+
+// FUNCIONES CRUD
+void crearProducto(Tienda* tienda);
+void buscarProducto(Tienda* tienda);
+void actualizarProducto(Tienda* tienda);
+void actualizarStockProducto(Tienda* tienda);
+void listarProductos(Tienda* tienda);
+void eliminarProducto(Tienda* tienda);
+
+
+void crearProveedor(Tienda* tienda);
+void buscarProveedor(Tienda* tienda);
+void actualizarProveedor(Tienda* tienda);
+void listarProveedores(Tienda* tienda);
+void eliminarProveedor(Tienda* tienda);
+
+void crearCliente(Tienda* tienda);
+void buscarCliente(Tienda* tienda);
+void actualizarCliente(Tienda* tienda);
+void listarClientes(Tienda* tienda);
+void eliminarCliente(Tienda* tienda);
+
+void registrarCompra(Tienda* tienda);
+void registrarVenta(Tienda* tienda);
+void buscarTransacciones(Tienda* tienda);
+void listarTransacciones(Tienda* tienda);
+void cancelarTransaccion(Tienda* tienda);
+
+// FUNCIONES AUXILIARES
+// Redimensionamiento de Arrays
+void redimensionarProductos(Tienda* tienda);
+void redimensionarProveedores(Tienda* tienda);
+void redimensionarClientes(Tienda* tienda);
+void redimensionarTransacciones(Tienda* tienda);
+
+// VALIDACIONES
+bool validarEmail(const char* email);
+bool validarFecha(const char* fecha);
+bool existeProducto(Tienda* tienda, int id);
+bool existeProveedor(Tienda* tienda, int id);
+bool existeCliente(Tienda* tienda, int id);
+bool codigoDuplicado(Tienda* tienda, const char* codigo);
+bool rifDuplicado(Tienda* tienda, const char* rif);
+
+// BUSQUEDAS
+int buscarProductoPorId(Tienda* tienda, int id);
+int buscarProveedorPorId(Tienda* tienda, int id);
+int buscarClientePorId(Tienda* tienda, int id);
+int buscarTransaccionPorId(Tienda* tienda, int id);
+int* buscarProductosPorNombre(Tienda* tienda, const char* nombre, int* numResultados);
+
+
+// UTILIDADES
+void obtenerFechaActual(char* buffer);
+void convertirAMinusculas(char* cadena);
+bool contieneSubstring(const char* texto, const char* busqueda);
+void mostrarDetalleTransaccion(Tienda* tienda, int ind);
+
 struct Producto {
     int id;
     char codigo[20];
@@ -431,21 +498,260 @@ void buscarTransacciones(Tienda* tienda){
         return;
     }
     
-}
+    int op;
+    bool encontro;
 
+    cout << endl << "===== Buscar Transacciones =====" << endl;
+    cout << "Seleccione opcion de busqueda: " << endl 
+    << "1. Buscar por ID de Transacción" << endl 
+    << "2. Buscar por ID de Producto" << endl
+    << "3. Buscar por ID de Cliente" << endl
+    << "4. Buscar por ID de Proveedor" << endl
+    << "5. Buscar por fecha exacta" << endl
+    << "6. Buscar por tipo de transación (COMPRA/VENTA)" << endl
+    << "0. Cancelar" << endl;
+    cin >> op;
+    
+    if (op == 0)
+    {
+        return;
+    }
+    
+    switch (op)
+    {
+    case 1: // Busqueda por ID de transacción
+        int TransID;
+        cout << " Ingrese ID de la transacción: ";
+        cin >> TransID;
+        int i = buscarTransaccionPorId(tienda, TransID); // Extraer ID
+        if (i == -1) // Validación de existencia
+        {
+            cout << "Error: La transaccion no existe.";
+            break;
+        }
+        cout << endl << left 
+            << setw(10) << "ID Trans" 
+            << setw(12) << "Fecha" 
+            << setw(10) << "Tipo" 
+            << setw(12) << "ID Relac." 
+            << setw(12) << "ID Prod"
+            << setw(15) << "Producto" 
+            << setw(10) << "Cant" 
+            << setw(10) << "Total" << endl;
+        mostrarDetalleTransaccion(tienda, i);
+        break;
+    
+    case 2: // Busqueda por ID del Producto
+        int prodID;
+
+        cout << "Ingrese ID del Producto: ";
+        cin >> prodID;
+
+        if (existeProducto(tienda, prodID) == false) // Validacion de existencia
+        {
+            cout << "Error: El producto no existe.";
+            break;
+        }
+        encontro = false;
+
+        cout << endl << left 
+            << setw(10) << "ID Trans" 
+            << setw(12) << "Fecha" 
+            << setw(10) << "Tipo" 
+            << setw(12) << "ID Relac." 
+            << setw(12) << "ID Prod"
+            << setw(15) << "Producto" 
+            << setw(10) << "Cant" 
+            << setw(10) << "Total" << endl;
+        
+        for (int i = 0; i < tienda->numTransacciones; i++)
+        {
+            if (tienda->transacciones[i].idProducto == prodID) // Si encuentra el ID del producto lo muestra
+            {
+            mostrarDetalleTransaccion(tienda, i);
+            encontro = true; // Actualización de la variable booleana
+            }
+        }
+        if (encontro == false) // No encontro el ID en las transacciones
+        {
+            cout << "No hay transacciones para este producto." << endl;
+        }
+        break;
+    case 3:
+        int clienteID;
+
+        cout << "Ingrese ID del cliente: ";
+        cin >> clienteID;
+        if (existeCliente(tienda, clienteID) == false){ // Validación de existencia del cliente
+            cout << "Error: El cliente no existe.";
+            break; 
+        }
+        encontro = false;
+
+        cout << endl << left 
+            << setw(10) << "ID Trans" 
+            << setw(12) << "Fecha" 
+            << setw(10) << "Tipo" 
+            << setw(12) << "ID Relac." 
+            << setw(12) << "ID Prod"
+            << setw(15) << "Producto" 
+            << setw(10) << "Cant" 
+            << setw(10) << "Total" << endl;
+
+        for (int i = 0; i < tienda->numTransacciones; i++)
+        {
+            if (tienda->transacciones[i].idRelacionado == clienteID) // Si encuentra el ID del producto lo muestra
+            {
+                mostrarDetalleTransaccion(tienda, i);
+                encontro = true; // Actualización de la variable boolena
+            }
+        }
+        if (encontro == false){ // No encontro el ID en las transacciones
+            cout << "No hay transacciones registradas para este cliente." << endl; 
+        }
+    break;
+
+    case 4: // Busqueda por ID de proveedor
+        int proveedorID;
+
+        cout << "Ingrese el ID del proveedor: ";
+        cin >> proveedorID;
+        if (existeProveedor(tienda, proveedorID) == false){
+            cout << "Error: El proveedor no existe.";
+            break;
+        }
+
+        cout << endl << left 
+            << setw(10) << "ID Trans" 
+            << setw(12) << "Fecha" 
+            << setw(10) << "Tipo" 
+            << setw(12) << "ID Relac." 
+            << setw(12) << "ID Prod"
+            << setw(15) << "Producto" 
+            << setw(10) << "Cant" 
+            << setw(10) << "Total" << endl;
+
+        encontro = false;
+        
+        for (int i = 0; i < tienda->numTransacciones; i++)
+        {
+            if (tienda->transacciones[i].idRelacionado == proveedorID){
+                mostrarDetalleTransaccion(tienda, i);
+                encontro = true;
+            }
+        }
+        if (encontro == false)
+        {
+            cout << "No hay transacciones registradas para este proveedor.";
+        }
+        
+    break;
+
+    case 5: // Busqueda por fecha
+        char fecha[11];
+
+        cout << "Ingrese fecha de la Transacción (YYYY-MM-DD): ";
+        cin >> fecha;
+        if(validarFecha(fecha) == false){
+            cout << "Error: Formato de fecha no valido";
+            break;
+        }
+
+        cout << endl << left 
+            << setw(10) << "ID Trans" 
+            << setw(12) << "Fecha" 
+            << setw(10) << "Tipo" 
+            << setw(12) << "ID Relac." 
+            << setw(12) << "ID Prod"
+            << setw(15) << "Producto" 
+            << setw(10) << "Cant" 
+            << setw(10) << "Total" << endl;
+
+        encontro = false; 
+        
+        for (int i = 0; i < tienda->numTransacciones; i++)
+        {
+            if (strcmp(tienda->transacciones[i].fecha, fecha) == 0)
+            {
+                mostrarDetalleTransaccion(tienda, i);
+                encontro = true;
+            }
+        }
+        if (encontro == false)
+        {
+            cout << "No hay transacciones registradas en la fecha especificada.";
+        }
+        
+    break;
+
+    case 6: // busqueda por tipo de transaccion
+
+        int tipo;
+        cout << "Ingrese tipo de transacción: "
+             << "1. Compra (A Proveedor)"
+             << "2. Venta (A Cliente)" 
+             << "0. Cancelar"
+             << endl;
+        cin >> tipo;
+
+        if (tipo == 0)
+        {
+            break;
+        }
+        if (tipo < 1 || tipo > 2)
+        {
+            cout << "Opcion Invalida";
+            break;
+        }
+        
+        cout << endl << left 
+            << setw(10) << "ID Trans" 
+            << setw(12) << "Fecha" 
+            << setw(10) << "Tipo" 
+            << setw(12) << "ID Relac." 
+            << setw(12) << "ID Prod"
+            << setw(15) << "Producto" 
+            << setw(10) << "Cant" 
+            << setw(10) << "Total" << endl;
+
+        encontro = false;
+
+        const char* tipoTransaccion = (tipo == 1) ? "COMPRA" : "VENTA"; 
+
+        for (int i = 0; i < tienda->numTransacciones; i++)
+        {
+            if (strcmp(tienda->transacciones[i].tipo, tipoTransaccion) == 0)
+            {
+                mostrarDetalleTransaccion(tienda, i);
+                encontro = true;
+            }
+        }
+        if (encontro == false)
+        {
+            cout << "No hay transacciones de este tipo";
+        }
+
+    break;
+
+    default:
+        break;
+    }
+
+}
 
 // Listar Transacciones
 void listarTransacciones(Tienda* tienda){
-if (tienda == nullptr){ // Validacion de seguridad
+    if (tienda == nullptr){ // Validacion de seguridad
         return;
     }
-
-
 }
 
 
 // Cancelar/Anular Transacción
 void cancelarTransaccion(Tienda* tienda){
+    if (tienda == nullptr){ // Validacion de seguridad
+        return;
+    }
 
 }
 
@@ -567,7 +873,9 @@ bool validarFecha(const char* fecha) {
     if ((mes == 4 || mes == 6 || mes == 9 || mes == 11) && dia > 30) return false;
     if (mes == 2) 
     {
-        if (dia > 29) return false;
+        if (dia > 29){
+            return false;
+        } 
     }
     return true; // Fecha valida
 }
@@ -658,7 +966,7 @@ bool rifDuplicado(Tienda* tienda, const char* rif){
             return true; // Si lo encuenta retorna True (Si existe la cedula)
         }
     }
-    return false; // No esta duplicado
+    return false; // Si llega hasta aqui, no esta duplicado
 }
 
 
@@ -676,7 +984,7 @@ int buscarProductoPorId(Tienda* tienda, int id){
             return i; // Si lo encuentra retorna el indice
         }
     }
-    return -1; // No existe
+    return -1; // Si llega hasta aqui, no existe
 }
 
 
@@ -692,7 +1000,7 @@ int buscarProveedorPorId(Tienda* tienda, int id){
             return i; // Si lo encuentra retorna el indice
         }
     }
-    return -1; // No existe
+    return -1; // Si llega hasta aqui, No existe
 }
 
 
@@ -708,7 +1016,22 @@ int buscarClientePorId(Tienda* tienda, int id){
             return i; // Si lo encuentra retorna el indice
         }
     }
-    return -1; // No existe
+    return -1; // Si llega hasta aqui, No existe
+}
+
+int buscarTransaccionPorId(Tienda* tienda, int id){
+    if (tienda == nullptr){ 
+        return -1;
+    }
+    // Recorrido del arreglo en busca del producto
+    for (int i = 0; i < tienda->numTransacciones; i++)
+    {
+        if (tienda->transacciones[i].id == id)
+        {
+            return i; // Si lo encuentra retorna el indice
+        }
+    }
+    return -1; // Si llega hasta aqui, no existe
 }
 
 int* buscarProductosPorNombre(Tienda* tienda, const char* nombre, int* numResultados){
@@ -788,6 +1111,30 @@ bool contieneSubstring(const char* texto, const char* busqueda){
     }
 
     return false; // Retorna False si no hubo coincidencias
+}
+
+void mostrarDetalleTransaccion(Tienda* tienda, int ind){
+    if (tienda == nullptr || ind < 0 || ind >= tienda->numTransacciones){ // Validacion de seguridad
+        return;
+    }
+    int indprod = buscarProductoPorId(tienda, tienda->transacciones[ind].idProducto);
+    char nombreProd[100];
+
+    if (indprod != -1) {
+        strcpy(nombreProd, tienda->productos[indprod].nombre);
+    } else {
+        strcpy(nombreProd, "No encontrado");
+    }
+    
+    cout << left << setw(10) << tienda->transacciones[ind].id 
+         << setw(12) << tienda->transacciones[ind].fecha 
+         << setw(10) << tienda->transacciones[ind].tipo 
+         << setw(12) << tienda->transacciones[ind].idRelacionado 
+         << setw(12) << tienda->transacciones[ind].idProducto
+         << setw(15) << nombreProd
+         << setw(10) << tienda->transacciones[ind].cantidad
+         << fixed << setprecision(2) << tienda->transacciones[ind].total << endl;
+    
 }
 
 
