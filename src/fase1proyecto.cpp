@@ -77,6 +77,9 @@ void imprimirSeparador(int ancho = 91, char simbolo = '-');
 void encabezadoTabla();
 bool floatesPositivo(float valor);
 bool IntesPositivo(int valor);
+bool solicitarTexto(const char* prompt, char* destino, int largo);
+bool solicitarFloat(const char* prompt, float& valor);
+bool solicitarEntero(const char* prompt, int& valor);
 
 
 struct Producto {
@@ -317,8 +320,7 @@ void registrarCompra(Tienda* tienda){
     if (tienda == nullptr){ // Validacion de seguridad
         return;
     }
-    if (tienda->numTransacciones >= tienda->capacidadTransacciones) // Verificacion del tamaño del arreglo
-    {
+    if (tienda->numTransacciones >= tienda->capacidadTransacciones){ // Verificacion del tamaño del arreglo
         redimensionarTransacciones(tienda);
     }
     
@@ -328,33 +330,37 @@ void registrarCompra(Tienda* tienda){
     cout << endl << "===== REGISTRAR COMPRA A PROVEEDOR =====" << endl;
 
     // Validar existencia del producto y del proveedor
-    cout << "Ingrese ID del producto: ";
-    cin >> ProdID;
-    if (existeProducto(tienda, ProdID) == false){
-        cout << "Error: El producto no existe." << endl;
+    if (!solicitarEntero("Ingrese ID del producto", ProdID)){
         return;
     }
-
-    cout << "Ingrese ID del proveedor: ";
-    cin >> ProveedorID;
+    int IndiceProducto = buscarProductoPorId(tienda, ProdID);
+    if (IndiceProducto == -1){
+        cout << "Error: El producto no existe.";
+        return;
+    }
+    
+    if (!solicitarEntero("Ingrese ID del proveedor", ProveedorID)){
+        return;
+    }
     if (existeProveedor(tienda, ProveedorID) == false){
         cout << "Error: El proveedor no existe." << endl;
         return;
     }
 
     // Datos de Transaccion
-    cout << "Ingrese cantidad de productos: ";
-    cin >> cantidad;
+    if (!solicitarEntero("Ingrese cantidad de productos", cantidad)){
+        return;
+    }
     if (!IntesPositivo(cantidad)){
         return;
     }
     
-    cout << "Ingrese costo del producto por unidad: ";
-    cin >> costoUni;
+    if (!solicitarFloat("Ingrese costo del producto por unidad", costoUni)){
+        return;
+    }
     if (!floatesPositivo(costoUni)){
         return;
     }
-    int IndiceProducto = buscarProductoPorId(tienda, ProdID);
     
     // Llenar la transaccion en el indice actual
     int i = tienda->numTransacciones;
@@ -366,11 +372,11 @@ void registrarCompra(Tienda* tienda){
     tienda->transacciones[i].total = cantidad*costoUni;
     
     obtenerFechaActual(tienda->transacciones[i].fecha);
-
-    cout << "Descripción: ";
-    cin.ignore();  // Limpieza del buffer
-    cin.getline(tienda->transacciones[i].descripcion, 200);
-
+    
+    if (!solicitarTexto("Ingrese descripción", tienda->transacciones[i].descripcion, 200)){
+        strcpy(tienda->transacciones[i].descripcion, "Sin descripción");
+    }
+    
     cout << endl;
     imprimirSeparador(30, '=');
     cout << "      RESUMEN DE COMPRA" << endl;
@@ -391,7 +397,7 @@ void registrarCompra(Tienda* tienda){
     // Actualizacion del contador
     tienda->numTransacciones++;
     
-    cout << endl << "Compra registrada con exito! \n Nuevo Stock de: ";
+    cout << endl << "Compra registrada con exito!" << endl << "Nuevo Stock de: ";
     cout << tienda->productos[IndiceProducto].nombre << ": " << tienda->productos[IndiceProducto].stock;
     } else {
         cout << endl << "Compra cancelada.";
@@ -412,25 +418,27 @@ void registrarVenta(Tienda* tienda){
     cout << endl << "===== REGISTRAR VENTA A CLIENTE =====" << endl;
 
     // Validar existencia del producto y del proveedor
-    cout << "Ingrese ID del producto: ";
-    cin >> ProdID;
+    if (!solicitarEntero("Ingrese ID del producto", ProdID)){
+        return;
+    }
     int IndiceProducto = buscarProductoPorId(tienda, ProdID);
-    
     if (IndiceProducto == -1){
         cout << "Error: El producto no existe.";
         return;
     }
 
-    cout << "Ingrese ID del Cliente: ";
-    cin >> clienteID;
+    if (!solicitarEntero("Ingrese ID del cliente", clienteID)){
+        return;
+    }
     if (existeCliente(tienda, clienteID) == false){
         cout << "Error: El cliente no existe.";
         return;
     }
 
     // Datos de Transaccion
-    cout << "Ingrese cantidad de productos: ";
-    cin >> cantidad;
+    if (!solicitarEntero("Ingrese cantidad de productos", cantidad)){
+        return;
+    }
     if (!IntesPositivo(cantidad)){
         return;
     }
@@ -452,9 +460,9 @@ void registrarVenta(Tienda* tienda){
 
     obtenerFechaActual(tienda->transacciones[i].fecha);
 
-    cout << "Descripción: ";
-    cin.ignore();  // Limpieza del buffer
-    cin.getline(tienda->transacciones[i].descripcion, 200);
+    if (!solicitarTexto("Ingrese descripción", tienda->transacciones[i].descripcion, 200)){
+        strcpy(tienda->transacciones[i].descripcion, "Sin descripción");
+    }
 
     cout << endl;
     imprimirSeparador(30, '=');
@@ -510,8 +518,9 @@ void buscarTransacciones(Tienda* tienda){
     switch (op){
     case 1: // Busqueda por ID de transacción
         int TransID;
-        cout << " Ingrese ID de la transacción: ";
-        cin >> TransID;
+        if (!solicitarEntero("Ingrese ID de la transacción", TransID)){
+        return;
+        }
         int i = buscarTransaccionPorId(tienda, TransID); // Extraer ID
         if (i == -1){ // Validación de existencia
             cout << "Error: La transaccion no existe.";
@@ -526,9 +535,9 @@ void buscarTransacciones(Tienda* tienda){
     case 2: // Busqueda por ID del Producto
         int prodID;
 
-        cout << "Ingrese ID del Producto: ";
-        cin >> prodID;
-
+        if (!solicitarEntero("Ingrese ID del producto", prodID)){
+        return;
+        }
         if (existeProducto(tienda, prodID) == false){ // Validacion de existencia
             cout << "Error: El producto no existe.";
             break;
@@ -547,11 +556,13 @@ void buscarTransacciones(Tienda* tienda){
             cout << "No hay transacciones para este producto." << endl;
         }
         break;
+
     case 3:
         int clienteID;
 
-        cout << "Ingrese ID del cliente: ";
-        cin >> clienteID;
+        if (!solicitarEntero("Ingrese ID del cliente", clienteID)){
+        return;
+        }
         if (existeCliente(tienda, clienteID) == false){ // Validación de existencia del cliente
             cout << "Error: El cliente no existe.";
             break; 
@@ -574,8 +585,9 @@ void buscarTransacciones(Tienda* tienda){
     case 4: // Busqueda por ID de proveedor
         int proveedorID;
 
-        cout << "Ingrese el ID del proveedor: ";
-        cin >> proveedorID;
+        if (!solicitarEntero("Ingrese ID del proveedor", proveedorID)){
+        return;
+        }
         if (existeProveedor(tienda, proveedorID) == false){
             cout << "Error: El proveedor no existe.";
             break;
@@ -594,16 +606,16 @@ void buscarTransacciones(Tienda* tienda){
         if (encontro == false){
             cout << "No hay transacciones registradas para este proveedor.";
         }
-        
     break;
 
     case 5: // Busqueda por fecha
         char fecha[11];
 
-        cout << "Ingrese fecha de la Transacción (YYYY-MM-DD): ";
-        cin >> fecha;
+        if (!solicitarTexto("Ingrese fecha de la Transacción (YYYY-MM-DD)", fecha, 11)){
+            return;
+        }
         if(validarFecha(fecha) == false){
-            cout << "Error: Formato de fecha no valido";
+            cout << "Error: Formato de fecha no valido (Use YYYY-MM-DD)";
             break;
         }
 
@@ -620,19 +632,18 @@ void buscarTransacciones(Tienda* tienda){
         if (encontro == false){
             cout << "No hay transacciones registradas en la fecha especificada.";
         }
-        
     break;
 
     case 6: // busqueda por tipo de transaccion
 
         int tipo;
-        cout << "Ingrese tipo de transacción: "
-             << "1. Compra (A Proveedor)"
+        cout << "1. Compra (A Proveedor)"
              << "2. Venta (A Cliente)" 
              << "0. Cancelar"
              << endl;
-        cin >> tipo;
-
+        if (!solicitarEntero("Ingrese tipo de transacción", tipo)){
+            break;
+            }
         if (tipo == 0){
             break;
         }
@@ -655,7 +666,6 @@ void buscarTransacciones(Tienda* tienda){
         if (encontro == false){
             cout << "No hay transacciones de este tipo";
         }
-
         break;
 
     default:
@@ -690,9 +700,9 @@ void cancelarTransaccion(Tienda* tienda){
     }
     int TransID;
     cout << endl << "===== CANCELAR TRANSACCIÓN =====" << endl;
-    cout << "Ingrese el ID de la transacción a cancelar: ";
-    cin >> TransID;
-
+    if (!solicitarEntero("Ingrese ID de la transacción a cancelar", TransID)){
+        return;
+    }
     int IndiceTrans = buscarTransaccionPorId(tienda, TransID);
     if (IndiceTrans == -1)
     {
@@ -730,7 +740,7 @@ void cancelarTransaccion(Tienda* tienda){
         cout << endl << "Transacción anulada y stock actualizado" << endl;
     } else {
         cout << endl << "Operación cancelada. No se realizaron cambios en la transacción." <<  endl;
-    }       
+    }
 }
 
 // FUNCIONES AUXILIARES
@@ -1108,6 +1118,58 @@ bool IntesPositivo(int valor){
         return false;
     }
     return true;
+}
+
+bool solicitarTexto(const char* prompt, char* destino, int largo) {
+    cout << prompt << " (o Enter para cancelar): ";
+    cin.ignore(cin.rdbuf()->in_avail(), '\n'); // Limpia restos del buffer
+    
+    char temp[200];
+    cin.getline(temp, 200);
+
+    if (strlen(temp) == 0) {
+        cout << "Operacion cancelada por el usuario." << endl;
+        return false; 
+    }
+
+    strncpy(destino, temp, largo);
+    return true;
+}
+
+bool solicitarEntero(const char* prompt, int& valor) {
+    string entrada;
+    cout << prompt << " (Escribe 's' para salir): ";
+    cin >> entrada;
+
+    if (entrada == "s" || entrada == "S") {
+        cout << "Entrada cancelada." << endl;
+        return false;
+    }
+
+    // Intentar convertir a numero
+    try {
+        valor = stoi(entrada);
+        return true;
+    } catch (...) {
+        cout << "Error: Debe ingresar un numero valido." << endl;
+        return solicitarEntero(prompt, valor); // Reintento (Recursividad)
+    }
+}
+
+bool solicitarFloat(const char* prompt, float& valor) {
+    string entrada;
+    cout << prompt << " (Escribe 's' para salir): ";
+    cin >> entrada;
+
+    if (entrada == "s" || entrada == "S") return false;
+
+    try {
+        valor = stof(entrada);
+        return true;
+    } catch (...) {
+        cout << "Error: Numero decimal invalido." << endl;
+        return solicitarFloat(prompt, valor);
+    }
 }
 
 int main(){
