@@ -68,12 +68,16 @@ int buscarClientePorId(Tienda* tienda, int id);
 int buscarTransaccionPorId(Tienda* tienda, int id);
 int* buscarProductosPorNombre(Tienda* tienda, const char* nombre, int* numResultados);
 
-
 // UTILIDADES
 void obtenerFechaActual(char* buffer);
 void convertirAMinusculas(char* cadena);
 bool contieneSubstring(const char* texto, const char* busqueda);
 void mostrarDetalleTransaccion(Tienda* tienda, int ind);
+void imprimirSeparador(int ancho = 91, char simbolo = '-');
+void encabezadoTabla();
+bool floatesPositivo(float valor);
+bool IntesPositivo(int valor);
+
 
 struct Producto {
     int id;
@@ -86,7 +90,6 @@ struct Producto {
     char fechaRegistro[11];
 };
 
-
 // Estructura Proveedor
 struct Proveedor {
     int id;
@@ -98,7 +101,6 @@ struct Proveedor {
     char fechaRegistro[11];
 };
 
-
 // Estructura Cliente
 struct Cliente {
     int id;                    
@@ -109,7 +111,6 @@ struct Cliente {
     char direccion[200];
     char fechaRegistro[11];
 };
-
 
 // Estructura Transacción (puede separarse por transaccion)
 struct Transaccion {
@@ -123,7 +124,6 @@ struct Transaccion {
     char fecha[11];            
     char descripcion[200];     // Notas adicionales (opcional)
 };
-
 
 // Estructura Principal: Tienda
 struct Tienda {
@@ -153,7 +153,6 @@ struct Tienda {
     int siguienteIdCliente;
     int siguienteIdTransaccion;
 };
-
 
 // Funcion de Inicialización
 void inicializarTienda(Tienda* tienda, const char* nombre, const char* rif){
@@ -191,7 +190,6 @@ void inicializarTienda(Tienda* tienda, const char* nombre, const char* rif){
 
 }
 
-
 // Funcion de Liberación
 void liberarTienda(Tienda* tienda){
 
@@ -226,7 +224,6 @@ void liberarTienda(Tienda* tienda){
 
 }
 
-
 // FUNCIONES CRUD - PRODUCTOS
 
 // Crear Productos
@@ -234,24 +231,20 @@ void crearProducto(Tienda* tienda){
 
 }
 
-
 // Buscar Producto
 void buscarProducto(Tienda* tienda){
 
 }
-
 
 //Actualizar Producto
 void actualizarProducto(Tienda* tienda){
 
 }
 
-
 // Actualizar Stock Manualmente
 void actualizarStockProducto(Tienda* tienda){
 
 }
-
 
 // Listar Productos
 void listarProductos(Tienda* tienda){
@@ -263,14 +256,12 @@ void eliminarProducto(Tienda* tienda){
 
 }
 
-
 // FUNCIONES CRUD - PROVEEDORES
 
 // Crear Proveedores
 void crearProveedor(Tienda* tienda){
 
 }
-
 
 // Buscar Proveedor
 void buscarProveedor(Tienda* tienda){
@@ -282,18 +273,15 @@ void actualizarProveedor(Tienda* tienda){
 
 }
 
-
 // Listar Proveedores
 void listarProveedores(Tienda* tienda){
 
 }
 
-
 // Eliminar Proveedor
 void eliminarProveedor(Tienda* tienda){
 
 }
-
 
 // FUNCIONES CRUD - CLIENTES
 
@@ -302,30 +290,25 @@ void crearCliente(Tienda* tienda){
 
 }
 
-
 // Buscar Cliente
 void buscarCliente(Tienda* tienda){
 
 }
-
 
 // Actualizar Cliente
 void actualizarCliente(Tienda* tienda){
 
 }
 
-
 // Listar Clientes
 void listarClientes(Tienda* tienda){
 
 }
 
-
 // Eliminar Cliente
 void eliminarCliente(Tienda* tienda){
 
 }
-
 
 // FUNCIONES DE TRANSACCIONES
 
@@ -351,12 +334,10 @@ void registrarCompra(Tienda* tienda){
         cout << "Error: El producto no existe." << endl;
         return;
     }
-    int IndiceProducto = buscarProductoPorId(tienda, ProdID);
 
     cout << "Ingrese ID del proveedor: ";
     cin >> ProveedorID;
-    if (existeProveedor(tienda, ProveedorID) == false)
-    {
+    if (existeProveedor(tienda, ProveedorID) == false){
         cout << "Error: El proveedor no existe." << endl;
         return;
     }
@@ -364,12 +345,19 @@ void registrarCompra(Tienda* tienda){
     // Datos de Transaccion
     cout << "Ingrese cantidad de productos: ";
     cin >> cantidad;
+    if (!IntesPositivo(cantidad)){
+        return;
+    }
+    
     cout << "Ingrese costo del producto por unidad: ";
     cin >> costoUni;
-
+    if (!floatesPositivo(costoUni)){
+        return;
+    }
+    int IndiceProducto = buscarProductoPorId(tienda, ProdID);
+    
     // Llenar la transaccion en el indice actual
     int i = tienda->numTransacciones;
-    tienda->transacciones[i].id = tienda->siguienteIdTransaccion++;
     strcpy(tienda->transacciones[i].tipo, "COMPRA");
     tienda->transacciones[i].cantidad = cantidad;
     tienda->transacciones[i].idProducto = ProdID;
@@ -383,33 +371,39 @@ void registrarCompra(Tienda* tienda){
     cin.ignore();  // Limpieza del buffer
     cin.getline(tienda->transacciones[i].descripcion, 200);
 
+    cout << endl;
+    imprimirSeparador(30, '=');
+    cout << "      RESUMEN DE COMPRA" << endl;
+    imprimirSeparador(30, '-');
+    cout << "Cantidad: " << tienda->transacciones[i].cantidad << endl;
+    cout << "Producto: " << tienda->productos[IndiceProducto].nombre << endl;
+    cout << "Total a pagar: " << tienda->transacciones[i].total << endl;
+    imprimirSeparador(30, '=');
+
     char confirmar;
     cout << "¿Desea confirmar y guardar esta Compra? (S/N) ";
     cin >> confirmar;
 
-    if (confirmar == 'S' || confirmar == 's')
-    {
+    if (confirmar == 'S' || confirmar == 's'){
     // Actualizar Stock del producto
     tienda->productos[IndiceProducto].stock += cantidad;
+    tienda->transacciones[i].id = tienda->siguienteIdTransaccion++;
     // Actualizacion del contador
     tienda->numTransacciones++;
     
     cout << endl << "Compra registrada con exito! \n Nuevo Stock de: ";
     cout << tienda->productos[IndiceProducto].nombre << ": " << tienda->productos[IndiceProducto].stock;
     } else {
-        tienda->siguienteIdTransaccion--; // Revertimos el ID autoincremental;
         cout << endl << "Compra cancelada.";
     }   
 }
-
 
 // Registrar Venta (a Cliente)
 void registrarVenta(Tienda* tienda){
    if (tienda == nullptr){ // Validacion de seguridad
         return;
     }
-    if (tienda->numTransacciones >= tienda->capacidadTransacciones) // Verificacion del tamaño del arreglo
-    {
+    if (tienda->numTransacciones >= tienda->capacidadTransacciones){ // Verificacion del tamaño del arreglo
         redimensionarTransacciones(tienda);
     }
     
@@ -422,17 +416,14 @@ void registrarVenta(Tienda* tienda){
     cin >> ProdID;
     int IndiceProducto = buscarProductoPorId(tienda, ProdID);
     
-    if (IndiceProducto == -1)
-    {
+    if (IndiceProducto == -1){
         cout << "Error: El producto no existe.";
         return;
     }
-    
 
     cout << "Ingrese ID del Cliente: ";
     cin >> clienteID;
-    if (existeCliente(tienda, clienteID) == false)
-    {
+    if (existeCliente(tienda, clienteID) == false){
         cout << "Error: El cliente no existe.";
         return;
     }
@@ -440,17 +431,17 @@ void registrarVenta(Tienda* tienda){
     // Datos de Transaccion
     cout << "Ingrese cantidad de productos: ";
     cin >> cantidad;
-
+    if (!IntesPositivo(cantidad)){
+        return;
+    }
     // Validacion de Stock
-    if (cantidad > tienda->productos[IndiceProducto].stock)
-    {
+    if (cantidad > tienda->productos[IndiceProducto].stock){
         cout << "Error: Stock insuficiente. \n Stock Disponible: " << tienda->productos[IndiceProducto].stock << endl;
         return;
     }
 
     // Llenar la transaccion en el indice actual
     int i = tienda->numTransacciones;
-    tienda->transacciones[i].id = tienda->siguienteIdTransaccion++;
     strcpy(tienda->transacciones[i].tipo, "VENTA");
     tienda->transacciones[i].cantidad = cantidad;
     tienda->transacciones[i].idProducto = ProdID;
@@ -465,32 +456,32 @@ void registrarVenta(Tienda* tienda){
     cin.ignore();  // Limpieza del buffer
     cin.getline(tienda->transacciones[i].descripcion, 200);
 
-    cout << endl << "===== Resumen de compra =====" << endl;
+    cout << endl;
+    imprimirSeparador(30, '=');
+    cout << "      RESUMEN DE VENTA" << endl;
+    imprimirSeparador(30, '-');
     cout << "Cantidad: " << tienda->transacciones[i].cantidad << endl;
     cout << "Producto: " << tienda->productos[IndiceProducto].nombre << endl;
     cout << "Total a pagar: " << tienda->transacciones[i].total << endl;
+    imprimirSeparador(30, '=');
 
     char confirmar;
     cout << "¿Desea confirmar y guardar esta Venta? (S/N) ";
     cin >> confirmar;
 
-    if (confirmar == 'S' || confirmar == 's')
-    {
+    if (confirmar == 'S' || confirmar == 's'){
     // Actualizar Stock del producto
     tienda->productos[IndiceProducto].stock -= cantidad;
+    tienda->transacciones[i].id = tienda->siguienteIdTransaccion++;
     // Actualizacion del contador
     tienda->numTransacciones++;
 
     cout << endl << "Venta registrada con exito! \n Nuevo Stock de: ";
     cout << tienda->productos[IndiceProducto].nombre << ": " << tienda->productos[IndiceProducto].stock;
-    } 
-    else
-    {
-        tienda->siguienteIdTransaccion--; // Revertimos el ID autoincremental;
+    } else{
         cout << endl << "Venta cancelada.";
     }   
 }
-
 
 // Buscar Transacciones
 void buscarTransacciones(Tienda* tienda){
@@ -512,33 +503,24 @@ void buscarTransacciones(Tienda* tienda){
     << "0. Cancelar" << endl;
     cin >> op;
     
-    if (op == 0)
-    {
+    if (op == 0){
         return;
     }
     
-    switch (op)
-    {
+    switch (op){
     case 1: // Busqueda por ID de transacción
         int TransID;
         cout << " Ingrese ID de la transacción: ";
         cin >> TransID;
         int i = buscarTransaccionPorId(tienda, TransID); // Extraer ID
-        if (i == -1) // Validación de existencia
-        {
+        if (i == -1){ // Validación de existencia
             cout << "Error: La transaccion no existe.";
             break;
         }
-        cout << endl << left 
-            << setw(10) << "ID Trans" 
-            << setw(12) << "Fecha" 
-            << setw(10) << "Tipo" 
-            << setw(12) << "ID Relac." 
-            << setw(12) << "ID Prod"
-            << setw(15) << "Producto" 
-            << setw(10) << "Cant" 
-            << setw(10) << "Total" << endl;
+
+        encabezadoTabla();
         mostrarDetalleTransaccion(tienda, i);
+        imprimirSeparador(91, '=');
         break;
     
     case 2: // Busqueda por ID del Producto
@@ -547,33 +529,21 @@ void buscarTransacciones(Tienda* tienda){
         cout << "Ingrese ID del Producto: ";
         cin >> prodID;
 
-        if (existeProducto(tienda, prodID) == false) // Validacion de existencia
-        {
+        if (existeProducto(tienda, prodID) == false){ // Validacion de existencia
             cout << "Error: El producto no existe.";
             break;
         }
         encontro = false;
-
-        cout << endl << left 
-            << setw(10) << "ID Trans" 
-            << setw(12) << "Fecha" 
-            << setw(10) << "Tipo" 
-            << setw(12) << "ID Relac." 
-            << setw(12) << "ID Prod"
-            << setw(15) << "Producto" 
-            << setw(10) << "Cant" 
-            << setw(10) << "Total" << endl;
+        encabezadoTabla();
         
-        for (int i = 0; i < tienda->numTransacciones; i++)
-        {
-            if (tienda->transacciones[i].idProducto == prodID) // Si encuentra el ID del producto lo muestra
-            {
+        for (int i = 0; i < tienda->numTransacciones; i++){
+            if (tienda->transacciones[i].idProducto == prodID){ // Si encuentra el ID del producto lo muestra
             mostrarDetalleTransaccion(tienda, i);
             encontro = true; // Actualización de la variable booleana
             }
         }
-        if (encontro == false) // No encontro el ID en las transacciones
-        {
+        imprimirSeparador(91, '=');
+        if (encontro == false){ // No encontro el ID en las transacciones
             cout << "No hay transacciones para este producto." << endl;
         }
         break;
@@ -587,25 +557,15 @@ void buscarTransacciones(Tienda* tienda){
             break; 
         }
         encontro = false;
+        encabezadoTabla();
 
-        cout << endl << left 
-            << setw(10) << "ID Trans" 
-            << setw(12) << "Fecha" 
-            << setw(10) << "Tipo" 
-            << setw(12) << "ID Relac." 
-            << setw(12) << "ID Prod"
-            << setw(15) << "Producto" 
-            << setw(10) << "Cant" 
-            << setw(10) << "Total" << endl;
-
-        for (int i = 0; i < tienda->numTransacciones; i++)
-        {
-            if (tienda->transacciones[i].idRelacionado == clienteID) // Si encuentra el ID del producto lo muestra
-            {
+        for (int i = 0; i < tienda->numTransacciones; i++){
+            if (tienda->transacciones[i].idRelacionado == clienteID){ // Si encuentra el ID del producto lo muestra
                 mostrarDetalleTransaccion(tienda, i);
                 encontro = true; // Actualización de la variable boolena
             }
         }
+        imprimirSeparador(91, '=');
         if (encontro == false){ // No encontro el ID en las transacciones
             cout << "No hay transacciones registradas para este cliente." << endl; 
         }
@@ -621,27 +581,17 @@ void buscarTransacciones(Tienda* tienda){
             break;
         }
 
-        cout << endl << left 
-            << setw(10) << "ID Trans" 
-            << setw(12) << "Fecha" 
-            << setw(10) << "Tipo" 
-            << setw(12) << "ID Relac." 
-            << setw(12) << "ID Prod"
-            << setw(15) << "Producto" 
-            << setw(10) << "Cant" 
-            << setw(10) << "Total" << endl;
-
+        encabezadoTabla();
         encontro = false;
-        
-        for (int i = 0; i < tienda->numTransacciones; i++)
-        {
+
+        for (int i = 0; i < tienda->numTransacciones; i++){
             if (tienda->transacciones[i].idRelacionado == proveedorID){
                 mostrarDetalleTransaccion(tienda, i);
                 encontro = true;
             }
         }
-        if (encontro == false)
-        {
+        imprimirSeparador(91, '=');
+        if (encontro == false){
             cout << "No hay transacciones registradas para este proveedor.";
         }
         
@@ -657,28 +607,17 @@ void buscarTransacciones(Tienda* tienda){
             break;
         }
 
-        cout << endl << left 
-            << setw(10) << "ID Trans" 
-            << setw(12) << "Fecha" 
-            << setw(10) << "Tipo" 
-            << setw(12) << "ID Relac." 
-            << setw(12) << "ID Prod"
-            << setw(15) << "Producto" 
-            << setw(10) << "Cant" 
-            << setw(10) << "Total" << endl;
-
         encontro = false; 
-        
-        for (int i = 0; i < tienda->numTransacciones; i++)
-        {
-            if (strcmp(tienda->transacciones[i].fecha, fecha) == 0)
-            {
+        encabezadoTabla();
+
+        for (int i = 0; i < tienda->numTransacciones; i++){
+            if (strcmp(tienda->transacciones[i].fecha, fecha) == 0){
                 mostrarDetalleTransaccion(tienda, i);
                 encontro = true;
             }
         }
-        if (encontro == false)
-        {
+        imprimirSeparador(91, '=');
+        if (encontro == false){
             cout << "No hay transacciones registradas en la fecha especificada.";
         }
         
@@ -694,49 +633,34 @@ void buscarTransacciones(Tienda* tienda){
              << endl;
         cin >> tipo;
 
-        if (tipo == 0)
-        {
+        if (tipo == 0){
             break;
         }
-        if (tipo < 1 || tipo > 2)
-        {
+        if (tipo < 1 || tipo > 2){
             cout << "Opcion Invalida";
             break;
         }
         
-        cout << endl << left 
-            << setw(10) << "ID Trans" 
-            << setw(12) << "Fecha" 
-            << setw(10) << "Tipo" 
-            << setw(12) << "ID Relac." 
-            << setw(12) << "ID Prod"
-            << setw(15) << "Producto" 
-            << setw(10) << "Cant" 
-            << setw(10) << "Total" << endl;
-
         encontro = false;
-
         const char* tipoTransaccion = (tipo == 1) ? "COMPRA" : "VENTA"; 
+        encabezadoTabla();
 
-        for (int i = 0; i < tienda->numTransacciones; i++)
-        {
-            if (strcmp(tienda->transacciones[i].tipo, tipoTransaccion) == 0)
-            {
+        for (int i = 0; i < tienda->numTransacciones; i++){
+            if (strcmp(tienda->transacciones[i].tipo, tipoTransaccion) == 0){
                 mostrarDetalleTransaccion(tienda, i);
                 encontro = true;
             }
         }
-        if (encontro == false)
-        {
+        imprimirSeparador(91, '=');
+        if (encontro == false){
             cout << "No hay transacciones de este tipo";
         }
 
-    break;
+        break;
 
     default:
         break;
     }
-
 }
 
 // Listar Transacciones
@@ -744,17 +668,70 @@ void listarTransacciones(Tienda* tienda){
     if (tienda == nullptr){ // Validacion de seguridad
         return;
     }
-}
 
+    if (tienda->numTransacciones == 0){
+        cout << endl << "No hay transacciones registradas en el sistema." << endl;
+        return;
+    }
+    
+    cout << "LISTADO GENERAL DE TRANSACCIONES" << endl; 
+    encabezadoTabla();
+    for (int i = 0; i < tienda->numTransacciones; i++){
+        mostrarDetalleTransaccion(tienda, i);
+    }
+    imprimirSeparador(91, '=');
+}
 
 // Cancelar/Anular Transacción
 void cancelarTransaccion(Tienda* tienda){
-    if (tienda == nullptr){ // Validacion de seguridad
+    if (tienda == nullptr || tienda->numTransacciones <= 0){ // Validacion de seguridad
+        cout << "No hay transacciones para cancelar.";
         return;
     }
+    int TransID;
+    cout << endl << "===== CANCELAR TRANSACCIÓN =====" << endl;
+    cout << "Ingrese el ID de la transacción a cancelar: ";
+    cin >> TransID;
 
+    int IndiceTrans = buscarTransaccionPorId(tienda, TransID);
+    if (IndiceTrans == -1)
+    {
+        cout << "Error: Transacción no encontrada.";
+        return;
+    }
+    encabezadoTabla();
+    mostrarDetalleTransaccion(tienda, IndiceTrans);
+    imprimirSeparador(91, '=');
+
+    char confirmar;
+    cout << "¿Desea confirmar y anular esta transacción? (S/N) ";
+    cin >> confirmar;
+
+    if (confirmar == 'S' || confirmar == 's'){
+        int prodID = tienda->transacciones[IndiceTrans].idProducto;
+        int IndiceProd = buscarProductoPorId(tienda, prodID);
+        int cantidad = tienda->transacciones[IndiceTrans].cantidad;
+
+        // Sumar cantidad al Stock si cancelo una venta, restar cantidad al Stock si cancelo una compra
+        if (IndiceProd != -1){
+            if (strcmp(tienda->transacciones[IndiceTrans].tipo, "COMPRA") == 0){
+                tienda->productos[IndiceProd].stock -= cantidad;
+            } else {
+                tienda->productos[IndiceProd].stock += cantidad;
+            }
+        }
+
+        // Eliminar datos de la transacción moviendo los elementos del arreglo
+        for (int j = IndiceTrans; j < tienda->numTransacciones-1; j++){
+            tienda->transacciones[j] = tienda->transacciones[j + 1];
+        }
+        tienda->numTransacciones--;
+
+        cout << endl << "Transacción anulada y stock actualizado" << endl;
+    } else {
+        cout << endl << "Operación cancelada. No se realizaron cambios en la transacción." <<  endl;
+    }       
 }
-
 
 // FUNCIONES AUXILIARES
 
@@ -763,8 +740,7 @@ void redimensionarProductos(Tienda* tienda){
     int nuevaCapacidad = tienda->capacidadProductos * 2; // Aumento de la capacidad del arreglo al doble
     Producto* nuevoArray = new Producto[nuevaCapacidad]; // Creacion de un nuevo arreglo con la nueva capacidad
 
-    for (int i = 0; i < tienda->numProductos; i++) // Copia de datos al nuevo arreglo
-    {
+    for (int i = 0; i < tienda->numProductos; i++){ // Copia de datos al nuevo arreglo
         nuevoArray[i] = tienda->productos[i];
     }
     
@@ -773,13 +749,11 @@ void redimensionarProductos(Tienda* tienda){
     tienda->productos = nuevoArray; // Actualizacion del punero al nuevo array
 }
 
-
 void redimensionarProveedores(Tienda* tienda){
     int nuevaCapacidad = tienda->capacidadProveedores * 2; // Aumento de la capacidad del arreglo al doble
     Proveedor* nuevoArray = new Proveedor[nuevaCapacidad]; // Creacion de un nuevo arreglo con la nueva capacidad
 
-    for (int i = 0; i < tienda->numProveedores; i++) // Copia de datos al nuevo arreglo
-    {
+    for (int i = 0; i < tienda->numProveedores; i++){ // Copia de datos al nuevo arreglo
         nuevoArray[i] = tienda->proveedores[i];
     }
     
@@ -787,7 +761,6 @@ void redimensionarProveedores(Tienda* tienda){
     tienda->capacidadProveedores = nuevaCapacidad; // Actualizacion de capacidad
     tienda->proveedores = nuevoArray; // Actualizacion del punero al nuevo array
 }
-
 
 void redimensionarClientes(Tienda* tienda){
     int nuevaCapacidad = tienda->capacidadClientes * 2; // Aumento de la capacidad del arreglo al doble
@@ -803,13 +776,11 @@ void redimensionarClientes(Tienda* tienda){
     tienda->clientes = nuevoArray; // Actualizacion del punero al nuevo array
 }
 
-
 void redimensionarTransacciones(Tienda* tienda){
     int nuevaCapacidad = tienda->capacidadTransacciones * 2;// Aumento de la capacidad del arreglo al doble
     Transaccion* nuevoArray = new Transaccion[nuevaCapacidad]; // Creacion de un nuevo arreglo con la nueva capacidad
 
-    for (int i = 0; i < tienda->numTransacciones; i++)  // Copia de datos al nuevo arreglo
-    {
+    for (int i = 0; i < tienda->numTransacciones; i++){ // Copia de datos al nuevo arreglo
         nuevoArray[i] = tienda->transacciones[i];
     }
     
@@ -818,24 +789,19 @@ void redimensionarTransacciones(Tienda* tienda){
     tienda->transacciones = nuevoArray; // Actualizacion del punero al nuevo array
 }
 
-
 // VALIDACIONES
 bool validarEmail(const char* email){
     const char* at = nullptr; 
     const char* dot = nullptr;
 
     // Recorrido de la cadena en busca del '@'
-    for (int i = 0; email[i] != '\0' ; i++) 
-    {
-        if (email[i] == '@') 
-        {
+    for (int i = 0; email[i] != '\0' ; i++){
+        if (email[i] == '@'){
             // Una vez localizado se le asigna la direccion de memoria
             at = &email[i];
             // Recorrido de la cadena en busca del '.' 
-            for (int j = i + 1; email[j] != '\0'; j++)
-            {
-                if (email[j] == '.')
-                {
+            for (int j = i + 1; email[j] != '\0'; j++){
+                if (email[j] == '.'){
                     // Una vez localizado se le asigna la direccion de memoria
                     dot = &email[j];
                     break;
@@ -848,13 +814,13 @@ bool validarEmail(const char* email){
 }
 
 
-bool validarFecha(const char* fecha) {
+bool validarFecha(const char* fecha){
 
     if (strlen(fecha) != 10) return false; // Validar el tamaño de caracteres (YYYY-MM-DD)
     if (fecha[4] != '-' || fecha[7] != '-') return false; // Validar de caracteres en posicion 4 y 5 (deben ser '-')
 
     // Validar que sean numeros excepto los '-'
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++){
         if (i == 4 || i == 7) continue;
         if (fecha[i] < '0' || fecha[i] > '9') return false;
     }
@@ -871,8 +837,7 @@ bool validarFecha(const char* fecha) {
 
     // Validar dias para meses de 30 dias y Feb
     if ((mes == 4 || mes == 6 || mes == 9 || mes == 11) && dia > 30) return false;
-    if (mes == 2) 
-    {
+    if (mes == 2){
         if (dia > 29){
             return false;
         } 
@@ -887,10 +852,8 @@ bool existeProducto(Tienda* tienda, int id){
     return false;
     } 
     // Recorrido del arreglo en busca del id
-    for (int i = 0; i < tienda->numProductos; i++) 
-    {
-        if (tienda->productos[i].id == id) 
-        {
+    for (int i = 0; i < tienda->numProductos; i++){
+        if (tienda->productos[i].id == id){
             return true; // Si lo encuenta retorna True (Si existe el producto)
         }
     }
@@ -903,10 +866,8 @@ bool existeProveedor(Tienda* tienda, int id){
     return false;
     } 
     // Recorrido del arreglo en busca del id
-    for (int i = 0; i < tienda->numProveedores; i++)
-    {
-        if (tienda->proveedores[i].id == id)
-        {
+    for (int i = 0; i < tienda->numProveedores; i++){
+        if (tienda->proveedores[i].id == id){
             return true; // Si lo encuenta retorna True (Si existe el proveedor)
         }
     }
@@ -919,10 +880,8 @@ bool existeCliente(Tienda* tienda, int id){
         return false;
     }
     // Recorrido del arreglo en busca del id
-    for (int i = 0; i < tienda->numClientes; i++)
-    {
-        if (tienda->clientes[i].id == id)
-        {
+    for (int i = 0; i < tienda->numClientes; i++){
+        if (tienda->clientes[i].id == id){
             return true; // Si lo encuenta retorna True (Si existe el cliente)
         }
     }
@@ -935,10 +894,8 @@ bool codigoDuplicado(Tienda* tienda, const char* codigo){
         return false;
     }
     // Recorrido del arreglo en busca del codigo
-    for (int i = 0; i < tienda->numProductos; i++)
-    {
-        if (strcmp(tienda->productos[i].codigo, codigo) == 0)
-        {
+    for (int i = 0; i < tienda->numProductos; i++){
+        if (strcmp(tienda->productos[i].codigo, codigo) == 0){
             return true; // Si lo encuenta retorna True (Si existe el codigo)
         }
     }
@@ -951,24 +908,19 @@ bool rifDuplicado(Tienda* tienda, const char* rif){
         return false;
     }
     // Recorrido del arreglo en busca del rif
-    for (int i = 0; i < tienda->numProveedores; i++)
-    {
-        if (strcmp(tienda->proveedores[i].rif, rif) == 0)
-        {
+    for (int i = 0; i < tienda->numProveedores; i++){
+        if (strcmp(tienda->proveedores[i].rif, rif) == 0){
             return true; // Si lo encuenta retorna True (Si existe el rif)
         }
     }
     // Recorrido del arreglo en busca de la cedula
-    for (int j = 0; j < tienda->numClientes; j++)
-    {
-        if (strcmp(tienda->clientes[j].cedula, rif) == 0)
-        {
+    for (int j = 0; j < tienda->numClientes; j++){
+        if (strcmp(tienda->clientes[j].cedula, rif) == 0){
             return true; // Si lo encuenta retorna True (Si existe la cedula)
         }
     }
     return false; // Si llega hasta aqui, no esta duplicado
 }
-
 
 // BUSQUEDAS 
 
@@ -977,42 +929,34 @@ int buscarProductoPorId(Tienda* tienda, int id){
         return -1;
     }
     // Recorrido del arreglo en busca del producto
-    for (int i = 0; i < tienda->numProductos; i++)
-    {
-        if (tienda->productos[i].id == id)
-        {
+    for (int i = 0; i < tienda->numProductos; i++){
+        if (tienda->productos[i].id == id){
             return i; // Si lo encuentra retorna el indice
         }
     }
     return -1; // Si llega hasta aqui, no existe
 }
 
-
 int buscarProveedorPorId(Tienda* tienda, int id){
     if (tienda == nullptr){ // Validacion de seguridad
         return -1;
     }
     // Recorrido del arreglo en busca del proveedor
-    for (int i = 0; i < tienda->numProveedores; i++)
-    {
-        if (tienda->proveedores[i].id == id)
-        {
+    for (int i = 0; i < tienda->numProveedores; i++){
+        if (tienda->proveedores[i].id == id){
             return i; // Si lo encuentra retorna el indice
         }
     }
     return -1; // Si llega hasta aqui, No existe
 }
 
-
 int buscarClientePorId(Tienda* tienda, int id){
     if (tienda == nullptr){ // Validacion de seguridad
         return -1;
     }
     // Recorrido del arreglo en busca del cliente    
-    for (int i = 0; i < tienda->numClientes; i++)
-    {
-        if (tienda->clientes[i].id == id)
-        {
+    for (int i = 0; i < tienda->numClientes; i++){
+        if (tienda->clientes[i].id == id){
             return i; // Si lo encuentra retorna el indice
         }
     }
@@ -1024,10 +968,8 @@ int buscarTransaccionPorId(Tienda* tienda, int id){
         return -1;
     }
     // Recorrido del arreglo en busca del producto
-    for (int i = 0; i < tienda->numTransacciones; i++)
-    {
-        if (tienda->transacciones[i].id == id)
-        {
+    for (int i = 0; i < tienda->numTransacciones; i++){
+        if (tienda->transacciones[i].id == id){
             return i; // Si lo encuentra retorna el indice
         }
     }
@@ -1041,10 +983,8 @@ int* buscarProductosPorNombre(Tienda* tienda, const char* nombre, int* numResult
     // Inicializacion del contador de resultados encontrados
     *numResultados = 0;
     // Recorrido para saber tamaño del arreglo de productos encontrados
-    for (int i = 0; i < tienda->numProductos; i++) // Verificar si hay coincidencias
-    {
-        if (contieneSubstring(tienda->productos[i].nombre, nombre))
-        {
+    for (int i = 0; i < tienda->numProductos; i++){ // Verificar si hay coincidencias
+        if (contieneSubstring(tienda->productos[i].nombre, nombre)){
             (*numResultados)++; 
         }
     }
@@ -1055,10 +995,8 @@ int* buscarProductosPorNombre(Tienda* tienda, const char* nombre, int* numResult
     int* indiceProductos = new int[*numResultados];
     int posicion = 0;
     // Llenar arreglo con indices reales de los productos encontrados
-    for (int i = 0; i < tienda->numProductos; i++) // Verificar si hay coincidencias
-    {
-        if (contieneSubstring(tienda->productos[i].nombre, nombre))
-        {
+    for (int i = 0; i < tienda->numProductos; i++){ // Verificar si hay coincidencias
+        if (contieneSubstring(tienda->productos[i].nombre, nombre)){
             indiceProductos[posicion] = i;
             posicion++;
         }
@@ -1075,18 +1013,15 @@ void obtenerFechaActual(char* buffer){
     strftime(buffer, 11, "%Y-%m-%d", fechaActual); // Organizar la informacion al formato YYYY-MM-DD
 }
 
-
 void convertirAMinusculas(char* cadena){
     if (cadena == nullptr){ // Validacion de Seguridad
         return;
     }
     // Conversion de caracteres a letras minusculas 
-    for (int i = 0; cadena[i] != 0; i++)
-    {
+    for (int i = 0; cadena[i] != 0; i++){
         cadena[i] = tolower((unsigned char)cadena[i]);
     }
 }
-
 
 bool contieneSubstring(const char* texto, const char* busqueda){
     if (texto == nullptr || busqueda == nullptr){ // Validacion de Seguridad
@@ -1120,7 +1055,7 @@ void mostrarDetalleTransaccion(Tienda* tienda, int ind){
     int indprod = buscarProductoPorId(tienda, tienda->transacciones[ind].idProducto);
     char nombreProd[100];
 
-    if (indprod != -1) {
+    if (indprod != -1){
         strcpy(nombreProd, tienda->productos[indprod].nombre);
     } else {
         strcpy(nombreProd, "No encontrado");
@@ -1137,6 +1072,43 @@ void mostrarDetalleTransaccion(Tienda* tienda, int ind){
     
 }
 
+void encabezadoTabla(){
+    cout << endl;
+    imprimirSeparador(91, '=');
+
+    cout << left 
+         << setw(10) << "ID Trans" 
+         << setw(12) << "Fecha" 
+         << setw(10) << "Tipo" 
+         << setw(12) << "ID Relac." 
+         << setw(12) << "ID Prod"
+         << setw(15) << "Producto" 
+         << setw(10) << "Cant" 
+         << setw(10) << "Total" << endl;
+
+    imprimirSeparador(91, '=');
+}
+
+void imprimirSeparador(int ancho = 91, char simbolo = '-'){
+    
+    cout << setfill(simbolo) << setw(ancho) << "" << setfill(' ') << endl;
+}
+
+bool floatesPositivo(float valor){
+    if (valor <= 0){
+        cout << "Error: El valor debe ser mayor a cero." << endl;
+        return false;
+    }
+    return true;
+}
+
+bool IntesPositivo(int valor){
+    if (valor <= 0){
+        cout << "Error: El valor debe ser mayor a cero." << endl;
+        return false;
+    }
+    return true;
+}
 
 int main(){
 
