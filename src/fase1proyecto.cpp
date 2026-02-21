@@ -18,33 +18,6 @@ struct Tienda;
 void inicializarTienda(Tienda* tienda, const char* nombre, const char* rif);
 void liberarTienda(Tienda* tienda);
 
-// FUNCIONES CRUD
-void crearProducto(Tienda* tienda);
-void buscarProducto(Tienda* tienda);
-void actualizarProducto(Tienda* tienda);
-void actualizarStockProducto(Tienda* tienda);
-void listarProductos(Tienda* tienda);
-void eliminarProducto(Tienda* tienda);
-
-
-void crearProveedor(Tienda* tienda);
-void buscarProveedor(Tienda* tienda);
-void actualizarProveedor(Tienda* tienda);
-void listarProveedores(Tienda* tienda);
-void eliminarProveedor(Tienda* tienda);
-
-void crearCliente(Tienda* tienda);
-void buscarCliente(Tienda* tienda);
-void actualizarCliente(Tienda* tienda);
-void listarClientes(Tienda* tienda);
-void eliminarCliente(Tienda* tienda);
-
-void registrarCompra(Tienda* tienda);
-void registrarVenta(Tienda* tienda);
-void buscarTransacciones(Tienda* tienda);
-void listarTransacciones(Tienda* tienda);
-void cancelarTransaccion(Tienda* tienda);
-
 // FUNCIONES AUXILIARES
 // Redimensionamiento de Arrays
 void redimensionarProductos(Tienda* tienda);
@@ -81,6 +54,32 @@ bool solicitarTexto(const char* prompt, char* destino, int largo);
 bool solicitarFloat(const char* prompt, float& valor);
 bool solicitarEntero(const char* prompt, int& valor);
 
+// FUNCIONES CRUD
+void crearProducto(Tienda* tienda);
+void buscarProducto(Tienda* tienda);
+void actualizarProducto(Tienda* tienda);
+void actualizarStockProducto(Tienda* tienda);
+void listarProductos(Tienda* tienda);
+void eliminarProducto(Tienda* tienda);
+
+
+void crearProveedor(Tienda* tienda);
+void buscarProveedor(Tienda* tienda);
+void actualizarProveedor(Tienda* tienda);
+void listarProveedores(Tienda* tienda);
+void eliminarProveedor(Tienda* tienda);
+
+void crearCliente(Tienda* tienda);
+void buscarCliente(Tienda* tienda);
+void actualizarCliente(Tienda* tienda);
+void listarClientes(Tienda* tienda);
+void eliminarCliente(Tienda* tienda);
+
+void registrarCompra(Tienda* tienda);
+void registrarVenta(Tienda* tienda);
+void buscarTransacciones(Tienda* tienda);
+void listarTransacciones(Tienda* tienda);
+void cancelarTransaccion(Tienda* tienda);
 
 struct Producto {
     int id;
