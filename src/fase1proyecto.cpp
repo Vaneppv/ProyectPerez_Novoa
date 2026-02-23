@@ -308,6 +308,7 @@ void crearProducto(Tienda* tienda) {
         }
     } else {
         cout << endl << "Volviendo al menu." << endl;
+        imprimirSeparador();
     }
 }
 
@@ -317,13 +318,15 @@ void buscarProducto(Tienda* tienda) {
 
     int seleccion;
     do {
-        cout << endl << "===== MENU DE BUSQUEDA DE PRODUCTOS =====" << endl;
+        imprimirSeparador(60,'=');
+        cout << endl << "         MENU DE BUSQUEDA DE PRODUCTOS" << endl;
+        imprimirSeparador(60,'=');
         cout << "1. Buscar por ID" << endl;
         cout << "2. Buscar por nombre (coincidencia parcial)" << endl;
         cout << "3. Buscar por codigo (coincidencia parcial)" << endl;
         cout << "4. Listar por proveedor" << endl;
         cout << "0. Cancelar" << endl;
-
+        
         if (!solicitarEntero("Seleccione una opcion", seleccion)) {
             break; 
         }
@@ -430,7 +433,8 @@ void buscarProducto(Tienda* tienda) {
 }
 
 //Actualizar Producto
-void actualizarProducto(Tienda* tienda) {
+void actualizarProducto(
+    Tienda* tienda) {
     // 1. Validación de seguridad
     if (tienda == nullptr) return;
 
@@ -459,7 +463,8 @@ void actualizarProducto(Tienda* tienda) {
     
     // Menú de campos editables
     do {
-        cout << endl << "¿Qué desea editar?" << endl;
+        imprimirSeparador(60,'=');
+        cout << endl << "           EDITAR PRODUCTO" << endl;
         cout << "1. Código" << endl;
         cout << "2. Nombre" << endl;
         cout << "3. Descripción" << endl;
@@ -472,7 +477,7 @@ void actualizarProducto(Tienda* tienda) {
         if (!solicitarEntero("Seleccione una opción", seleccion)) continue;
 
         switch (seleccion) {
-            case 1:
+            case 1: {
                 if (solicitarTexto("Ingrese nuevo código", codigo, 20)) {
                     if (codigoDuplicado(tienda, codigo) && strcmp(codigo, tienda->productos[i].codigo) != 0) {
                         cout << "Error: El código ya existe." << endl;
@@ -481,17 +486,20 @@ void actualizarProducto(Tienda* tienda) {
                     }
                 }
                 break;
-            case 2:
+            }
+            case 2: {
                 if (solicitarTexto("Ingrese nuevo nombre", nombre, 100)){
                     VerNombre = true;
                 }
                 break;
-            case 3:
+            }
+            case 3:{
                 if (solicitarTexto("Ingrese nueva descripción", descripcion, 200)) {
                     VerDescrip = true;
                 }
                 break;
-            case 4:
+            }
+            case 4:{
                 if (solicitarEntero("Ingrese ID del nuevo proveedor", idProveedor)) {
                     if (existeProveedor(tienda, idProveedor)) {
                         VerIdProveedor = true;
@@ -501,16 +509,19 @@ void actualizarProducto(Tienda* tienda) {
                     }
                 }
                 break;
-            case 5:
+            }
+            case 5:{
                 if (solicitarFloat("Ingrese nuevo precio", precio) && floatesPositivo(precio)) {
                     VerPrecio = true;
                 }
                 break;
-            case 6:
+            }
+            case 6:{
                 if (solicitarEntero("Ingrese nuevo stock", stock) && IntesPositivo(stock)) {
                     VerStock = true;
                 }
                 break;
+            }
             case 7: {
                 char decision;
                 cout << "¿Desea Guardar los cambios hechos al producto? (S/N): ";
@@ -634,7 +645,7 @@ void listarProductos(Tienda* tienda) {
         cout << "No hay productos registrados." << endl;
         return;
     }
-
+    imprimirSeparador(60,'=');
     cout << endl << "          LISTADO GENERAL DE PRODUCTOS" << endl;
     encabezadoProductos();
     for (int i = 0; i < tienda->numProductos; i++) {
@@ -937,7 +948,7 @@ void buscarTransacciones(Tienda* tienda){
     }
     
     switch (op){
-    case 1: // Busqueda por ID de transacción
+    case 1: {// Busqueda por ID de transacción
         int TransID;
         if (!solicitarEntero("Ingrese ID de la transacción", TransID)){
         return;
@@ -952,8 +963,8 @@ void buscarTransacciones(Tienda* tienda){
         mostrarDetalleTransaccion(tienda, i);
         imprimirSeparador(91, '=');
         break;
-    
-    case 2: // Busqueda por ID del Producto
+    }
+    case 2: {// Busqueda por ID del Producto
         int prodID;
 
         if (!solicitarEntero("Ingrese ID del producto", prodID)){
@@ -977,8 +988,8 @@ void buscarTransacciones(Tienda* tienda){
             cout << "No hay transacciones para este producto." << endl;
         }
         break;
-
-    case 3:
+    }
+    case 3:{
         int clienteID;
 
         if (!solicitarEntero("Ingrese ID del cliente", clienteID)){
@@ -1002,8 +1013,8 @@ void buscarTransacciones(Tienda* tienda){
             cout << "No hay transacciones registradas para este cliente." << endl; 
         }
     break;
-
-    case 4: // Busqueda por ID de proveedor
+    }
+    case 4: {// Busqueda por ID de proveedor
         int proveedorID;
 
         if (!solicitarEntero("Ingrese ID del proveedor", proveedorID)){
@@ -1028,8 +1039,8 @@ void buscarTransacciones(Tienda* tienda){
             cout << "No hay transacciones registradas para este proveedor.";
         }
     break;
-
-    case 5: // Busqueda por fecha
+    }
+    case 5: {// Busqueda por fecha
         char fecha[11];
 
         if (!solicitarTexto("Ingrese fecha de la Transacción (YYYY-MM-DD)", fecha, 11)){
@@ -1054,8 +1065,9 @@ void buscarTransacciones(Tienda* tienda){
             cout << "No hay transacciones registradas en la fecha especificada.";
         }
     break;
+    }
 
-    case 6: // busqueda por tipo de transaccion
+    case 6:{ // busqueda por tipo de transaccion
 
         int tipo;
         cout << "1. Compra (A Proveedor)"
@@ -1088,6 +1100,7 @@ void buscarTransacciones(Tienda* tienda){
             cout << "No hay transacciones de este tipo";
         }
         break;
+    }
 
     default:
         break;
@@ -1577,7 +1590,7 @@ void encabezadoProductos() {
     imprimirSeparador(100, '=');
 }
 
-void imprimirSeparador(int ancho = 91, char simbolo = '-'){
+void imprimirSeparador(int ancho, char simbolo){
     
     cout << setfill(simbolo) << setw(ancho) << "" << setfill(' ') << endl;
 }
@@ -1599,14 +1612,16 @@ bool IntesPositivo(int valor){
 }
 
 bool solicitarTexto(const char* prompt, char* destino, int largo) {
-    cout << prompt << " (o Enter para cancelar): ";
-    cin.ignore(cin.rdbuf()->in_avail(), '\n'); // Limpia restos del buffer
+    
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cout << prompt << " (o Enter para cancelar): "; // Limpia restos del buffer
     
     char temp[200];
     cin.getline(temp, 200);
 
     if (strlen(temp) == 0) {
         cout << "Operacion cancelada por el usuario." << endl;
+        imprimirSeparador();
         return false; 
     }
 
@@ -1616,7 +1631,7 @@ bool solicitarTexto(const char* prompt, char* destino, int largo) {
 
 bool solicitarEntero(const char* prompt, int& valor) {
     string entrada;
-    cout << prompt << " (Escribe 's' para salir): ";
+    cout << prompt << " (o Ingresa 's' para cancelar): ";
     cin >> entrada;
 
     if (entrada == "s" || entrada == "S") {
@@ -1636,7 +1651,7 @@ bool solicitarEntero(const char* prompt, int& valor) {
 
 bool solicitarFloat(const char* prompt, float& valor) {
     string entrada;
-    cout << prompt << " (Escribe 's' para salir): ";
+    cout << prompt << " (o Ingresa 's' para salir): ";
     cin >> entrada;
 
     if (entrada == "s" || entrada == "S") return false;
@@ -1652,6 +1667,113 @@ bool solicitarFloat(const char* prompt, float& valor) {
 
 int main(){
 
+    Tienda* Negocio= nullptr;
+    Negocio= new Tienda;
+
+    char nombre[100] = {"JSport Maracaibo"}, rif[20]={"V-15163126"};
+    int op;
+
+    if (Negocio == nullptr) {
+        cout << "Error al asignar memoria.";
+        return 1;
+    }
+    inicializarTienda(Negocio, nombre, rif);   
+    
+    
+    do {
+        imprimirSeparador(60,'=');
+        cout << "             SISTEMA DE GESTION DE INVENTARIO" << endl
+         << "               Tienda: " << Negocio->nombre << endl;
+        imprimirSeparador(60,'=');
+
+        cout << "Seleccione una opción: " << endl
+             << "1. Gestión de Productos" << endl
+             << "2. Gestión de Proveedores" << endl
+             << "3. Gestión de Clientes" << endl
+             << "4. Gestión de Transacciones" << endl
+             << "5. Salir" << endl;
+        imprimirSeparador(60, '=');
+        cin >> op;
+
+        switch (op)
+            {
+            case 1: { // Gestión de Productos
+            imprimirSeparador(60,'=');
+            cout << "             SISTEMA DE GESTION DE PRODUCTOS" << endl;
+            imprimirSeparador(60,'=');
+            int opProd;
+            do {
+                cout << "Seleccione una opción: " << endl
+                << "1. Registrar nuevo productos" << endl
+                << "2. Buscar producto" << endl
+                << "3. Actualizar producto" << endl
+                << "4. Actualizar Stock manualmente" << endl
+                << "5. Listar todos los productos" << endl
+                << "6. Eliminar prododucto" << endl
+                << "0. Volver al menu principal" << endl;
+                imprimirSeparador(60, '=');
+                cin >> opProd;
+                
+                switch (opProd) {
+                    case 1:{ // Registrar nuevo productos
+                        crearProducto(Negocio);
+                        break;
+                    }
+                    case 2:{ // Buscar producto
+                        buscarProducto(Negocio);
+                        break;
+                    }
+                    case 3:{ // Actualizar Producto
+                        actualizarProducto(Negocio);
+                        break;
+                    }
+                    case 4: { // Actualizar Stock manualmente
+                        actualizarStockProducto(Negocio);
+                        break;
+                    }
+                    case 5: { // Listar todos los productos
+                        listarProductos(Negocio);
+                        break;
+                    }
+                    case 6: { // Eliminar prododucto
+                        eliminarProducto(Negocio);
+                        break;
+                    }
+                    case 0: { // Volver al menu principal
+                        cout << "Volviendo al menú principal...";
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            } while (opProd != 0);
+
+            break;
+            }
+            case 2: { // Gestión de Proveedores
+
+                break;
+            }
+            case 3:{ // Gestión de Clientes
+
+                break;
+            }
+            case 4:{ // Gestión de Transacciones
+                break;
+            }
+            case 5: { // Salir
+                cout << "Saliendo del programa...";
+                break;
+            }
+            default:
+                break;
+            }
+    } while (op != 5);
+    
+
+    liberarTienda(Negocio);
+    delete Negocio;
+    Negocio = nullptr;
 
     return 0;
 }
