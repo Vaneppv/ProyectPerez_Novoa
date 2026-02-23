@@ -40,6 +40,7 @@ int buscarProveedorPorId(Tienda* tienda, int id);
 int buscarClientePorId(Tienda* tienda, int id);
 int buscarTransaccionPorId(Tienda* tienda, int id);
 int* buscarProductosPorNombre(Tienda* tienda, const char* nombre, int* numResultados);
+int* buscarProductosPorCodigo(Tienda* tienda, const char* codigo, int* numResultados);
 
 // UTILIDADES
 void obtenerFechaActual(char* buffer);
@@ -231,30 +232,377 @@ void liberarTienda(Tienda* tienda){
 // Crear Productos
 void crearProducto(Tienda* tienda){
 
+	char decision;
+	cout << "�Desea registrar un nuevo producto? (S/N)" << endl;
+	cin >> decision;
+	
+	if ((decision == 's') || (decision == 'S')) {
+	
+		int i = tienda->siguienteIdProducto;
+		char* nombre = new char[100];
+		char* codigo = new char[20];
+		char* descripcion = new char[200];
+		float precio;
+		int stock;
+		int idProveedor;
+		
+		cout << "Ingrese el nombre del producto. (Puede cancelar la crecion en cualquier momento si ingresa 'CANCELAR' o '0')" << endl;
+		cin.ignore();
+		cin.getline(nombre, 100);
+		
+		cout << "Ingrese el codigo del producto. (Puede cancelar la crecion en cualquier momento si ingresa 'CANCELAR' o '0')" << endl;
+		cin.getline(codigo, 20);
+		codigoDuplicado(tienda, codigo);
+		
+		cout << "Ingrese la descripcion del producto. (Puede cancelar la crecion en cualquier momento si ingresa 'CANCELAR' o '0')" << endl;
+		cin.getline(descripcion, 200);
+		
+		do {
+		
+			cout << "Ingrese el precio del producto. (Puede cancelar la crecion en cualquier momento si ingresa '0')" << endl;
+			cin >> precio;
+			
+		}while (precio <= 0);
+		
+		do{
+		cout << "Ingrese el stock del producto. (Puede cancelar la crecion en cualquier momento si ingresa '0')" << endl;
+		cin >> stock;
+		}while (precio < 0);
+		
+		cout << "Ingrese la ID del proveedor. (Puede cancelar la crecion en cualquier momento si ingresa '0')" << endl;
+		cin >> idProveedor;
+		existeProveedor(tienda, idProveedor);
+		
+		cout << "A continuacion se le mostrara los datos ingresados" << endl;
+		cout << "Nombre: " << nombre << endl;
+		cout << "Codigo: " << codigo << endl;
+		cout << "Descripcion: " << descripcion << endl;
+		cout << "Precio: " << precio << endl;
+		cout << "Stock: " << stock << endl;
+		cout << "ID del proveedor: " << idProveedor << endl;
+		cout << "Desea Guardar producto? (S/N)" << endl;
+		cin >> decision;
+	
+		if ((decision == 's') || (decision == 'S')) {
+		
+			strncpy(tienda->productos[i].nombre, nombre, 100);
+			strncpy(tienda->productos[i].codigo, codigo, 20);
+			strncpy(tienda->productos[i].descripcion, descripcion, 200);
+			tienda->productos[i].idProveedor = idProveedor;
+			tienda->productos[i].precio = precio;
+			tienda->productos[i].stock = stock;
+			tienda->productos[i].id = tienda->siguienteIdProducto;
+			tienda->siguienteIdProducto++;
+			
+			cout << "El producto fue creado con exito, volviendo al menu principal" << endl;
+		} else {
+			
+			cout << "No se deseo guardar el producto hecho, eliminando producto y volviendo al menu principal" << endl;
+			
+		}
+		
+		delete [] nombre;
+		delete [] codigo;
+		delete [] descripcion;
+		
+	} else {
+		
+		cout << "No se va a crear un prodcuto nuevo, volviendo al menu" << endl;
+		
+	}
+
 }
 
 // Buscar Producto
 void buscarProducto(Tienda* tienda){
 
+	int seleccion;
+	char decision;
+	
+	do {
+	
+	cout << "Menu de Busqueda" << endl;
+	cout << "1. Buscar por ID" << endl;
+	cout << "2. Buscar por nombre (coincidencia parcial)" << endl;
+	cout << "3. Buscar por codigo (coincidencia parcial)" << endl;
+	cout << "4. Listar por proveedor" << endl;
+	cout << "0. Cancelar" << endl;
+	
+		if (seleccion == 1){
+			
+			do {
+				
+				int id;
+				int i;
+				cout << "Eligo buscar por id, por favor ingrese la ID del producto a buscar" << endl;
+				cin >> id;
+			
+				i =	buscarProductoPorId(tienda, id);
+					
+					if (buscarProductoPorId){
+						
+						
+						cout << "Se encontro el producto de ID " << id << endl;
+						cout << "Nombre: " << tienda->productos[i].nombre << endl;
+						cout << "Codigo: " << tienda->productos[i].codigo << endl;
+						cout << "Descripcion: " << tienda->productos[i].descripcion << endl;
+						cout << "Precio: " << tienda->productos[i].precio << endl;
+						cout << "Stock: " << tienda->productos[i].stock << endl;
+						cout << "ID del proveedor: " << tienda->productos[i].idProveedor << endl;
+						
+					}
+					
+				
+				cout << "Desea buscar otro producto por ID (S/N)" << endl;
+				cin >> decision;
+			} while((decision == 's') || (decision == 'S'));
+			
+		} else if (seleccion == 2){
+			
+			char* nombre = new char[100];
+			int* numResultados;
+			cout << "Eligo buscar producto por nombre, por favor ingrese el del producto a buscar" << endl;
+			cin.ignore();
+			cin.getline(nombre, 100);
+			buscarProductosPorNombre(tienda, nombre, numResultados);
+			
+		} else if (seleccion == 3){
+			
+			char* codigo = new char[20];
+			int* numResultados;
+			cout << "Eligo buscar producto por codigo, por favor ingrese el codigo del producto a buscar" << endl;
+			cin.ignore();
+			cin.getline(codigo, 20);
+			buscarProductosPorCodigo(tienda, codigo, numResultados);
+			
+		} else if (seleccion == 4){
+			
+			int id;
+			cout << "Eligo listar productos por id del Proveedor, por favor ingrese la ID del proveedor" << endl;
+			cin >> id;
+				
+				for(int i = 0; i < tienda->capacidadProductos; i++){
+				
+						cout <<	"+------------------------------------------------------------+" << endl;
+						cout <<	"�                    LISTA DE PRODUCTOS                      �" << endl;
+						cout <<	"�------------------------------------------------------------�" << endl;
+						cout <<	"� NOMBRE     � CODIGO       �     PRECIO    �      STOCK     �" << endl;
+						cout <<	"�-----+---------------------+--------------+------+----------�" << endl;
+					if (tienda->productos[i].idProveedor == id){
+
+								cout <<	left << setw(10) << tienda->productos[i].nombre <<	left << setw(5) << tienda->productos[i].codigo << left << setw(15) << tienda->productos[i].precio << left << setw(15) << tienda->productos[i].stock << endl;
+							
+					}
+						cout <<	"+------------------------------------------------------------+" << endl;
+				}
+		}
+	
+	} while(seleccion != 0);
+
 }
 
 //Actualizar Producto
 void actualizarProducto(Tienda* tienda){
-
+		
+	int id;
+	int i;
+	cout << "Eligo buscar por id, por favor ingrese la ID del producto a buscar" << endl;
+	cin >> id;
+			
+	i = buscarProductoPorId(tienda, id);
+	int seleccion;
+	char decision;
+	
+	if (buscarProductoPorId){
+		
+		char* nombre = new char[100];
+		char* codigo = new char[20];
+		char* descripcion = new char[200];
+		float precio;
+		int stock;
+		int idProveedor;
+		bool VerCodigo;
+		bool VerNombre;
+		bool VerDescrip;
+		bool VerPrecio;
+		bool VerStock;
+		bool VerIdProveedor;
+		
+		do {
+					
+			cout << "�Qu� desea editar?" << endl;
+			cout << "1. C�digo" << endl;
+			cout << "2. Nombre" << endl;
+			cout << "3. Descripci�n" << endl;
+			cout << "4. Proveedor" << endl;
+			cout << "5. Precio" << endl;
+			cout << "6. Stock" << endl;
+			cout << "7. Guardar cambios" << endl;
+			cout << "0. Cancelar sin guardar" << endl;
+			
+			if (seleccion == 1 ){
+				
+				cout << "Ingrese el nuevo codigo del producto" << endl;
+				cin.ignore();
+				cin.getline(codigo, 20);
+				codigoDuplicado(tienda, codigo);
+				VerCodigo = true;
+				
+				} else if (seleccion == 2 ){
+				
+				cout << "Ingrese el nuevo nombre del producto" << endl;
+				cin.ignore();
+				cin.getline(nombre, 100); 
+				VerNombre = true;
+				
+				} else if (seleccion == 3 ){
+				
+				cout << "Ingrese la nueva descripccion del producto" << endl;
+				cin.ignore();
+				cin.getline(descripcion, 200);
+				VerDescrip = true;
+				
+				} else if (seleccion == 4 ){
+				
+				cout << "Ingrese la ID del nuevo proveedor del producto" << endl;
+				cin >> idProveedor;
+				existeProveedor(tienda, idProveedor);
+				VerIdProveedor = true;
+				
+				} else if (seleccion == 5 ){
+				
+				cout << "Ingrese el nuevo precio del producto" << endl;
+				cin >> precio;
+				VerPrecio = true;
+				
+				} else if (seleccion == 6 ){
+				
+				cout << "Ingrese el nuevo stock del producto" << endl;
+				cin >> stock;
+				VerStock = true;
+				
+				} else if (seleccion == 7 ){
+					
+					
+				cout << "Desea Guardar los cambios hechos al producto? (S/N)" << endl;
+				cin >> decision;
+			
+				if ((decision == 's') || (decision == 'S')){
+						
+						if (VerNombre == true){
+							strncpy(tienda->productos[i].nombre, nombre, 100);
+						}
+						if (VerCodigo == true){
+						strncpy(tienda->productos[i].codigo, codigo, 20);
+						}
+						if (VerDescrip == true){
+						
+						strncpy(tienda->productos[i].descripcion, descripcion, 200);
+						}
+						if (VerIdProveedor == true){
+						
+						tienda->productos[i].idProveedor = idProveedor;
+						}
+						if (VerPrecio == true){
+						
+						tienda->productos[i].precio = precio;
+						}
+						if (VerStock == true){
+						
+						tienda->productos[i].stock = stock;
+						}
+				}
+				
+			}
+		
+		}while(seleccion != 0);
+						
+	}
+		
+	
 }
 
 // Actualizar Stock Manualmente
 void actualizarStockProducto(Tienda* tienda){
-
+	
+	int id;
+	int i;
+	cout << "Por favor ingrese la ID del producto que se va a actualizar" << endl;
+	cin >> id;
+			
+	i = buscarProductoPorId(tienda, id);
+	int seleccion;
+	char decision;
+	
+	if (buscarProductoPorId){
+		
+		int stock = tienda->productos[i].stock;
+		do {
+		
+			cout << "Stock actual:" << tienda->productos[i].stock;
+			cout << "Nuevo Stock:" << stock;
+			cout << "Que desea hacer?" << endl;
+			cout << "1. Agregar stock" << endl;
+			cout << "2. Quitar stock" << endl;
+			cout << "3. Guardar cambios" << endl;
+			cout << "0. Cancelar sin guardar" << endl;
+			cin >> seleccion;
+			
+			if (seleccion == 1) {
+				
+				stock++;
+				
+			} else if (seleccion == 2) {
+				
+				stock--;
+				
+			} else if (seleccion == 3){
+				
+				cout << "Seguro que quiere guardar el nuevo stock?(S/N)" << endl;
+				cin >> decision;
+				
+				if ((decision == 's') || (decision == 'S')){
+				
+					tienda->productos[i].stock = stock;
+				
+				}
+			}
+		
+		}while(seleccion !=0);
+	}
 }
 
 // Listar Productos
 void listarProductos(Tienda* tienda){
 
+		for(int i = 0; i < tienda->capacidadProductos; i++){
+		
+			
+			cout <<	"+------------------------------------------------------------+" << endl;
+			cout <<	"�                    LISTA DE PRODUCTOS                      �" << endl;
+			cout <<	"�------------------------------------------------------------�" << endl;
+			cout <<	"� NOMBRE     � CODIGO       �     PRECIO    �      STOCK     �" << endl;
+			cout <<	"�-----+---------------------+--------------+------+----------�" << endl;
+			
+					cout <<	left << setw(10) << tienda->productos[i].nombre <<	left << setw(5) << tienda->productos[i].codigo << left << setw(15) << tienda->productos[i].precio << left << setw(15) << tienda->productos[i].stock << endl;
+			cout <<	"+------------------------------------------------------------+" << endl;
+			
+	}
+
 }
 
 // Eliminar Producto
 void eliminarProducto(Tienda* tienda){
+
+	int id;
+	int i;
+	cout << "Por favor ingrese la ID del producto que se va a eliminar" << endl;
+	cin >> id;
+			
+	i = buscarProductoPorId(tienda, id);
+	for (int j = i; j < tienda->capacidadProductos - 1; ++j) {
+                tienda->productos[j] = tienda->productos[j + 1];
+    }
 
 }
 
@@ -1006,6 +1354,34 @@ int* buscarProductosPorNombre(Tienda* tienda, const char* nombre, int* numResult
     // Llenar arreglo con indices reales de los productos encontrados
     for (int i = 0; i < tienda->numProductos; i++){ // Verificar si hay coincidencias
         if (contieneSubstring(tienda->productos[i].nombre, nombre)){
+            indiceProductos[posicion] = i;
+            posicion++;
+        }
+    }
+    return indiceProductos; // Retorna el puntero al arreglo de indices
+}
+
+int* buscarProductosPorCodigo(Tienda* tienda, const char* codigo, int* numResultados){
+    if (tienda == nullptr){ // Validacion de seguridad
+        return nullptr;
+    }
+    // Inicializacion del contador de resultados encontrados
+    *numResultados = 0;
+    // Recorrido para saber tamaño del arreglo de productos encontrados
+    for (int i = 0; i < tienda->numProductos; i++){ // Verificar si hay coincidencias
+        if (contieneSubstring(tienda->productos[i].codigo, codigo)){
+            (*numResultados)++; 
+        }
+    }
+    if (*numResultados == 0){ // Si no hay coincidencias retorna nullptr
+        return nullptr;
+    }
+    // Reservar memoria para arreglo de productos encontrados
+    int* indiceProductos = new int[*numResultados];
+    int posicion = 0;
+    // Llenar arreglo con indices reales de los productos encontrados
+    for (int i = 0; i < tienda->numProductos; i++){ // Verificar si hay coincidencias
+        if (contieneSubstring(tienda->productos[i].codigo, codigo)){
             indiceProductos[posicion] = i;
             posicion++;
         }
