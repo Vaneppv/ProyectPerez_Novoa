@@ -233,7 +233,10 @@ void liberarTienda(Tienda* tienda){
 
 // Crear Productos
 void crearProducto(Tienda* tienda) {
-    if (tienda == nullptr) return;
+    if (tienda == nullptr){
+        cout << "Error al crear tienda " << tienda->nombre;
+        return;
+    }
 
     if (tienda->numProductos >= tienda->capacidadProductos) {
         redimensionarProductos(tienda);
@@ -314,7 +317,10 @@ void crearProducto(Tienda* tienda) {
 
 // Buscar Producto
 void buscarProducto(Tienda* tienda) {
-    if (tienda == nullptr) return;
+    if (tienda == nullptr || tienda->numProductos == 0) {
+        cout << "Error al crear tienda " << tienda->nombre << " o no hay productos registrados." << endl;
+        return;
+    }
 
     int seleccion;
     do {
@@ -436,8 +442,10 @@ void buscarProducto(Tienda* tienda) {
 void actualizarProducto(
     Tienda* tienda) {
     // 1. Validación de seguridad
-    if (tienda == nullptr) return;
-
+    if (tienda == nullptr || tienda->numProductos == 0) {
+        cout << "Error al crear tienda " << tienda->nombre << " o no hay productos registrados." << endl;
+        return;
+    }
     int id, i;
     if (!solicitarEntero("Ingrese el ID del producto a buscar", id)) return;
 
@@ -550,7 +558,10 @@ void actualizarProducto(
 
 // Actualizar Stock Manualmente
 void actualizarStockProducto(Tienda* tienda) {
-    if (tienda == nullptr) return;
+    if (tienda == nullptr || tienda->numProductos == 0) {
+        cout << "Error al crear tienda " << tienda->nombre << " o no hay productos registrados." << endl;
+        return;
+    }
 
     int id, i;
     if (!solicitarEntero("Ingrese la ID del producto", id)){
@@ -642,7 +653,7 @@ void actualizarStockProducto(Tienda* tienda) {
 // Listar Productos
 void listarProductos(Tienda* tienda) {
     if (tienda == nullptr || tienda->numProductos == 0) {
-        cout << "No hay productos registrados." << endl;
+        cout << "Error al crear tienda " << tienda->nombre << " o no hay productos registrados." << endl;
         return;
     }
     imprimirSeparador(60,'=');
@@ -658,7 +669,7 @@ void listarProductos(Tienda* tienda) {
 void eliminarProducto(Tienda* tienda){
 
 	if (tienda == nullptr || tienda->numProductos == 0) {
-        cout << "No hay productos para eliminar." << endl;
+        cout << "Error al crear tienda o no hay productos en el sistema" << endl;
         return;
     }
 
@@ -749,7 +760,8 @@ void eliminarCliente(Tienda* tienda){
 
 // Registrar Compra (a Proveedor)
 void registrarCompra(Tienda* tienda){
-    if (tienda == nullptr){ // Validacion de seguridad
+    if (tienda == nullptr) {
+        cout << "Error al crear tienda " << tienda->nombre << endl;
         return;
     }
     if (tienda->numTransacciones >= tienda->capacidadTransacciones){ // Verificacion del tamaño del arreglo
@@ -839,6 +851,7 @@ void registrarCompra(Tienda* tienda){
 // Registrar Venta (a Cliente)
 void registrarVenta(Tienda* tienda){
    if (tienda == nullptr){ // Validacion de seguridad
+        cout << "Error al crear tienda " << tienda->nombre << endl;
         return;
     }
     if (tienda->numTransacciones >= tienda->capacidadTransacciones){ // Verificacion del tamaño del arreglo
@@ -925,7 +938,8 @@ void registrarVenta(Tienda* tienda){
 
 // Buscar Transacciones
 void buscarTransacciones(Tienda* tienda){
-    if (tienda == nullptr){ // Validacion de seguridad
+    if (tienda == nullptr || tienda->numTransacciones == 0){ // Validacion de seguridad
+        cout << "Error al crear tienda " << tienda->nombre << " o no hay transacciones en el sistema." << endl;
         return;
     }
     
@@ -1109,7 +1123,8 @@ void buscarTransacciones(Tienda* tienda){
 
 // Listar Transacciones
 void listarTransacciones(Tienda* tienda){
-    if (tienda == nullptr){ // Validacion de seguridad
+    if (tienda == nullptr|| tienda->numTransacciones == 0){ // Validacion de seguridad
+        cout << "Error al crear tienda " << tienda->nombre << " o no hay transacciones en el sistema." << endl;
         return;
     }
 
@@ -1128,8 +1143,8 @@ void listarTransacciones(Tienda* tienda){
 
 // Cancelar/Anular Transacción
 void cancelarTransaccion(Tienda* tienda){
-    if (tienda == nullptr || tienda->numTransacciones <= 0){ // Validacion de seguridad
-        cout << "No hay transacciones para cancelar.";
+    if (tienda == nullptr || tienda->numTransacciones == 0){ // Validacion de seguridad
+        cout << "Error al crear tienda " << tienda->nombre << " o no hay transacciones en el sistema." << endl;
         return;
     }
     int TransID;
@@ -1698,6 +1713,7 @@ int main(){
         switch (op)
             {
             case 1: { // Gestión de Productos
+            
             imprimirSeparador(60,'=');
             cout << "             SISTEMA DE GESTION DE PRODUCTOS" << endl;
             imprimirSeparador(60,'=');
@@ -1709,7 +1725,7 @@ int main(){
                 << "3. Actualizar producto" << endl
                 << "4. Actualizar Stock manualmente" << endl
                 << "5. Listar todos los productos" << endl
-                << "6. Eliminar prododucto" << endl
+                << "6. Eliminar producto" << endl
                 << "0. Volver al menu principal" << endl;
                 imprimirSeparador(60, '=');
                 cin >> opProd;
@@ -1744,6 +1760,7 @@ int main(){
                         break;
                     }
                     default:
+                        cout << "Opción Invalida.";
                         break;
                 }
             } while (opProd != 0);
@@ -1751,6 +1768,51 @@ int main(){
             break;
             }
             case 2: { // Gestión de Proveedores
+                imprimirSeparador(60,'=');
+                cout << "             SISTEMA DE GESTION DE PRODUCTOS" << endl;
+                imprimirSeparador(60,'=');
+                int opProv;
+                do {
+                    cout << "Seleccione una opción: " << endl
+                    << "1. Registrar nuevo Proveedor" << endl
+                    << "2. Buscar Proveedor" << endl
+                    << "3. Actualizar Proveedor" << endl
+                    << "4. Listar todos los Proveedores" << endl
+                    << "5. Eliminar Proveedor" << endl
+                    << "0. Volver al menu principal" << endl;
+                    imprimirSeparador(60, '=');
+                    cin >> opProv;
+                    
+                    switch (opProv) {
+                        case 1:{ // Registrar nuevo proveedor
+                            crearProveedor(Negocio);
+                            break;
+                        }
+                        case 2:{ // Buscar proveedor
+                            buscarProveedor(Negocio);
+                            break;
+                        }
+                        case 3:{ // Actualizar proveedor
+                            actualizarProveedor(Negocio);
+                            break;
+                        }
+                        case 4: { // Listar todos los proveedores
+                            listarProveedores(Negocio);
+                            break;
+                        }
+                        case 5: { // Eliminar proveedor
+                            eliminarProveedor(Negocio);
+                            break;
+                        }
+                        case 0: { // Volver al menu principal
+                            cout << "Volviendo al menú principal...";
+                            break;
+                        }
+                        default:
+                            cout << "Opción Invalida.";
+                            break;
+                    }
+                } while (opProv != 0);
 
                 break;
             }
@@ -1759,6 +1821,52 @@ int main(){
                 break;
             }
             case 4:{ // Gestión de Transacciones
+                imprimirSeparador(60,'=');
+                cout << "             SISTEMA DE GESTION DE TRANSACCIONES" << endl;
+                imprimirSeparador(60,'=');
+                int opTrans;
+                do {
+                    cout << "Seleccione una opción: " << endl
+                    << "1. Registrar Compra a Proveedor" << endl
+                    << "2. Registrar Venta a Cliente" << endl
+                    << "3. Buscar Transacciones" << endl
+                    << "4. Listar Transacciones" << endl
+                    << "5. Cancelar Transacción" << endl
+                    << "0. Volver al menu principal" << endl;
+                    imprimirSeparador(60, '=');
+                    cin >> opTrans;
+                    
+                    switch (opTrans)
+                    {
+                    case 1: { // Registrar compra a proveedor
+                        registrarCompra(Negocio);      
+                        break;
+                    }
+                    case 2: { // Registrar venta a cliente
+                        registrarVenta(Negocio);
+                        break;
+                    }
+                    case 3: { // Buscar transacciones
+                        buscarTransacciones(Negocio);
+                        break;    
+                    }
+                    case 4: { // Listar transacciones
+                        listarTransacciones(Negocio);
+                        break;
+                    }
+                    case 5: { // Cancelar transaccion
+                        cancelarTransaccion(Negocio);
+                        break;
+                    }
+                    case 0: { // Volver al menu principal
+                        cout << "Volviendo al menú principal...";
+                        break;
+                    }
+                    default:
+                        cout << "Opción Invalida.";
+                        break;
+                    }
+                } while (opTrans != 0);
                 break;
             }
             case 5: { // Salir
@@ -1766,10 +1874,10 @@ int main(){
                 break;
             }
             default:
+                cout << "Opción Invalida.";
                 break;
             }
     } while (op != 5);
-    
 
     liberarTienda(Negocio);
     delete Negocio;
