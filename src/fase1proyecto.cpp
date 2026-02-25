@@ -1174,6 +1174,10 @@ void cancelarTransaccion(Tienda* tienda){
         // Sumar cantidad al Stock si cancelo una venta, restar cantidad al Stock si cancelo una compra
         if (IndiceProd != -1){
             if (strcmp(tienda->transacciones[IndiceTrans].tipo, "COMPRA") == 0){
+                if (tienda->productos[IndiceProd].stock < cantidad) {
+                    cout << "Error: No se puede anular la compra porque ya se vendió parte del stock." << endl;
+                    return;
+                }
                 tienda->productos[IndiceProd].stock -= cantidad;
             } else {
                 tienda->productos[IndiceProd].stock += cantidad;
@@ -1628,14 +1632,16 @@ bool IntesPositivo(int valor){
 
 bool solicitarTexto(const char* prompt, char* destino, int largo) {
     
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    cout << prompt << " (o Enter para cancelar): "; // Limpia restos del buffer
-    
+    if (cin.peek() == '\n') {
+        cin.ignore();
+    }
+
     char temp[200];
+    cout << prompt << " (o Enter para cancelar): "; // Limpia restos del buffer    
     cin.getline(temp, 200);
 
     if (strlen(temp) == 0) {
-        cout << "Operacion cancelada por el usuario." << endl;
+        cout << "Operacion cancelada." << endl;
         imprimirSeparador();
         return false; 
     }
@@ -1720,12 +1726,12 @@ int main(){
             int opProd;
             do {
                 cout << "Seleccione una opción: " << endl
-                << "1. Registrar nuevo productos" << endl
-                << "2. Buscar producto" << endl
-                << "3. Actualizar producto" << endl
+                << "1. Registrar nuevo Productos" << endl
+                << "2. Buscar Producto" << endl
+                << "3. Actualizar Producto" << endl
                 << "4. Actualizar Stock manualmente" << endl
-                << "5. Listar todos los productos" << endl
-                << "6. Eliminar producto" << endl
+                << "5. Listar todos los Productos" << endl
+                << "6. Eliminar Producto" << endl
                 << "0. Volver al menu principal" << endl;
                 imprimirSeparador(60, '=');
                 cin >> opProd;
@@ -1769,7 +1775,7 @@ int main(){
             }
             case 2: { // Gestión de Proveedores
                 imprimirSeparador(60,'=');
-                cout << "             SISTEMA DE GESTION DE PRODUCTOS" << endl;
+                cout << "             SISTEMA DE GESTION DE PROVEEDORES" << endl;
                 imprimirSeparador(60,'=');
                 int opProv;
                 do {
@@ -1817,6 +1823,52 @@ int main(){
                 break;
             }
             case 3:{ // Gestión de Clientes
+                imprimirSeparador(60,'=');
+                cout << "             SISTEMA DE GESTION DE CLIENTES" << endl;
+                imprimirSeparador(60,'=');
+                int opCliente;
+                do {
+                    cout << "Seleccione una opción: " << endl
+                    << "1. Registrar nuevo Cliente" << endl
+                    << "2. Buscar Cliente" << endl
+                    << "3. Actualizar Cliente" << endl
+                    << "4. Listar todos los Cliente" << endl
+                    << "5. Eliminar Cliente" << endl
+                    << "0. Volver al menu principal" << endl;
+                    imprimirSeparador(60, '=');
+                    cin >> opCliente;
+                    cin.ignore();
+                    
+                    switch (opCliente) {
+                        case 1:{ // Registrar nuevo Cliente
+                            crearCliente(Negocio);
+                            break;
+                        }
+                        case 2:{ // Buscar Cliente
+                            buscarCliente(Negocio);
+                            break;
+                        }
+                        case 3:{ // Actualizar Cliente
+                            actualizarCliente(Negocio);
+                            break;
+                        }
+                        case 4: { // Listar todos los Cliente
+                            listarClientes(Negocio);
+                            break;
+                        }
+                        case 5: { // Eliminar Cliente
+                            eliminarCliente(Negocio);
+                            break;
+                        }
+                        case 0: { // Volver al menu principal
+                            cout << "Volviendo al menú principal...";
+                            break;
+                        }
+                        default:
+                            cout << "Opción Invalida.";
+                            break;
+                    }
+                } while (opCliente != 0);
 
                 break;
             }
