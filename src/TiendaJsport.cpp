@@ -54,7 +54,7 @@ void mostrarDetalleTransaccion(Tienda* tienda, int ind);
 void mostrarDetalleProducto(Tienda* tienda, int ind);
 void mostrarDetalleProveedor(Tienda* tienda, int i);
 void mostrarDetalleCliente(Tienda* tienda, int i);
-void imprimirSeparador(int ancho = 91, char simbolo = '-');
+void imprimirSeparador(int ancho, char simbolo);
 void encabezadoTabla();
 void encabezadoProductos();
 bool floatesPositivo(float valor);
@@ -2456,6 +2456,7 @@ bool solicitarFloat(const char* prompt, float& valor) {
     }
 }
 
+
 int main(){
 
     Tienda* Negocio= nullptr;
@@ -2472,6 +2473,7 @@ int main(){
     
     
     do {
+        system("cls");
         imprimirSeparador(60,'=');
         cout << "             SISTEMA DE GESTION DE INVENTARIO" << endl
          << "               Tienda: " << Negocio->nombre << endl;
