@@ -198,6 +198,12 @@ void inicializarTienda(Tienda* tienda, const char* nombre, const char* rif){
 // Funcion de Liberación
 void liberarTienda(Tienda* tienda){
 
+    if (tienda == nullptr)
+    {
+        cout << "Error: Memoria ya liberada." << endl;
+        return;
+    }
+    
     // Liberar arreglos dinámicos para evitar fugas de memoria
     delete[] tienda->clientes;
     delete[] tienda->proveedores;
@@ -1714,6 +1720,9 @@ int main(){
              << "4. Gestión de Transacciones" << endl
              << "5. Salir" << endl;
         imprimirSeparador(60, '=');
+        if (!IntesPositivo(op)){
+            return 1;
+        }
         cin >> op;
 
         switch (op)
@@ -1734,6 +1743,9 @@ int main(){
                 << "6. Eliminar Producto" << endl
                 << "0. Volver al menu principal" << endl;
                 imprimirSeparador(60, '=');
+                if (!IntesPositivo(opProd)){
+                    return 1;
+                }
                 cin >> opProd;
                 
                 switch (opProd) {
@@ -1787,6 +1799,9 @@ int main(){
                     << "5. Eliminar Proveedor" << endl
                     << "0. Volver al menu principal" << endl;
                     imprimirSeparador(60, '=');
+                    if (!IntesPositivo(opProv)){
+                        return 1;
+                    }
                     cin >> opProv;
                     
                     switch (opProv) {
@@ -1836,9 +1851,12 @@ int main(){
                     << "5. Eliminar Cliente" << endl
                     << "0. Volver al menu principal" << endl;
                     imprimirSeparador(60, '=');
+                    if (!IntesPositivo(opCliente)){
+                        return 1;
+                    }
                     cin >> opCliente;
                     cin.ignore();
-                    
+
                     switch (opCliente) {
                         case 1:{ // Registrar nuevo Cliente
                             crearCliente(Negocio);
@@ -1886,6 +1904,9 @@ int main(){
                     << "5. Cancelar Transacción" << endl
                     << "0. Volver al menu principal" << endl;
                     imprimirSeparador(60, '=');
+                    if (!IntesPositivo(opTrans)){
+                        return 1;
+                    }
                     cin >> opTrans;
                     
                     switch (opTrans)
