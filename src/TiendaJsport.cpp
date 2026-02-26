@@ -2527,7 +2527,6 @@ int main(){
             
             int opProd;
             do {
-                system("cls");
                 imprimirSeparador(60,'=');
                 cout << "             SISTEMA DE GESTION DE PRODUCTOS" << endl;
                 imprimirSeparador(60,'=');
@@ -2587,7 +2586,6 @@ int main(){
                 
                 int opProv;
                 do {
-                    system("cls");
                     imprimirSeparador(60,'=');
                     cout << "             SISTEMA DE GESTION DE PROVEEDORES" << endl;
                     imprimirSeparador(60,'=');
@@ -2642,7 +2640,6 @@ int main(){
                 
                 int opCliente;
                 do {
-                    system("cls");
                     imprimirSeparador(60,'=');
                     cout << "             SISTEMA DE GESTION DE CLIENTES" << endl;
                     imprimirSeparador(60,'=');  
@@ -2698,7 +2695,6 @@ int main(){
                 
                 int opTrans;
                 do {
-                    system("cls");
                     imprimirSeparador(60,'=');
                     cout << "             SISTEMA DE GESTION DE TRANSACCIONES" << endl;
                     imprimirSeparador(60,'=');
