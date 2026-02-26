@@ -54,7 +54,7 @@ void mostrarDetalleTransaccion(Tienda* tienda, int ind);
 void mostrarDetalleProducto(Tienda* tienda, int ind);
 void mostrarDetalleProveedor(Tienda* tienda, int i);
 void mostrarDetalleCliente(Tienda* tienda, int i);
-void imprimirSeparador(int ancho = 100, char simbolo = '=');
+void imprimirSeparador(int ancho = 120, char simbolo = '=');
 void encabezadoTransacciones();
 void encabezadoProductos();
 void encabezadoProveedorCliente();
@@ -277,7 +277,7 @@ void crearProducto(Tienda* tienda) {
         if (!solicitarEntero("Ingrese ID del proveedor", idProveedor) || !IntesPositivo(idProveedor)) return;
 
         if (!existeProveedor(tienda, idProveedor)) {
-            cout << "Error: El proveedor no existe. Debe crearlo primero" << endl;
+            cout << endl << "Error: El proveedor no existe. Debe crearlo primero" << endl;
             return;
         }
 
@@ -357,7 +357,7 @@ void buscarProducto(Tienda* tienda) {
                         mostrarDetalleProducto(tienda, i);
                         imprimirSeparador();
                     } else {
-                        cout << "Error: El producto con ID " << id << " no existe." << endl;
+                        cout << endl << "Error: El producto con ID " << id << " no existe." << endl;
                     }
                 }
                 break;
@@ -463,7 +463,7 @@ void actualizarProducto(Tienda* tienda) {
     i = buscarProductoPorId(tienda, id);
 
     if (i == -1) {
-        cout << "Error: El producto con ID " << id << " no existe." << endl;
+        cout << endl << "Error: El producto con ID " << id << " no existe." << endl;
         return;
     }
 
@@ -520,7 +520,7 @@ void actualizarProducto(Tienda* tienda) {
                         VerIdProveedor = true;
                     }
                     else {
-                        cout << "Error: El proveedor no existe." << endl;
+                        cout << endl << "Error: El proveedor no existe." << endl;
                     }
                 }
                 break;
@@ -578,7 +578,7 @@ void actualizarStockProducto(Tienda* tienda) {
     i = buscarProductoPorId(tienda, id);
     
     if (i == -1) {
-        cout << "Error: El producto no existe." << endl;
+        cout << endl << "Error: El producto no existe." << endl;
         return;
     }
 
@@ -696,7 +696,7 @@ void eliminarProducto(Tienda* tienda){
 
     // 2. Validamos que exista
     if (i == -1) {
-        cout << "Error: El producto con ID " << id << " no existe." << endl;
+        cout << endl << "Error: El producto con ID " << id << " no existe." << endl;
         return;
     }
 
@@ -832,7 +832,7 @@ void buscarProveedor(Tienda* tienda){
                         mostrarDetalleProveedor(tienda, i);
                         imprimirSeparador();
                     } else {
-                        cout << "Error: El proveedor con ID " << id << " no existe." << endl;
+                        cout << endl << "Error: El proveedor con ID " << id << " no existe." << endl;
                     }
                 }
                 break;
@@ -878,7 +878,7 @@ void buscarProveedor(Tienda* tienda){
                         mostrarDetalleProveedor(tienda, i);
                         imprimirSeparador();
                     } else {
-                        cout << "Error: El proveedor con rif " << rifBusqueda << " no existe." << endl;
+                        cout << endl << "Error: El proveedor con rif " << rifBusqueda << " no existe." << endl;
                     }
                 }
                 break;            
@@ -914,7 +914,7 @@ void actualizarProveedor(Tienda* tienda){
     i = buscarProveedorPorId(tienda, id);;
 
     if (i == -1) {
-        cout << "Error: El proveedor con ID " << id << " no existe." << endl;
+        cout << endl << "Error: El proveedor con ID " << id << " no existe." << endl;
         return;
     }
 
@@ -1050,7 +1050,7 @@ void eliminarProveedor(Tienda* tienda){
 
     // 2. Validamos que exista
     if (i == -1) {
-        cout << "Error: El proveedor con ID " << id << " no existe." << endl;
+        cout << endl << "Error: El proveedor con ID " << id << " no existe." << endl;
         return;
     }
 
@@ -1117,7 +1117,7 @@ void crearCliente(Tienda* tienda){
         cout << "Telefono: " << telefono << endl;
         cout << "Email: " << email << endl;
         cout << "Cedula:" << cedula << endl;
-        cout << "Dirección" << direccion << endl;
+        cout << "Dirección:" << direccion << endl;
         imprimirSeparador(60, '=');
 
         cout << "¿Desea Guardar al cliente? (S/N): ";
@@ -1285,7 +1285,7 @@ void actualizarCliente(Tienda* tienda){
     do {
         cout << endl << "¿Qué desea editar?" << endl;
         cout << "1. Nombre" << endl;
-        cout << "2. Rif" << endl;
+        cout << "2. Cedula " << endl;
         cout << "3. Telefono" << endl;
         cout << "4. Email" << endl;
         cout << "5. Direccion" << endl;
@@ -1445,7 +1445,7 @@ void registrarCompra(Tienda* tienda){
     }
     int IndiceProducto = buscarProductoPorId(tienda, ProdID);
     if (IndiceProducto == -1){
-        cout << "Error: El producto no existe.";
+        cout << endl << "Error: El producto no existe.";
         return;
     }
     
@@ -1453,7 +1453,7 @@ void registrarCompra(Tienda* tienda){
         return;
     }
     if (existeProveedor(tienda, ProveedorID) == false){
-        cout << "Error: El proveedor no existe." << endl;
+        cout << endl << "Error: El proveedor no existe." << endl;
         return;
     }
 
@@ -1508,7 +1508,7 @@ void registrarCompra(Tienda* tienda){
     tienda->numTransacciones++;
     
     cout << endl << "Compra registrada con exito!" << endl << "Nuevo Stock de: ";
-    cout << tienda->productos[IndiceProducto].nombre << ": " << tienda->productos[IndiceProducto].stock;
+    cout << tienda->productos[IndiceProducto].nombre << ": " << tienda->productos[IndiceProducto].stock << endl;
     } else {
         cout << endl << "Compra cancelada.";
     }   
@@ -1535,7 +1535,7 @@ void registrarVenta(Tienda* tienda){
     }
     int IndiceProducto = buscarProductoPorId(tienda, ProdID);
     if (IndiceProducto == -1){
-        cout << "Error: El producto no existe.";
+        cout << endl << "Error: El producto no existe.";
         return;
     }
 
@@ -1658,7 +1658,7 @@ void buscarTransacciones(Tienda* tienda){
 	        return;
 	        }
 	        if (existeProducto(tienda, prodID) == false){ // Validacion de existencia
-	            cout << "Error: El producto no existe.";
+	            cout << endl << "Error: El producto no existe.";
 	            break;
 	        }
 	        encontro = false;
@@ -1710,7 +1710,7 @@ void buscarTransacciones(Tienda* tienda){
 	        return;
 	        }
 	        if (existeProveedor(tienda, proveedorID) == false){
-	            cout << "Error: El proveedor no existe.";
+	            cout << endl << "Error: El proveedor no existe.";
 	            break;
 	        }
 	
@@ -2106,7 +2106,7 @@ int buscarProveedorPorRif(Tienda* tienda, const char* rif){
     }
     // Recorrido del arreglo en busca del proveedor
     for (int i = 0; i < tienda->numProveedores; i++){
-        if (strcmp(tienda->proveedores[i].rif, rif)){
+        if (strstr(tienda->proveedores[i].rif, rif) != nullptr){
             return i; // Si lo encuentra retorna el indice
         }
     }
@@ -2119,7 +2119,7 @@ int buscarClientePorCedula(Tienda* tienda, const char* cedula){
     }
     // Recorrido del arreglo en busca del cliente
     for (int i = 0; i < tienda->numClientes; i++){
-        if (strcmp(tienda->clientes[i].cedula, cedula)== 0){
+        if (strstr(tienda->clientes[i].cedula, cedula) != nullptr){
             return i; // Si lo encuentra retorna el indice
         }
     }
@@ -2465,7 +2465,7 @@ bool solicitarEntero(const char* prompt, int& valor) {
         return true;
     } catch (...) {
         cout << "Error: Debe ingresar un numero valido." << endl;
-        return solicitarEntero(prompt, valor); // Reintento (Recursividad)
+        return false; // 
     }
 }
 
@@ -2481,7 +2481,7 @@ bool solicitarFloat(const char* prompt, float& valor) {
         return true;
     } catch (...) {
         cout << "Error: Numero decimal invalido." << endl;
-        return solicitarFloat(prompt, valor);
+        return false;
     }
 }
 
@@ -2508,40 +2508,43 @@ int main(){
          << "               Tienda: " << Negocio->nombre << endl;
         imprimirSeparador(60,'=');
 
-        cout << "Seleccione una opción: " << endl
-             << "1. Gestión de Productos" << endl
+        cout << "1. Gestión de Productos" << endl
              << "2. Gestión de Proveedores" << endl
              << "3. Gestión de Clientes" << endl
              << "4. Gestión de Transacciones" << endl
              << "5. Salir" << endl;
+        while (!solicitarEntero("Seleccione una opción", op)){
+            cout << endl;
+        }
         imprimirSeparador(60, '=');
-        cin >> op;
         if (!IntesPositivo(op)){
-            return 1;
+            break;
         }
 
         switch (op)
             {
             case 1: { // Gestión de Productos
             
-            imprimirSeparador(60,'=');
-            cout << "             SISTEMA DE GESTION DE PRODUCTOS" << endl;
-            imprimirSeparador(60,'=');
             int opProd;
             do {
-                cout << "Seleccione una opción: " << endl
-                << "1. Registrar nuevo Productos" << endl
-                << "2. Buscar Producto" << endl
-                << "3. Actualizar Producto" << endl
-                << "4. Actualizar Stock manualmente" << endl
-                << "5. Listar todos los Productos" << endl
-                << "6. Eliminar Producto" << endl
-                << "0. Volver al menu principal" << endl;
+                system("cls");
+                imprimirSeparador(60,'=');
+                cout << "             SISTEMA DE GESTION DE PRODUCTOS" << endl;
+                imprimirSeparador(60,'=');
+                cout<< "1. Registrar nuevo Productos" << endl
+                    << "2. Buscar Producto" << endl
+                    << "3. Actualizar Producto" << endl
+                    << "4. Actualizar Stock manualmente" << endl
+                    << "5. Listar todos los Productos" << endl
+                    << "6. Eliminar Producto" << endl
+                    << "0. Volver al menu principal" << endl;
+                if (!solicitarEntero("Seleccione una opción", opProd)){
+                    break;
+                }
                 imprimirSeparador(60, '=');
                 if (!IntesPositivo(opProd)){
-                    return 1;
+                    break;
                 }
-                cin >> opProd;
                 
                 switch (opProd) {
                     case 1:{ // Registrar nuevo productos
@@ -2581,23 +2584,26 @@ int main(){
             break;
             }
             case 2: { // Gestión de Proveedores
-                imprimirSeparador(60,'=');
-                cout << "             SISTEMA DE GESTION DE PROVEEDORES" << endl;
-                imprimirSeparador(60,'=');
+                
                 int opProv;
                 do {
-                    cout << "Seleccione una opción: " << endl
-                    << "1. Registrar nuevo Proveedor" << endl
-                    << "2. Buscar Proveedor" << endl
-                    << "3. Actualizar Proveedor" << endl
-                    << "4. Listar todos los Proveedores" << endl
-                    << "5. Eliminar Proveedor" << endl
-                    << "0. Volver al menu principal" << endl;
+                    system("cls");
+                    imprimirSeparador(60,'=');
+                    cout << "             SISTEMA DE GESTION DE PROVEEDORES" << endl;
+                    imprimirSeparador(60,'=');
+                    cout << "1. Registrar nuevo Proveedor" << endl
+                        << "2. Buscar Proveedor" << endl
+                        << "3. Actualizar Proveedor" << endl
+                        << "4. Listar todos los Proveedores" << endl
+                        << "5. Eliminar Proveedor" << endl
+                        << "0. Volver al menu principal" << endl;
+                    if (!solicitarEntero("Seleccione una opción", opProv)){
+                        break;
+                    }
                     imprimirSeparador(60, '=');
                     if (!IntesPositivo(opProv)){
-                        return 1;
+                        break;
                     }
-                    cin >> opProv;
                     
                     switch (opProv) {
                         case 1:{ // Registrar nuevo proveedor
@@ -2633,23 +2639,26 @@ int main(){
                 break;
             }
             case 3:{ // Gestión de Clientes
-                imprimirSeparador(60,'=');
-                cout << "             SISTEMA DE GESTION DE CLIENTES" << endl;
-                imprimirSeparador(60,'=');
+                
                 int opCliente;
                 do {
-                    cout << "Seleccione una opción: " << endl
-                    << "1. Registrar nuevo Cliente" << endl
-                    << "2. Buscar Cliente" << endl
-                    << "3. Actualizar Cliente" << endl
-                    << "4. Listar todos los Cliente" << endl
-                    << "5. Eliminar Cliente" << endl
-                    << "0. Volver al menu principal" << endl;
+                    system("cls");
+                    imprimirSeparador(60,'=');
+                    cout << "             SISTEMA DE GESTION DE CLIENTES" << endl;
+                    imprimirSeparador(60,'=');  
+                    cout << "1. Registrar nuevo Cliente" << endl
+                        << "2. Buscar Cliente" << endl
+                        << "3. Actualizar Cliente" << endl
+                        << "4. Listar todos los Cliente" << endl
+                        << "5. Eliminar Cliente" << endl
+                        << "0. Volver al menu principal" << endl;
+                    if (!solicitarEntero("Seleccione una opción", opCliente)){
+                        break;
+                    }
                     imprimirSeparador(60, '=');
                     if (!IntesPositivo(opCliente)){
-                        return 1;
+                        break;;
                     }
-                    cin >> opCliente;
                     cin.ignore();
 
                     switch (opCliente) {
@@ -2686,23 +2695,26 @@ int main(){
                 break;
             }
             case 4:{ // Gestión de Transacciones
-                imprimirSeparador(60,'=');
-                cout << "             SISTEMA DE GESTION DE TRANSACCIONES" << endl;
-                imprimirSeparador(60,'=');
+                
                 int opTrans;
                 do {
-                    cout << "Seleccione una opción: " << endl
-                    << "1. Registrar Compra a Proveedor" << endl
-                    << "2. Registrar Venta a Cliente" << endl
-                    << "3. Buscar Transacciones" << endl
-                    << "4. Listar Transacciones" << endl
-                    << "5. Cancelar Transacción" << endl
-                    << "0. Volver al menu principal" << endl;
+                    system("cls");
+                    imprimirSeparador(60,'=');
+                    cout << "             SISTEMA DE GESTION DE TRANSACCIONES" << endl;
+                    imprimirSeparador(60,'=');
+                    cout << "1. Registrar Compra a Proveedor" << endl
+                        << "2. Registrar Venta a Cliente" << endl
+                        << "3. Buscar Transacciones" << endl
+                        << "4. Listar Transacciones" << endl
+                        << "5. Cancelar Transacción" << endl
+                        << "0. Volver al menu principal" << endl;
+                    if (!solicitarEntero("Seleccione una opción", opTrans)){
+                        break;
+                    }
                     imprimirSeparador(60, '=');
                     if (!IntesPositivo(opTrans)){
-                        return 1;
+                        break;
                     }
-                    cin >> opTrans;
                     
                     switch (opTrans)
                     {
