@@ -101,14 +101,11 @@ struct Producto {
     float precio;
     int stock;
     char fechaRegistro[11];
-    // abajo es lo nuevo se tiene que traducir asi al resto especialmente la metadata
-    // 4. Estadísticas del registro
+    // Estadisticas del registro
     int stockMinimo;                 
     int totalVendido;                
-    
-    // 5. Metadata de Control Obligatoria
-    bool eliminado;                  // Para BORRADO LÓGICO
-    time_t fechaCreacion;
+    // Metadata de Control Obligatoria
+    bool eliminado;              // Para BORRADO LOGICO
     time_t fechaUltimaModificacion;
 };
 
@@ -121,13 +118,10 @@ struct Proveedor {
     char email[100];       
     char direccion[200];
     char fechaRegistro[11];
-	
-	// en caso de tener multiples productos del mismo proveedor
-	int productosIDs[100];
-	int cantidadProductos;   
+	int cantidadProductos;     // Cantidad de productos bajo el proveedor
+	int productosIDs[100];     // IDs de los productos bajo el proveedor
     
-    bool eliminado;                  // Para BORRADO LÓGICO
-    time_t fechaCreacion;
+    bool eliminado;            // Para BORRADO LOGICO
     time_t fechaUltimaModificacion;
 };
 
@@ -140,11 +134,15 @@ struct Cliente {
     char email[100];  
     char direccion[200];
     char fechaRegistro[11];
-    // no creo que a cliente se le tenga que agregar algo nuevo aparte del metadata
     
-    bool eliminado;                  // Para BORRADO LÓGICO
-    time_t fechaCreacion;
+    bool eliminado; // Para BORRADO LOGICO
     time_t fechaUltimaModificacion;
+};
+
+struct DetalleVenta {
+    int idProducto;
+    int cantidad;
+    float precioUnitario; 
 };
 
 // Estructura TransacciÃ³n (puede separarse por transaccion)
@@ -158,10 +156,10 @@ struct Transaccion {
     float total;                         
     char descripcion[200];     // Notas adicionales (opcional)
     char fechaRegistro[11];
-    // no se que agregar a esto
-    
-    bool eliminado;                  // Para BORRADO LÓGICO
-    time_t fechaCreacion;
+    DetalleVenta detalles[50];  // Arreglo de productos en la transaccion
+    int cantidadItemsDiferentes;
+
+    bool eliminado;      // Para BORRADO LOGICO
     time_t fechaUltimaModificacion;
 };
 
@@ -170,7 +168,11 @@ struct Tienda {
     char nombre[100]; // Nombre de la tienda
     char rif[20];     // RIF de la tienda
     
-    //solo se mantrendra esto
+    int numProductos;    
+    int numProveedores;
+    int numClientes;
+    int numTransacciones;
+
     // Contadores para IDs autoincrementales
     int siguienteIdProducto;
     int siguienteIdProveedor;
@@ -179,10 +181,10 @@ struct Tienda {
 };
 
 struct ArchivoHeader {
-    int cantidadRegistros;      // Total histórico de registros
+    int cantidadRegistros;      // Total historico de registros
     int proximoID;              // Siguiente ID a asignar (Autoincremental)
-    int registrosActivos;       // Registros que no están marcados como eliminados
-    int version;                // Control de versión del archivo
+    int registrosActivos;       // Registros que no estan marcados como eliminados
+    int version;                // Control de version del archivo
 };
 
 // Funcion de InicializaciÃ³n
@@ -194,6 +196,12 @@ void inicializarTienda(Tienda* tienda, const char* nombre, const char* rif){
 
     strncpy(tienda->rif, rif, 19);
     tienda->rif[19] = '\0';
+    
+    // Inicializar contadores de cantidad (stock) en 0
+    tienda->numProductos = 0;
+    tienda->numProveedores = 0;
+    tienda->numClientes = 0;
+    tienda->numTransacciones = 0;
 
     // Inicializar IDs Autoincrementales
     tienda->siguienteIdTransaccion = 1;
@@ -205,6 +213,12 @@ void inicializarTienda(Tienda* tienda, const char* nombre, const char* rif){
 
 // Funcion de LiberaciÃ³n
 void liberarTienda(Tienda* tienda){
+    // Reiniciar contadores de cantidad y capacidad 
+    tienda->numProductos = 0;
+    tienda->numProveedores = 0;
+    tienda->numClientes = 0;
+    tienda->numTransacciones = 0;
+
     // Reiniciar IDs Autoincrementales
     tienda->siguienteIdTransaccion = 0;
     tienda->siguienteIdCliente = 0;
@@ -213,143 +227,17 @@ void liberarTienda(Tienda* tienda){
 
 }
 
-// 3. LÓGICA DE OPERACIONES CON ARCHIVOS (CRUD)
-
-// 3.1 Inicialización y Gestión de Header
-// Crea el archivo si no existe y escribe un ArchivoHeader inicializado en 0.
-bool inicializarArchivo(const char* nombreArchivo) {
-    // Intentamos abrir el archivo para lectura para ver si ya existe
-    ifstream test(nombreArchivo, ios::binary);
-    
-    if (test.good()) {
-        // El archivo ya existe, no hacemos nada o podrías decidir resetearlo
-        test.close();
-        return true; 
-    }
-    test.close();
-
-    // Si no existe, lse crea
-    ofstream archivo(nombreArchivo, ios::binary | ios::out);
-    if (!archivo) return false;
-
-    // Se inicializa todo en 0
-    ArchivoHeader header = {0, 0, 0, 0};
-    
-    // Escribimos el header al inicio
-    archivo.write(reinterpret_cast<const char*>(&header), sizeof(ArchivoHeader));
-    
-    bool resultado = archivo.good();
-    archivo.close();
-    return resultado;
-}
-
-// Lee los primeros bytes correspondientes al header y lo retorna.
-ArchivoHeader leerHeader(const char* nombreArchivo) {
-    ArchivoHeader header = {0, 0, 0, 0}; // Valores por defecto en caso de error
-    
-    ifstream archivo(nombreArchivo, ios::binary);
-    if (!archivo) {
-        return header; // Retorna header vacío si el archivo no existe
-    }
-
-    archivo.read(reinterpret_cast<char*>(&header), sizeof(ArchivoHeader));
-    archivo.close();
-    
-    return header;
-}
-
-// Sobrescribe únicamente la sección del header.
-bool actualizarHeader(const char* nombreArchivo, ArchivoHeader header) {
-    
-    fstream archivo(nombreArchivo, ios::binary | ios::in | ios::out);
-    
-    if (!archivo) return false;
-
-    // Nos posicionamos al principio del archivo
-    archivo.seekp(0, ios::beg);
-    
-    // Escribimos los nuevos datos del header
-    archivo.write(reinterpret_cast<const char*>(&header), sizeof(ArchivoHeader));
-    
-    bool resultado = archivo.good();
-    archivo.close();
-    return resultado;
-}
-
-// 3.2 Acceso Aleatorio y Cálculo de Offsets
-// La clave del proyecto es la función matemática para ubicar un registro sin recorrer el archivo
-// sizeof(ArchivoHeader) + (indice * sizeof(TuEstructura))
-
-// 3.3 Creación de un Registro (Append)
-// Lógica requerida:
-
-//- Leer el header actual para obtener el proximoID.
-//- Asignar ese ID a tu nueva estructura y marcarla como `eliminado = false`.
-//- Abrir el archivo en modo adición/binario (`ios::app | ios::binary` o usar `seekp(0, ios::end)`).
-//- Escribir la estructura.
-//- Actualizar los contadores en el header y guardarlo nuevamente.
-
-// 3.4 Actualización (Update) y Borrado Lógico (Delete)
-//Lógica requerida:
-
-//- Buscar el índice del registro mediante su ID.
-//- Calcular su posición exacta en bytes.
-//- Posicionar el cursor de escritura (`seekp`) en ese byte.
-//- Escribir la estructura modificada (o la estructura con `eliminado = true`) sobrescribiendo los datos anteriores.
-
-// 4. GESTIÓN DE RELACIONES Y TRANSACCIONES
-
-// 4.1 Registrar una Compra/Venta
-//El proceso de registrar una transacción ahora involucra múltiples accesos a disco para mantener la coherencia.
-
-//**Pasos algorítmicos obligatorios para una Venta:**
-
-//1. Buscar y leer el Producto y el Cliente desde sus respectivos archivos.
-//2. Validar reglas de negocio (ej. ¿Hay stock suficiente? ¿El cliente existe?).
-//3. Si es válido, instanciar un registro Transaccion.
-//4. Guardar la Transaccion al final de `transacciones.bin`.
-//5. Modificar el Producto en memoria (restar stock, sumar estadísticas, añadir el ID de la transacción a su arreglo de historial) y actualizar su registro en el archivo binario.
-//6. Modificar el Cliente en memoria (sumar gastos, añadir ID de transacción) y actualizar su registro en el archivo binario.
-
-// 5. MANTENIMIENTO E INTEGRIDAD (NUEVAS FUNCIONALIDADES)
-
-//5.1 Integridad Referencial
-//Debes programar un módulo de diagnóstico `verificarIntegridadReferencial()` que detecte "referencias rotas".
-
-//¿Qué debe hacer el algoritmo?
-
-//- Recorrer `productos.bin`. Por cada producto activo, extraer su `idProveedor`.
-//- Buscar en `proveedores.bin` si ese ID existe y no está eliminado. Si no existe, registrar el error.
-//- Repetir la lógica cruzada para Transacciones (verificar que el `idProducto` y el `idCliente/Proveedor` aún existan).
-//- Imprimir un reporte de salud de la base de datos al finalizar.
-
-//5.2 Respaldo de Datos (Backup)
-//Implementar una función `crearBackup()`:
-
-//- Debe crear una carpeta (o usar un prefijo en el nombre) con la fecha y hora actual.
-//- Debe copiar byte a byte los 5 archivos .bin operativos a este nuevo destino seguro.
-
-//5.3 Reportes Analíticos (Lectura en Lote)
-//Se requiere un submenú para leer datos y generar estadísticas:
-
-//- **Productos con stock crítico:** Recorrer productos y filtrar los que tengan `stock <= stockMinimo`.
-//- **Historial de Cliente:** Dado un ID de cliente, imprimir sus datos básicos, buscar todas las transacciones asociadas a su arreglo `comprasIDs[]` e imprimir el detalle recuperando el nombre del producto involucrado.
-
-// 6. EXPERIENCIA DE USUARIO
-
-// 6.1. IMPRESIÓN DE DATOS
-//- Todos los datos que se muestren en el sistema deben estar correctamente formateados usando tablas, colores, caracteres, etc
-
-//6.2. PRACTICIDAD
-//- Se debe tomar en cuenta que el sistema busca ser práctico, tal vez opciones de los submenus deberian repensarse para poder brindar la mejor experiencia de usuario. Por ejemplo: Cuando muestras la información de un producto ¿No sería bueno mostrar también la información del proveedor que lo vende, o solamente su id te parece suficiente?
-
-
 // FUNCIONES CRUD - PRODUCTOS
 
 // Crear Productos
 void crearProducto(Tienda* tienda) {
     if (tienda == nullptr){ // Validacion de seguridad
         cout << "Error al crear tienda" << endl;
+        return;
+    }
+
+    if (tienda->numProductos >= tienda->capacidadProductos) {
+        redimensionarProductos(tienda);
         return;
     }
 
@@ -586,22 +474,22 @@ void actualizarProducto(Tienda* tienda) {
     // MenÃº de campos editables
     do {
         cout << endl << "Â¿QuÃ© desea editar?" << endl;
-        cout << "1. CÃ³digo" << endl;
+        cout << "1. Codigo" << endl;
         cout << "2. Nombre" << endl;
-        cout << "3. DescripciÃ³n" << endl;
+        cout << "3. Descripcion" << endl;
         cout << "4. Proveedor" << endl;
         cout << "5. Precio" << endl;
         cout << "6. Stock" << endl;
         cout << "7. Guardar cambios" << endl;
         cout << "0. Cancelar sin guardar" << endl;
         
-        if (!solicitarEntero("Seleccione una opciÃ³n", seleccion)) continue;
+        if (!solicitarEntero("Seleccione una opcion", seleccion)) continue;
 
         switch (seleccion) {
             case 1:
-                if (solicitarTexto("Ingrese nuevo cÃ³digo", codigo, 20)) {
+                if (solicitarTexto("Ingrese nuevo codigo", codigo, 20)) {
                     if (codigoDuplicado(tienda, codigo) && strcmp(codigo, tienda->productos[i].codigo) != 0) {
-                        cout << "Error: El cÃ³digo ya existe." << endl;
+                        cout << "Error: El codigo ya existe." << endl;
                     } else {
                         VerCodigo = true;
                     }
@@ -613,7 +501,7 @@ void actualizarProducto(Tienda* tienda) {
                 }
                 break;
             case 3:
-                if (solicitarTexto("Ingrese nueva descripciÃ³n", descripcion, 200)) {
+                if (solicitarTexto("Ingrese nueva descripcion", descripcion, 200)) {
                     VerDescrip = true;
                 }
                 break;
@@ -654,10 +542,10 @@ void actualizarProducto(Tienda* tienda) {
                 break;
             }
             case 0:
-                cout << "OperaciÃ³n cancelada. No se guardaron cambios." << endl;
+                cout << "Operacion cancelada. No se guardaron cambios." << endl;
                 break;
             default:
-                cout << "OpciÃ³n no vÃ¡lida." << endl;
+                cout << "Opcion no vÃ¡lida." << endl;
                 break;
         }
     } while (seleccion != 0);
@@ -698,7 +586,7 @@ void actualizarStockProducto(Tienda* tienda) {
         cout << "2. Quitar unidades" << endl;
         cout << "3. Guardar cambios" << endl;
         cout << "0. Cancelar sin guardar" << endl;
-        if (!solicitarEntero("Seleccione una opciÃ³n", seleccion)){
+        if (!solicitarEntero("Seleccione una opcion", seleccion)){
             return;
         }
         
@@ -877,7 +765,7 @@ void crearProveedor(Tienda* tienda){
         cout << "Telefono: " << telefono << endl;
         cout << "Email: " << email << endl;
         cout << "Rif: " << rif << endl;
-        cout << "DirecciÃ³n: " << direccion << endl;
+        cout << "Direccion: " << direccion << endl;
         imprimirSeparador(60, '=');
 
         cout << "Â¿Desea Guardar proveedor? (S/N): ";
@@ -1053,7 +941,7 @@ void actualizarProveedor(Tienda* tienda){
         cout << "6. Guardar cambios" << endl;
         cout << "0. Cancelar sin guardar" << endl;
         
-        if (!solicitarEntero("Seleccione una opciÃ³n", seleccion)) continue;
+        if (!solicitarEntero("Seleccione una opcion", seleccion)) continue;
 
         switch (seleccion) {
             case 1:
@@ -1111,10 +999,10 @@ void actualizarProveedor(Tienda* tienda){
                 break;
             }
             case 0:
-                cout << "OperaciÃ³n cancelada. No se guardaron cambios." << endl;
+                cout << "Operacion cancelada. No se guardaron cambios." << endl;
                 break;
             default:
-                cout << "OpciÃ³n no vÃ¡lida." << endl;
+                cout << "Opcion no vÃ¡lida." << endl;
                 break;
         }
     } while (seleccion != 0);
@@ -1239,7 +1127,7 @@ void crearCliente(Tienda* tienda){
         cout << "Telefono: " << telefono << endl;
         cout << "Email: " << email << endl;
         cout << "Cedula:" << cedula << endl;
-        cout << "DirecciÃ³n:" << direccion << endl;
+        cout << "Direccion:" << direccion << endl;
         imprimirSeparador(60, '=');
 
         cout << "Â¿Desea Guardar al cliente? (S/N): ";
@@ -1414,7 +1302,7 @@ void actualizarCliente(Tienda* tienda){
         cout << "6. Guardar cambios" << endl;
         cout << "0. Cancelar sin guardar" << endl;
         
-        if (!solicitarEntero("Seleccione una opciÃ³n", seleccion)) continue;
+        if (!solicitarEntero("Seleccione una opcion", seleccion)) continue;
 
         switch (seleccion) {
             case 1:
@@ -1471,10 +1359,10 @@ void actualizarCliente(Tienda* tienda){
                 break;
             }
             case 0:
-                cout << "OperaciÃ³n cancelada. No se guardaron cambios." << endl;
+                cout << "Operacion cancelada. No se guardaron cambios." << endl;
                 break;
             default:
-                cout << "OpciÃ³n no vÃ¡lida." << endl;
+                cout << "Opcion no vÃ¡lida." << endl;
                 break;
         }
     } while (seleccion != 0);
@@ -1605,8 +1493,8 @@ void registrarCompra(Tienda* tienda){
     
     obtenerFechaActual(tienda->transacciones[i].fecha);
     
-    if (!solicitarTexto("Ingrese descripciÃ³n", tienda->transacciones[i].descripcion, 200)){
-        strcpy(tienda->transacciones[i].descripcion, "Sin descripciÃ³n");
+    if (!solicitarTexto("Ingrese descripcion", tienda->transacciones[i].descripcion, 200)){
+        strcpy(tienda->transacciones[i].descripcion, "Sin descripcion");
     }
     
     cout << endl;
@@ -1694,8 +1582,8 @@ void registrarVenta(Tienda* tienda){
 
     obtenerFechaActual(tienda->transacciones[i].fecha);
 
-    if (!solicitarTexto("Ingrese descripciÃ³n", tienda->transacciones[i].descripcion, 200)){
-        strcpy(tienda->transacciones[i].descripcion, "Sin descripciÃ³n");
+    if (!solicitarTexto("Ingrese descripcion", tienda->transacciones[i].descripcion, 200)){
+        strcpy(tienda->transacciones[i].descripcion, "Sin descripcion");
     }
 
     cout << endl;
@@ -1742,12 +1630,12 @@ void buscarTransacciones(Tienda* tienda){
 
     cout << endl << "===== Buscar Transacciones =====" << endl;
     cout << "Seleccione opcion de busqueda: " << endl 
-    << "1. Buscar por ID de TransacciÃ³n" << endl 
+    << "1. Buscar por ID de Transaccion" << endl 
     << "2. Buscar por ID de Producto" << endl
     << "3. Buscar por ID de Cliente" << endl
     << "4. Buscar por ID de Proveedor" << endl
     << "5. Buscar por fecha exacta" << endl
-    << "6. Buscar por tipo de transaciÃ³n (COMPRA/VENTA)" << endl
+    << "6. Buscar por tipo de transaccion (COMPRA/VENTA)" << endl
     << "0. Cancelar" << endl;
     cin >> op;
     
@@ -1758,7 +1646,7 @@ void buscarTransacciones(Tienda* tienda){
     switch (op){
     case 1:{ // Busqueda por ID de transacciÃ³n
 	        int TransID;
-	        if (!solicitarEntero("Ingrese ID de la transacciÃ³n", TransID)){
+	        if (!solicitarEntero("Ingrese ID de la transaccion", TransID)){
 	        return;
 	        }
 	        int i = buscarTransaccionPorId(tienda, TransID); // Extraer ID
@@ -1858,7 +1746,7 @@ void buscarTransacciones(Tienda* tienda){
     case 5: { // Busqueda por fecha
 	        char fecha[11];
 	
-	        if (!solicitarTexto("Ingrese fecha de la TransacciÃ³n (YYYY-MM-DD)", fecha, 11)){
+	        if (!solicitarTexto("Ingrese fecha de la Transaccion (YYYY-MM-DD)", fecha, 11)){
 	            break;;
 	        }
 	        if(validarFecha(fecha) == false){
@@ -1888,7 +1776,7 @@ void buscarTransacciones(Tienda* tienda){
              << "2. Venta (A Cliente)" << endl
              << "0. Cancelar" << endl
              << endl;
-        if (!solicitarEntero("Ingrese tipo de transacciÃ³n", tipo)){
+        if (!solicitarEntero("Ingrese tipo de transaccion", tipo)){
             break;
             }
         if (tipo == 0){
@@ -1952,14 +1840,14 @@ void cancelarTransaccion(Tienda* tienda){
         return;
     }
     int TransID;
-    cout << endl << "===== CANCELAR TRANSACCIÃ“N =====" << endl;
-    if (!solicitarEntero("Ingrese ID de la transacciÃ³n a cancelar", TransID)){
+    cout << endl << "===== CANCELAR TRANSACCION =====" << endl;
+    if (!solicitarEntero("Ingrese ID de la transaccion a cancelar", TransID)){
         return;
     }
     int IndiceTrans = buscarTransaccionPorId(tienda, TransID);
     if (IndiceTrans == -1)
     {
-        cout << "Error: TransacciÃ³n no encontrada.";
+        cout << "Error: Transaccion no encontrada.";
         return;
     }
     encabezadoTransacciones();
@@ -1967,7 +1855,7 @@ void cancelarTransaccion(Tienda* tienda){
     imprimirSeparador();
 
     char confirmar;
-    cout << "Â¿Desea confirmar y anular esta transacciÃ³n? (S/N) ";
+    cout << "Â¿Desea confirmar y anular esta transaccion? (S/N) ";
     cin >> confirmar;
 
     if (confirmar == 'S' || confirmar == 's'){
@@ -1990,9 +1878,9 @@ void cancelarTransaccion(Tienda* tienda){
         }
         tienda->numTransacciones--;
 
-        cout << endl << "TransacciÃ³n anulada y stock actualizado" << endl;
+        cout << endl << "Transaccion anulada y stock actualizado" << endl;
     } else {
-        cout << endl << "OperaciÃ³n cancelada. No se realizaron cambios en la transacciÃ³n." <<  endl;
+        cout << endl << "Operacion cancelada. No se realizaron cambios en la transaccion." <<  endl;
     }
 }
 
@@ -2641,12 +2529,12 @@ int main(){
          << "               Tienda: " << Negocio->nombre << endl;
         imprimirSeparador(60,'=');
 
-        cout << "1. GestiÃ³n de Productos" << endl
-             << "2. GestiÃ³n de Proveedores" << endl
-             << "3. GestiÃ³n de Clientes" << endl
-             << "4. GestiÃ³n de Transacciones" << endl
+        cout << "1. Gestion de Productos" << endl
+             << "2. Gestion de Proveedores" << endl
+             << "3. Gestion de Clientes" << endl
+             << "4. Gestion de Transacciones" << endl
              << "5. Salir" << endl;
-        while (!solicitarEntero("Seleccione una opciÃ³n", op)){
+        while (!solicitarEntero("Seleccione una opcion", op)){
             cout << endl;
         }
         imprimirSeparador(60, '=');
@@ -2670,7 +2558,7 @@ int main(){
                     << "5. Listar todos los Productos" << endl
                     << "6. Eliminar Producto" << endl
                     << "0. Volver al menu principal" << endl;
-                if (!solicitarEntero("Seleccione una opciÃ³n", opProd)){
+                if (!solicitarEntero("Seleccione una opcion", opProd)){
                     break;
                 }
                 imprimirSeparador(60, '=');
@@ -2708,7 +2596,7 @@ int main(){
                         break;
                     }
                     default:
-                        cout << "OpciÃ³n Invalida.";
+                        cout << "Opcion Invalida.";
                         break;
                 }
             } while (opProd != 0);
@@ -2728,7 +2616,7 @@ int main(){
                         << "4. Listar todos los Proveedores" << endl
                         << "5. Eliminar Proveedor" << endl
                         << "0. Volver al menu principal" << endl;
-                    if (!solicitarEntero("Seleccione una opciÃ³n", opProv)){
+                    if (!solicitarEntero("Seleccione una opcion", opProv)){
                         break;
                     }
                     imprimirSeparador(60, '=');
@@ -2762,7 +2650,7 @@ int main(){
                             break;
                         }
                         default:
-                            cout << "OpciÃ³n Invalida.";
+                            cout << "Opcion Invalida.";
                             break;
                     }
                 } while (opProv != 0);
@@ -2782,7 +2670,7 @@ int main(){
                         << "4. Listar todos los Cliente" << endl
                         << "5. Eliminar Cliente" << endl
                         << "0. Volver al menu principal" << endl;
-                    if (!solicitarEntero("Seleccione una opciÃ³n", opCliente)){
+                    if (!solicitarEntero("Seleccione una opcion", opCliente)){
                         break;
                     }
                     imprimirSeparador(60, '=');
@@ -2817,7 +2705,7 @@ int main(){
                             break;
                         }
                         default:
-                            cout << "OpciÃ³n Invalida.";
+                            cout << "Opcion Invalida.";
                             break;
                     }
                 } while (opCliente != 0);
@@ -2835,9 +2723,9 @@ int main(){
                         << "2. Registrar Venta a Cliente" << endl
                         << "3. Buscar Transacciones" << endl
                         << "4. Listar Transacciones" << endl
-                        << "5. Cancelar TransacciÃ³n" << endl
+                        << "5. Cancelar Transaccion" << endl
                         << "0. Volver al menu principal" << endl;
-                    if (!solicitarEntero("Seleccione una opciÃ³n", opTrans)){
+                    if (!solicitarEntero("Seleccione una opcion", opTrans)){
                         break;
                     }
                     imprimirSeparador(60, '=');
@@ -2872,7 +2760,7 @@ int main(){
                         break;
                     }
                     default:
-                        cout << "OpciÃ³n Invalida.";
+                        cout << "Opcion Invalida.";
                         break;
                     }
                 } while (opTrans != 0);
@@ -2883,7 +2771,7 @@ int main(){
                 break;
             }
             default:
-                cout << "OpciÃ³n Invalida.";
+                cout << "Opcion Invalida.";
                 break;
             }
     } while (op != 5);
