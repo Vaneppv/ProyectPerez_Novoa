@@ -13,6 +13,7 @@ struct Cliente;
 struct Transaccion;
 struct Tienda;
 
+
 // PROTOTIPO DE FUNCIONES
 
 // Inicialización y Liberación
@@ -64,6 +65,8 @@ bool IntesPositivo(int valor);
 bool solicitarTexto(const char* prompt, char* destino, int largo);
 bool solicitarFloat(const char* prompt, float& valor);
 bool solicitarEntero(const char* prompt, int& valor);
+int calcularOffsetProducto(int indice);
+
 
 // FUNCIONES CRUD
 void crearProducto(Tienda* tienda);
@@ -106,7 +109,7 @@ struct Producto {
     int totalVendido;                
     // Metadata de Control Obligatoria
     bool eliminado;              // Para BORRADO LOGICO
-    time_t fechaUltimaModificacion;
+    char fechaUltimaModificacion[11];
 };
 
 // Estructura Proveedor
@@ -122,7 +125,7 @@ struct Proveedor {
 	int productosIDs[100];     // IDs de los productos bajo el proveedor
     
     bool eliminado;            // Para BORRADO LOGICO
-    time_t fechaUltimaModificacion;
+    char fechaUltimaModificacion[11];
 };
 
 // Estructura Cliente
@@ -136,7 +139,7 @@ struct Cliente {
     char fechaRegistro[11];
     
     bool eliminado; // Para BORRADO LOGICO
-    time_t fechaUltimaModificacion;
+    char fechaUltimaModificacion[11];
 };
 
 struct DetalleVenta {
@@ -160,7 +163,7 @@ struct Transaccion {
     int cantidadItemsDiferentes;
 
     bool eliminado;      // Para BORRADO LOGICO
-    time_t fechaUltimaModificacion;
+    char fechaUltimaModificacion[11];
 };
 
 // Estructura Principal: Tienda
@@ -268,7 +271,6 @@ bool actualizarHeader(const char* nombreArchivo, ArchivoHeader header) {
 
     // Nos posicionamos al byte 0 (principio del archivo)
     archivo.seekp(0, ios::beg);
-    
     // Sobrescribimoscon los nuevos datos del header
     archivo.write(reinterpret_cast<const char*>(&header), sizeof(ArchivoHeader));
     
@@ -277,18 +279,53 @@ bool actualizarHeader(const char* nombreArchivo, ArchivoHeader header) {
     return resultado;
 }
 
-// 3.2 Acceso Aleatorio y C�lculo de Offsets
-// La clave del proyecto es la funci�n matem�tica para ubicar un registro sin recorrer el archivo
-// sizeof(ArchivoHeader) + (indice * sizeof(TuEstructura))
+// Acceso Aleatorio y Calculo de Offsets
+int calcularPosicionProducto(int indiceFisico) {
+    // Se salta el Header, y luego multiplica el índice por el tamaño del struct productos para obtener la posicion del producto
+    long posicionProducto = sizeof(ArchivoHeader) + (indiceFisico * sizeof(Producto));
+    return posicionProducto;
+}
 
-// 3.3 Creaci�n de un Registro (Append)
-// L�gica requerida:
+// Creacion de un Registro (Append)
+bool guardarNuevoProducto(const char* nombreArchivo, Producto& nuevoProducto){
+    
+    ArchivoHeader header = leerHeader(nombreArchivo); // Leer el header para obtener metadatos
+    nuevoProducto.id = header.proximoID;
+    nuevoProducto.eliminado = false;
+    obtenerFechaActual(nuevoProducto.fechaRegistro);
+    obtenerFechaActual(nuevoProducto.fechaUltimaModificacion);
+    
+    // Abrir el archivo de para escritura binaria
+    fstream archivo(nombreArchivo, ios::in | ios::out | ios::binary);
+    if (!archivo.is_open())
+    {
+        cout << "Error: no se pudo abrir el archivo de productos." << endl; 
+        return false;
+    }
+    // Calculo de la posicion de escritura
+    long posicionEscritura = sizeof(ArchivoHeader) + (header.cantidadRegistros * sizeof(Producto));
+    archivo.seekp(posicionEscritura, ios::beg);
 
-//- Leer el header actual para obtener el proximoID.
-//- Asignar ese ID a tu nueva estructura y marcarla como `eliminado = false`.
-//- Abrir el archivo en modo adici�n/binario (`ios::app | ios::binary` o usar `seekp(0, ios::end)`).
-//- Escribir la estructura.
-//- Actualizar los contadores en el header y guardarlo nuevamente.
+    archivo.write(reinterpret_cast<const char*>(&nuevoProducto), sizeof(Producto));
+    
+    if (archivo.fail()) {
+    cout << "Error crítico: No se pudo escribir en el archivo." << endl;
+    archivo.close();
+    return false;
+    }
+
+    // Actualizar contadores del Header
+    header.cantidadRegistros++; // Nueva cantidad de registros
+    header.proximoID++; // Actualiza al nuevo ID disponible
+    header.registrosActivos++; // Nueva cantidad de registros no eliminados
+    
+    archivo.close(); 
+
+    return actualizarHeader(nombreArchivo, header);
+} 
+
+
+
 
 // 3.4 Actualizaci�n (Update) y Borrado L�gico (Delete)
 //L�gica requerida:
@@ -2187,44 +2224,31 @@ bool rifDuplicado(Tienda* tienda, const char* rif){
 }
 
 // BUSQUEDAS 
-
-int buscarProductoPorId(Tienda* tienda, int id){
-    if (tienda == nullptr){ 
+template <typename Registro> // Template para tomar cualquier registro (productos, cliente, proveedor o transacciones)
+int buscarIdEnArchivo(const char* nombreArchivo, int id){
+    
+    ifstream archivo(nombreArchivo, ios::binary);
+    if (!archivo.is_open())
+    {
+        cout << "Error: No se pudo abrir el archivo" << endl; 
         return -1;
     }
-    // Recorrido del arreglo en busca del producto
-    for (int i = 0; i < tienda->numProductos; i++){
-        if (tienda->productos[i].id == id){
+
+    ArchivoHeader header;
+    archivo.read(reinterpret_cast<char*>(&header), sizeof(ArchivoHeader));
+
+    // Recorrido del archivo en busca de la informacion
+    for (int i = 0; i < header.cantidadRegistros; i++){
+        Registro temp;
+        // Lee el registro actual
+        archivo.read(reinterpret_cast<char*>(&temp), sizeof(Registro));
+        if (!temp.eliminado && productoTemp.id == id){
+            archivo.close();
             return i; // Si lo encuentra retorna el indice
         }
     }
-    return -1; // Si llega hasta aqui, no existe
-}
-
-int buscarProveedorPorId(Tienda* tienda, int id){
-    if (tienda == nullptr){ // Validacion de seguridad
-        return -1;
-    }
-    // Recorrido del arreglo en busca del proveedor
-    for (int i = 0; i < tienda->numProveedores; i++){
-        if (tienda->proveedores[i].id == id){
-            return i; // Si lo encuentra retorna el indice
-        }
-    }
-    return -1; // Si llega hasta aqui, No existe
-}
-
-int buscarClientePorId(Tienda* tienda, int id){
-    if (tienda == nullptr){ // Validacion de seguridad
-        return -1;
-    }
-    // Recorrido del arreglo en busca del cliente    
-    for (int i = 0; i < tienda->numClientes; i++){
-        if (tienda->clientes[i].id == id){
-            return i; // Si lo encuentra retorna el indice
-        }
-    }
-    return -1; // Si llega hasta aqui, No existe
+    archivo.close(); // Cerrar archivo al no encontrar el producto
+    return -1; 
 }
 
 int buscarProveedorPorRif(Tienda* tienda, const char* rif){
@@ -2251,20 +2275,6 @@ int buscarClientePorCedula(Tienda* tienda, const char* cedula){
         }
     }
     return -1; // Si llega hasta aqui, No existe
-}
-
-
-int buscarTransaccionPorId(Tienda* tienda, int id){
-    if (tienda == nullptr){ 
-        return -1;
-    }
-    // Recorrido del arreglo en busca de la transaccion
-    for (int i = 0; i < tienda->numTransacciones; i++){
-        if (tienda->transacciones[i].id == id){
-            return i; // Si lo encuentra retorna el indice
-        }
-    }
-    return -1; // Si llega hasta aqui, no existe
 }
 
 int* buscarProductosPorNombre(Tienda* tienda, const char* nombre, int* numResultados){
@@ -2618,7 +2628,6 @@ bool solicitarFloat(const char* prompt, float& valor) {
         return false;
     }
 }
-
 
 int main(){
 
