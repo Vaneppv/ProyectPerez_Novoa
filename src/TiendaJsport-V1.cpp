@@ -483,22 +483,22 @@ void actualizarProducto(Tienda* tienda) {
     // Menú de campos editables
     do {
         cout << endl << "¿Qué desea editar?" << endl;
-        cout << "1. Código" << endl;
+        cout << "1. Codigo" << endl;
         cout << "2. Nombre" << endl;
-        cout << "3. Descripción" << endl;
+        cout << "3. Descripcion" << endl;
         cout << "4. Proveedor" << endl;
         cout << "5. Precio" << endl;
         cout << "6. Stock" << endl;
         cout << "7. Guardar cambios" << endl;
         cout << "0. Cancelar sin guardar" << endl;
         
-        if (!solicitarEntero("Seleccione una opción", seleccion)) continue;
+        if (!solicitarEntero("Seleccione una opcion", seleccion)) continue;
 
         switch (seleccion) {
             case 1:
-                if (solicitarTexto("Ingrese nuevo código", codigo, 20)) {
+                if (solicitarTexto("Ingrese nuevo codigo", codigo, 20)) {
                     if (codigoDuplicado(tienda, codigo) && strcmp(codigo, tienda->productos[i].codigo) != 0) {
-                        cout << "Error: El código ya existe." << endl;
+                        cout << "Error: El codigo ya existe." << endl;
                     } else {
                         VerCodigo = true;
                     }
@@ -510,7 +510,7 @@ void actualizarProducto(Tienda* tienda) {
                 }
                 break;
             case 3:
-                if (solicitarTexto("Ingrese nueva descripción", descripcion, 200)) {
+                if (solicitarTexto("Ingrese nueva descripcion", descripcion, 200)) {
                     VerDescrip = true;
                 }
                 break;
@@ -551,10 +551,10 @@ void actualizarProducto(Tienda* tienda) {
                 break;
             }
             case 0:
-                cout << "Operación cancelada. No se guardaron cambios." << endl;
+                cout << "Operacion cancelada. No se guardaron cambios." << endl;
                 break;
             default:
-                cout << "Opción no válida." << endl;
+                cout << "Opcion no válida." << endl;
                 break;
         }
     } while (seleccion != 0);
@@ -595,7 +595,7 @@ void actualizarStockProducto(Tienda* tienda) {
         cout << "2. Quitar unidades" << endl;
         cout << "3. Guardar cambios" << endl;
         cout << "0. Cancelar sin guardar" << endl;
-        if (!solicitarEntero("Seleccione una opción", seleccion)){
+        if (!solicitarEntero("Seleccione una opcion", seleccion)){
             return;
         }
         
@@ -774,7 +774,7 @@ void crearProveedor(Tienda* tienda){
         cout << "Telefono: " << telefono << endl;
         cout << "Email: " << email << endl;
         cout << "Rif: " << rif << endl;
-        cout << "Dirección: " << direccion << endl;
+        cout << "Direccion: " << direccion << endl;
         imprimirSeparador(60, '=');
 
         cout << "¿Desea Guardar proveedor? (S/N): ";
@@ -950,7 +950,7 @@ void actualizarProveedor(Tienda* tienda){
         cout << "6. Guardar cambios" << endl;
         cout << "0. Cancelar sin guardar" << endl;
         
-        if (!solicitarEntero("Seleccione una opción", seleccion)) continue;
+        if (!solicitarEntero("Seleccione una opcion", seleccion)) continue;
 
         switch (seleccion) {
             case 1:
@@ -1008,10 +1008,10 @@ void actualizarProveedor(Tienda* tienda){
                 break;
             }
             case 0:
-                cout << "Operación cancelada. No se guardaron cambios." << endl;
+                cout << "Operacion cancelada. No se guardaron cambios." << endl;
                 break;
             default:
-                cout << "Opción no válida." << endl;
+                cout << "Opcion no válida." << endl;
                 break;
         }
     } while (seleccion != 0);
@@ -1136,7 +1136,7 @@ void crearCliente(Tienda* tienda){
         cout << "Telefono: " << telefono << endl;
         cout << "Email: " << email << endl;
         cout << "Cedula:" << cedula << endl;
-        cout << "Dirección:" << direccion << endl;
+        cout << "Direccion:" << direccion << endl;
         imprimirSeparador(60, '=');
 
         cout << "¿Desea Guardar al cliente? (S/N): ";
@@ -1311,7 +1311,7 @@ void actualizarCliente(Tienda* tienda){
         cout << "6. Guardar cambios" << endl;
         cout << "0. Cancelar sin guardar" << endl;
         
-        if (!solicitarEntero("Seleccione una opción", seleccion)) continue;
+        if (!solicitarEntero("Seleccione una opcion", seleccion)) continue;
 
         switch (seleccion) {
             case 1:
@@ -1368,10 +1368,10 @@ void actualizarCliente(Tienda* tienda){
                 break;
             }
             case 0:
-                cout << "Operación cancelada. No se guardaron cambios." << endl;
+                cout << "Operacion cancelada. No se guardaron cambios." << endl;
                 break;
             default:
-                cout << "Opción no válida." << endl;
+                cout << "Opcion no válida." << endl;
                 break;
         }
     } while (seleccion != 0);
@@ -1502,8 +1502,8 @@ void registrarCompra(Tienda* tienda){
     
     obtenerFechaActual(tienda->transacciones[i].fecha);
     
-    if (!solicitarTexto("Ingrese descripción", tienda->transacciones[i].descripcion, 200)){
-        strcpy(tienda->transacciones[i].descripcion, "Sin descripción");
+    if (!solicitarTexto("Ingrese descripcion", tienda->transacciones[i].descripcion, 200)){
+        strcpy(tienda->transacciones[i].descripcion, "Sin descripcion");
     }
     
     cout << endl;
@@ -1591,8 +1591,8 @@ void registrarVenta(Tienda* tienda){
 
     obtenerFechaActual(tienda->transacciones[i].fecha);
 
-    if (!solicitarTexto("Ingrese descripción", tienda->transacciones[i].descripcion, 200)){
-        strcpy(tienda->transacciones[i].descripcion, "Sin descripción");
+    if (!solicitarTexto("Ingrese descripcion", tienda->transacciones[i].descripcion, 200)){
+        strcpy(tienda->transacciones[i].descripcion, "Sin descripcion");
     }
 
     cout << endl;
@@ -1639,12 +1639,12 @@ void buscarTransacciones(Tienda* tienda){
 
     cout << endl << "===== Buscar Transacciones =====" << endl;
     cout << "Seleccione opcion de busqueda: " << endl 
-    << "1. Buscar por ID de Transacción" << endl 
+    << "1. Buscar por ID de Transaccion" << endl 
     << "2. Buscar por ID de Producto" << endl
     << "3. Buscar por ID de Cliente" << endl
     << "4. Buscar por ID de Proveedor" << endl
     << "5. Buscar por fecha exacta" << endl
-    << "6. Buscar por tipo de transación (COMPRA/VENTA)" << endl
+    << "6. Buscar por tipo de transaccion (COMPRA/VENTA)" << endl
     << "0. Cancelar" << endl;
     cin >> op;
     
@@ -1655,7 +1655,7 @@ void buscarTransacciones(Tienda* tienda){
     switch (op){
     case 1:{ // Busqueda por ID de transacción
 	        int TransID;
-	        if (!solicitarEntero("Ingrese ID de la transacción", TransID)){
+	        if (!solicitarEntero("Ingrese ID de la transaccion", TransID)){
 	        return;
 	        }
 	        int i = buscarTransaccionPorId(tienda, TransID); // Extraer ID
@@ -1755,7 +1755,7 @@ void buscarTransacciones(Tienda* tienda){
     case 5: { // Busqueda por fecha
 	        char fecha[11];
 	
-	        if (!solicitarTexto("Ingrese fecha de la Transacción (YYYY-MM-DD)", fecha, 11)){
+	        if (!solicitarTexto("Ingrese fecha de la Transaccion (YYYY-MM-DD)", fecha, 11)){
 	            break;;
 	        }
 	        if(validarFecha(fecha) == false){
@@ -1785,7 +1785,7 @@ void buscarTransacciones(Tienda* tienda){
              << "2. Venta (A Cliente)" << endl
              << "0. Cancelar" << endl
              << endl;
-        if (!solicitarEntero("Ingrese tipo de transacción", tipo)){
+        if (!solicitarEntero("Ingrese tipo de transaccion", tipo)){
             break;
             }
         if (tipo == 0){
@@ -1849,14 +1849,14 @@ void cancelarTransaccion(Tienda* tienda){
         return;
     }
     int TransID;
-    cout << endl << "===== CANCELAR TRANSACCIÓN =====" << endl;
-    if (!solicitarEntero("Ingrese ID de la transacción a cancelar", TransID)){
+    cout << endl << "===== CANCELAR TRANSACCION =====" << endl;
+    if (!solicitarEntero("Ingrese ID de la transaccion a cancelar", TransID)){
         return;
     }
     int IndiceTrans = buscarTransaccionPorId(tienda, TransID);
     if (IndiceTrans == -1)
     {
-        cout << "Error: Transacción no encontrada.";
+        cout << "Error: Transaccion no encontrada.";
         return;
     }
     encabezadoTransacciones();
@@ -1864,7 +1864,7 @@ void cancelarTransaccion(Tienda* tienda){
     imprimirSeparador();
 
     char confirmar;
-    cout << "¿Desea confirmar y anular esta transacción? (S/N) ";
+    cout << "¿Desea confirmar y anular esta transaccion? (S/N) ";
     cin >> confirmar;
 
     if (confirmar == 'S' || confirmar == 's'){
@@ -1887,9 +1887,9 @@ void cancelarTransaccion(Tienda* tienda){
         }
         tienda->numTransacciones--;
 
-        cout << endl << "Transacción anulada y stock actualizado" << endl;
+        cout << endl << "Transaccion anulada y stock actualizado" << endl;
     } else {
-        cout << endl << "Operación cancelada. No se realizaron cambios en la transacción." <<  endl;
+        cout << endl << "Operacion cancelada. No se realizaron cambios en la transaccion." <<  endl;
     }
 }
 
@@ -2538,12 +2538,12 @@ int main(){
          << "               Tienda: " << Negocio->nombre << endl;
         imprimirSeparador(60,'=');
 
-        cout << "1. Gestión de Productos" << endl
-             << "2. Gestión de Proveedores" << endl
-             << "3. Gestión de Clientes" << endl
-             << "4. Gestión de Transacciones" << endl
+        cout << "1. Gestion de Productos" << endl
+             << "2. Gestion de Proveedores" << endl
+             << "3. Gestion de Clientes" << endl
+             << "4. Gestion de Transacciones" << endl
              << "5. Salir" << endl;
-        while (!solicitarEntero("Seleccione una opción", op)){
+        while (!solicitarEntero("Seleccione una opcion", op)){
             cout << endl;
         }
         imprimirSeparador(60, '=');
@@ -2567,7 +2567,7 @@ int main(){
                     << "5. Listar todos los Productos" << endl
                     << "6. Eliminar Producto" << endl
                     << "0. Volver al menu principal" << endl;
-                if (!solicitarEntero("Seleccione una opción", opProd)){
+                if (!solicitarEntero("Seleccione una opcion", opProd)){
                     break;
                 }
                 imprimirSeparador(60, '=');
@@ -2605,7 +2605,7 @@ int main(){
                         break;
                     }
                     default:
-                        cout << "Opción Invalida.";
+                        cout << "Opcion Invalida.";
                         break;
                 }
             } while (opProd != 0);
@@ -2625,7 +2625,7 @@ int main(){
                         << "4. Listar todos los Proveedores" << endl
                         << "5. Eliminar Proveedor" << endl
                         << "0. Volver al menu principal" << endl;
-                    if (!solicitarEntero("Seleccione una opción", opProv)){
+                    if (!solicitarEntero("Seleccione una opcion", opProv)){
                         break;
                     }
                     imprimirSeparador(60, '=');
@@ -2659,7 +2659,7 @@ int main(){
                             break;
                         }
                         default:
-                            cout << "Opción Invalida.";
+                            cout << "Opcion Invalida.";
                             break;
                     }
                 } while (opProv != 0);
@@ -2679,7 +2679,7 @@ int main(){
                         << "4. Listar todos los Cliente" << endl
                         << "5. Eliminar Cliente" << endl
                         << "0. Volver al menu principal" << endl;
-                    if (!solicitarEntero("Seleccione una opción", opCliente)){
+                    if (!solicitarEntero("Seleccione una opcion", opCliente)){
                         break;
                     }
                     imprimirSeparador(60, '=');
@@ -2714,7 +2714,7 @@ int main(){
                             break;
                         }
                         default:
-                            cout << "Opción Invalida.";
+                            cout << "Opcion Invalida.";
                             break;
                     }
                 } while (opCliente != 0);
@@ -2732,9 +2732,9 @@ int main(){
                         << "2. Registrar Venta a Cliente" << endl
                         << "3. Buscar Transacciones" << endl
                         << "4. Listar Transacciones" << endl
-                        << "5. Cancelar Transacción" << endl
+                        << "5. Cancelar Transaccion" << endl
                         << "0. Volver al menu principal" << endl;
-                    if (!solicitarEntero("Seleccione una opción", opTrans)){
+                    if (!solicitarEntero("Seleccione una opcion", opTrans)){
                         break;
                     }
                     imprimirSeparador(60, '=');
@@ -2769,7 +2769,7 @@ int main(){
                         break;
                     }
                     default:
-                        cout << "Opción Invalida.";
+                        cout << "Opcion Invalida.";
                         break;
                     }
                 } while (opTrans != 0);
@@ -2780,7 +2780,7 @@ int main(){
                 break;
             }
             default:
-                cout << "Opción Invalida.";
+                cout << "Opcion Invalida.";
                 break;
             }
     } while (op != 5);
