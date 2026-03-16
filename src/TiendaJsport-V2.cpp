@@ -2308,10 +2308,10 @@ void mostrarDetalleTransaccion(const Transaccion& transaccion, const char* archi
 
     if (indprod != -1){
         Producto producto = obtenerRegistroPorIndice<Producto>(archivoProductos, indprod);
-        strcpy(nombreProd, producto.nombre, 99);
+        strcpy(nombreProd, producto.nombre);
         nombreProd[99] = '\0';
     } else {
-        strcpy(nombreProd, "Producto Inexistente", 99);
+        strcpy(nombreProd, "Producto Inexistente");
         nombreProd[99] = '\0';
     }
     
