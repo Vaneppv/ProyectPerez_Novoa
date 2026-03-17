@@ -64,17 +64,14 @@ struct DetalleTransaccion {
 // Estructura Transacción (puede separarse por transaccion)
 struct Transaccion {
     int id;                    
-    char tipo[10];             // "COMPRA" o "VENTA"
-    int idProducto;            
+    char tipo[10];             // "COMPRA" o "VENTA"          
     int idRelacionado;         // ID del proveedor (compra) o cliente (venta)
-    int cantidad;              
-    float precioUnitario;      
     float total;                         
     char descripcion[200];     // Notas adicionales (opcional)
-    char fechaRegistro[11];  // Arreglo de productos en la transaccion
+    char fechaRegistro[11];    // Arreglo de productos en la transaccion
     int cantidadItemsDiferentes;
 
-    bool eliminado;      // Para BORRADO LOGICO
+    bool eliminado;            // Para BORRADO LOGICO
     char fechaUltimaModificacion[11];
 };
 
@@ -128,12 +125,14 @@ int buscarPorId(const char* nombreArchivo, int id);
 void obtenerFechaActual(char* buffer);
 void convertirAMinusculas(char* cadena);
 bool contieneSubstring(const char* texto, const char* busqueda);
+void mostrarLineaDetalle(const Transaccion& t, const char* nombreProd, int idProducto, int cantidad, float total);
 void mostrarDetalleTransaccion(const Transaccion& transaccion, Producto& producto);
+void mostrarDetalleGeneralTransaccion(const Transaccion &trans);
 void mostrarDetalleProducto(const Producto& producto, const char* archivoProveedores);
 void mostrarDetalleProveedor(const Proveedor& proveedor);
 void mostrarDetalleCliente(const Cliente& cliente);
-void imprimirSeparador(int ancho = 130, char simbolo = '=');
 void encabezadoDetalleTransaccion();
+void imprimirSeparador(int ancho = 130, char simbolo = '=');
 void encabezadoProductos();
 void encabezadoProveedorCliente();
 bool floatesPositivo(float valor);
@@ -1728,7 +1727,7 @@ void registrarCompra(const char* archivoTransacciones, const char* archivoDetall
         return;
     }
 
-    ArchivoHeader header = leerHeader(archivoProductos);
+    header = leerHeader(archivoProductos);
     if (header.registrosActivos ==0){
         cout << endl << "No hay productos registrados en el sistema" << endl;
         return;
@@ -1772,13 +1771,16 @@ void registrarCompra(const char* archivoTransacciones, const char* archivoDetall
             if (!solicitarFloat("Ingrese Costo Unitario", costo)){
             return;
             }
-            carrito[cantItems] = {productoId, cantidad, costo};
+            carrito[cantItems].idProducto = productoId;
+            carrito[cantItems].cantidad = cantidad;
+            carrito[cantItems].precioUnitario = costo;
+
             totalCompra += cantidad*costo;
             cantItems++;
             cout << "Producto agregado al carrito." << endl;
         }
         if (cantItems < 50) {
-            cout << "¿Agregar otro producto a esta Compra? (S/N): ";
+            cout << "¿Desea agregar otro producto? (S/N y presione ENTER): ";
             cin >> continuar;
         } else {
             cout << "Carrito lleno." << endl;
@@ -1796,30 +1798,37 @@ void registrarCompra(const char* archivoTransacciones, const char* archivoDetall
     imprimirSeparador(60, '=');
     cout << "      RESUMEN DE COMPRA" << endl;
     imprimirSeparador(60, '-');
-    cout << "Cantidad de productos diferentes: " << cantItems << endl;
-    cout << "TOTAL A PAGAR:   $" << fixed << setprecision(2) << totalCompra << endl;
+    cout << left << setw(20) << "PRODUCTO" << setw(8)  << "CANT." << setw(12) << "SUBTOTAL" << endl;
+    for (int i = 0; i < cantItems; i++)
+    {
+        int indProd = buscarPorId<Producto>(archivoProductos, carrito[i].idProducto);
+        Producto producto = obtenerRegistroPorIndice<Producto>(archivoProductos, indProd);
+        cout << left << setw(20) << producto.nombre << setw(8)  << carrito[i].cantidad << setw(12) << carrito[i].precioUnitario*carrito[i].cantidad << endl;
+    }
+    cout << "TOTAL DE COMPRA:   $" << fixed << setprecision(2) << totalCompra << endl;
     imprimirSeparador(60, '=');
 
     char confirmar;
-    cout << "¿Desea confirmar y guardar esta Compra? (S/N) ";
+    cout << "¿Desea confirmar y guardar esta Compra? (S/N y presione ENTER para continuar) ";
     cin >> confirmar;
 
     if (confirmar == 'S' || confirmar == 's'){
-    // Actualizar Stock del producto
         Transaccion trans;
         trans.idRelacionado = proveedorId;
         strcpy(trans.tipo, "COMPRA");
         trans.cantidadItemsDiferentes = cantItems;
         trans.total = totalCompra;
-        solicitarTexto("Ingrese descricion de la compra", trans.descripcion, 200);
+        solicitarTexto("Ingrese descripcion de la compra", trans.descripcion, 200);
+        
         if (guardarNuevoRegistro<Transaccion>(archivoTransacciones, trans)){
+            
             for (int i = 0; i < cantItems; i++){
                 guardarDetalle(archivoDetalles, trans.id, carrito[i]);
-                // ACTUALIZAR STOCK EN ARCHIVO BINARIO
+                
                 int indProducto = buscarPorId<Producto>(archivoProductos, carrito[i].idProducto);
-                Producto p = obtenerRegistroPorIndice<Producto>(archivoProductos, indProducto);
-                p.stock += carrito[i].cantidad;
-                actualizarRegistro<Producto>(archivoProductos, indProducto, p);
+                Producto producto = obtenerRegistroPorIndice<Producto>(archivoProductos, indProducto);
+                producto.stock += carrito[i].cantidad;                                 // Calcula nuevo stock
+                actualizarRegistro<Producto>(archivoProductos, indProducto, producto); // Actualiza stock en el archivo
             }
             cout << endl << "Compra registrada con exito! ID Ticket: " << trans.id << endl;
         } else {
@@ -1837,7 +1846,7 @@ void registrarVenta(const char* archivoTransacciones, const char* archivoDetalle
         return;
     }
 
-    ArchivoHeader header = leerHeader(archivoProductos);
+    header = leerHeader(archivoProductos);
     if (header.registrosActivos ==0){
         cout << endl << "No hay productos registrados en el sistema" << endl;
         return;
@@ -1884,18 +1893,23 @@ void registrarVenta(const char* archivoTransacciones, const char* archivoDetalle
             } if (cantidad > prod.stock)
             {
                 cout << "Error: Stock insuficiente. Cantidad disponible: " << prod.stock << " unidades." << endl;
+                continue;
             } else if (cantidad <= 0) {
                 cout << "Error: La cantidad debe ser mayor a cero." << endl;
+                continue;
             } if (!solicitarFloat("Ingrese Precio Unitario", precio)){
                 break;
             }
-            carrito[cantItems] = {productoId, cantidad, precio};
+            carrito[cantItems].idProducto = productoId;
+            carrito[cantItems].cantidad = cantidad;
+            carrito[cantItems].precioUnitario = precio;
+            
             totalVenta += cantidad*precio;
             cantItems++;
             cout << "Producto guardado al carrito." << endl;
         }
         if (cantItems< 50){
-            cout << "¿Agregar otro producto a esta venta? (S/N): ";
+            cout << "¿Desea agregar otro producto? (S/N y presione ENTER para continuar): ";
             cin >> continuar;
         } else{
             cout << "Carrito lleno." << endl;   
@@ -1913,30 +1927,37 @@ void registrarVenta(const char* archivoTransacciones, const char* archivoDetalle
     imprimirSeparador(60, '=');
     cout << "      RESUMEN DE VENTA" << endl;
     imprimirSeparador(60, '-');
-    cout << "Cantidad de productos diferentes: " << cantItems << endl;
-    cout << "TOTAL A COBRAR:   $" << fixed << setprecision(2) << totalVenta << endl;
+    cout << left << setw(20) << "PRODUCTO" << setw(8)  << "CANT." << setw(12) << "SUBTOTAL" << endl;
+    for (int i = 0; i < cantItems; i++)
+    {
+        int indProd = buscarPorId<Producto>(archivoProductos, carrito[i].idProducto);
+        Producto producto = obtenerRegistroPorIndice<Producto>(archivoProductos, indProd);
+        cout << left << setw(20) << producto.nombre << setw(8)  << carrito[i].cantidad << setw(12) << carrito[i].precioUnitario*carrito[i].cantidad << endl;
+    }
+    cout << "TOTAL DE VENTA:   $" << fixed << setprecision(2) << totalVenta << endl;
     imprimirSeparador(60, '=');
 
     char confirmar;
-    cout << "¿Desea confirmar y guardar esta Compra? (S/N) ";
+    cout << "¿Desea confirmar y guardar esta Compra? (S/N y presione ENTER para continuar) ";
     cin >> confirmar;
 
     if (confirmar == 'S' || confirmar == 's'){
-    // Actualizar Stock del producto
         Transaccion trans;
         trans.idRelacionado = clienteId;
         strcpy(trans.tipo, "VENTA");
         trans.cantidadItemsDiferentes = cantItems;
         trans.total = totalVenta;
-        solicitarTexto("Ingrese descricion de la venta", trans.descripcion, 200);
+        solicitarTexto("Ingrese descripcion de la venta", trans.descripcion, 200);
+        
         if (guardarNuevoRegistro<Transaccion>(archivoTransacciones, trans)){
+
             for (int i = 0; i < cantItems; i++){
                 guardarDetalle(archivoDetalles, trans.id, carrito[i]);
-                // ACTUALIZAR STOCK EN ARCHIVO BINARIO
+                
                 int indProducto = buscarPorId<Producto>(archivoProductos, carrito[i].idProducto);
-                Producto p = obtenerRegistroPorIndice<Producto>(archivoProductos, indProducto);
-                p.stock -= carrito[i].cantidad;
-                actualizarRegistro<Producto>(archivoProductos, indProducto, p);
+                Producto producto = obtenerRegistroPorIndice<Producto>(archivoProductos, indProducto);
+                producto.stock -= carrito[i].cantidad; // Actualizar Stock
+                actualizarRegistro<Producto>(archivoProductos, indProducto, producto);
             }
             cout << endl << "Venta registrada con exito! ID Ticket" << trans.id << endl;
         } else {
@@ -1946,9 +1967,10 @@ void registrarVenta(const char* archivoTransacciones, const char* archivoDetalle
 }
 
 // Buscar Transacciones
-void buscarTransacciones(Tienda* tienda){
+void buscarTransacciones(const char* archivoTransacciones, const char* archivoDetalles, const char* archivoProductos, const char* archivoClientes, const char* archivoProveedores){
     
     int op;
+    Transaccion trans;
     bool encontro;
 
     cout << endl << "===== Buscar Transacciones =====" << endl;
@@ -1972,15 +1994,25 @@ void buscarTransacciones(Tienda* tienda){
 	        if (!solicitarEntero("Ingrese ID de la transacción", TransID)){
 	        return;
 	        }
-	        int i = buscarTransaccionPorId(tienda, TransID); // Extraer ID
+	        int i = buscarPorId<Transaccion>(archivoTransacciones, TransID); // Extraer ID
 	        if (i == -1){ // Validación de existencia
 	            cout << "Error: La transaccion no existe.";
 	            break;
-	        }
-		
-	        encabezadoTransacciones();
-	        mostrarDetalleTransaccion(tienda, i);
-	        imprimirSeparador();
+	        } 
+            trans = obtenerRegistroPorIndice<Transaccion>(archivoTransacciones, TransID);
+	        if (!trans.eliminado)
+            {
+                cout << endl << "DATOS DE LA TRANSACCION" << endl;
+                encabezadoTransacciones(); 
+                mostrarDetalleGeneralTransaccion(trans);
+                
+                cout << endl << "DETALLE DE ARTICULOS:";
+                encabezadoDetalleTransaccion();
+	            mostrarDetalleTransaccion(archivoTransacciones, archivoProductos, trans);
+                imprimirSeparador();
+            } else {
+                cout << "La transaccion fue anulada." << endl;
+            }
 	        break;
     	}
     	
@@ -1990,50 +2022,59 @@ void buscarTransacciones(Tienda* tienda){
 	        if (!solicitarEntero("Ingrese ID del producto", prodID)){
 	        return;
 	        }
-	        if (existeProducto(tienda, prodID) == false){ // Validacion de existencia
+	        if (!existeEntidad<Producto>(archivoProductos, prodID)){ // Validacion de existencia
 	            cout << endl << "Error: El producto no existe.";
 	            break;
 	        }
-	        encontro = false;
+            
+            encontro = false;
 	        encabezadoTransacciones();
-	        
-	        for (int i = 0; i < tienda->numTransacciones; i++){
-	            if (tienda->transacciones[i].idProducto == prodID){ // Si encuentra el ID del producto lo muestra
-	            mostrarDetalleTransaccion(tienda, i);
-	            encontro = true; // Actualización de la variable booleana
-	            }
-	        }
-	        imprimirSeparador();
-	        if (encontro == false){ // No encontro el ID en las transacciones
-	            cout << "No hay transacciones para este producto." << endl;
-	        }
+
+	        ifstream archivo(archivoTransacciones, ios::binary);
+            archivo.seekg(sizeof(ArchivoHeader), ios::beg);
+
+            while (archivo.read(reinterpret_cast<char*>(&trans), sizeof(Transaccion))){
+                if (!trans.eliminado){
+                    if (verificarProductoEnTransaccion(archivoDetalles, trans.id, prodID)) {
+                        mostrarDetalleGeneralTransaccion(trans);
+                        encontro = true;
+                    }           
+                }
+            }
+            
+            archivo.close();
+            if(!encontro){
+                cout << "No hay transacciones asociadas a este producto." << endl;
+            }
 	        break;
 		}
     case 3: {
 	
         int clienteID;
-
         if (!solicitarEntero("Ingrese ID del cliente", clienteID)){
             break;
         }
-        if (existeCliente(tienda, clienteID) == false){ // Validación de existencia del cliente
+        if (!existeEntidad<Cliente>(archivoClientes, clienteID)){ // Validación de existencia del cliente
             cout << "Error: El cliente no existe.";
             break; 
         }
         encontro = false;
         encabezadoTransacciones();
 
-        for (int i = 0; i < tienda->numTransacciones; i++){
-            if (tienda->transacciones[i].idRelacionado == clienteID){ // Si encuentra el ID del producto lo muestra
-                if (strcmp(tienda->transacciones[i].tipo, "VENTA") == 0){
-                    mostrarDetalleTransaccion(tienda, i);
-                    encontro = true; // Actualización de la variable boolena
-                    }
+        ifstream archivo(archivoTransacciones, ios::binary);
+        archivo.seekg(sizeof(ArchivoHeader), ios::beg);
+
+        while (archivo.read(reinterpret_cast<char*>(&trans), sizeof(Transaccion))){
+            bool esVenta = (strcmp(trans.tipo, "VENTA") == 0 || strcmp(trans.tipo, "V") == 0);
+            if (!trans.eliminado && trans.idRelacionado == clienteID && esVenta) {
+                mostrarDetalleGeneralTransaccion(trans);
+                encontro = true;
             }
         }
+        archivo.close();
         imprimirSeparador();
-        if (encontro == false){ // No encontro el ID en las transacciones
-            cout << "No hay transacciones registradas para este cliente." << endl; 
+        if (!encontro){ // No encontro el ID en las transacciones
+            cout << "No hay ventas registradas para este cliente." << endl; 
         }
     break;
 	}
@@ -2044,25 +2085,28 @@ void buscarTransacciones(Tienda* tienda){
 	        if (!solicitarEntero("Ingrese ID del proveedor", proveedorID)){
 	            break;
 	        }
-	        if (existeProveedor(tienda, proveedorID) == false){
+	        if (!existeEntidad<Proveedor>(archivoProveedores, proveedorID)){
 	            cout << endl << "Error: El proveedor no existe.";
 	            break;
 	        }
 	
 	        encabezadoTransacciones();
 	        encontro = false;
-	
-	        for (int i = 0; i < tienda->numTransacciones; i++){
-	            if (tienda->transacciones[i].idRelacionado == proveedorID){
-	                if (strcmp(tienda->transacciones[i].tipo, "COMPRA") == 0){
-                    mostrarDetalleTransaccion(tienda, i);
-                    encontro = true; // Actualización de la variable boolena
-                    }
-	            }
-	        }
-	        imprimirSeparador();
-	        if (encontro == false){
-	            cout << "No hay transacciones registradas para este proveedor.";
+
+            ifstream archivo(archivoTransacciones, ios::binary);
+            archivo.seekg(sizeof(ArchivoHeader), ios::beg);
+
+            while (archivo.read(reinterpret_cast<char*>(&trans), sizeof(Transaccion))){
+                bool esCompra = (strcmp(trans.tipo, "COMPRA") == 0 || strcmp(trans.tipo, "C") == 0);
+                if (!trans.eliminado && trans.idRelacionado == proveedorID && esCompra) {
+                    mostrarDetalleGeneralTransaccion(trans);
+                    encontro = true;
+                }
+            }
+            archivo.close();
+            imprimirSeparador();
+	        if (!encontro){
+	            cout << "No hay compras registradas para este proveedor.";
 	        }
 	    break;
 	}
@@ -2072,22 +2116,23 @@ void buscarTransacciones(Tienda* tienda){
 	        if (!solicitarTexto("Ingrese fecha de la Transacción (YYYY-MM-DD)", fecha, 11)){
 	            break;;
 	        }
-	        if(validarFecha(fecha) == false){
+	        if(!validarFecha(fecha)){
 	            cout << "Error: Formato de fecha no valido (Use YYYY-MM-DD)";
 	            break;
 	        }
-	
-	        encontro = false; 
+            
 	        encabezadoTransacciones();
-	
-	        for (int i = 0; i < tienda->numTransacciones; i++){
-	            if (strcmp(tienda->transacciones[i].fecha, fecha) == 0){
-	                mostrarDetalleTransaccion(tienda, i);
-	                encontro = true;
-	            }
-	        }
-	        imprimirSeparador();
-	        if (encontro == false){
+            ifstream archivo(archivoTransacciones, ios::binary);
+            archivo.seekg(sizeof(ArchivoHeader), ios::beg);
+
+            while (archivo.read(reinterpret_cast<char*>(&trans), sizeof(Transaccion))){
+                if (!trans.eliminado && strcmp(trans.fechaRegistro, fecha) == 0){
+                    mostrarDetalleGeneralTransaccion(trans);
+                    encontro = true;
+                }
+            }
+            archivo.close();
+	        if (!encontro){
 	            cout << "No hay transacciones registradas en la fecha especificada.";
 	        }
 	    break;
@@ -2095,14 +2140,11 @@ void buscarTransacciones(Tienda* tienda){
     case 6: {// busqueda por tipo de transaccion
 
         int tipo;
-        cout << "1. Compra (A Proveedor)" << endl
-             << "2. Venta (A Cliente)" << endl
+        cout << "1. Compras (A Proveedor)" << endl
+             << "2. Ventas (A Cliente)" << endl
              << "0. Cancelar" << endl
              << endl;
         if (!solicitarEntero("Ingrese tipo de transacción", tipo)){
-            break;
-            }
-        if (tipo == 0){
             break;
         }
         if (tipo < 1 || tipo > 2){
@@ -2111,17 +2153,21 @@ void buscarTransacciones(Tienda* tienda){
         }
         
         encontro = false;
-        const char* tipoTransaccion = (tipo == 1) ? "COMPRA" : "VENTA"; 
         encabezadoTransacciones();
+        ifstream archivo(archivoTransacciones, ios::binary);
+        archivo.seekg(sizeof(ArchivoHeader), ios::beg);
 
-        for (int i = 0; i < tienda->numTransacciones; i++){
-            if (strcmp(tienda->transacciones[i].tipo, tipoTransaccion) == 0){
-                mostrarDetalleTransaccion(tienda, i);
+        while (archivo.read(reinterpret_cast<char*>(&trans), sizeof(Transaccion))){
+            bool match = (tipo == 1) ? (strcmp(trans.tipo, "COMPRA") == 0 || strcmp(trans.tipo, "C") == 0)
+                                     : (strcmp(trans.tipo, "VENTA") == 0 || strcmp(trans.tipo, "V") == 0);
+            if (!trans.eliminado && match){
+                mostrarDetalleGeneralTransaccion(trans);
                 encontro = true;
             }
         }
+        archivo.close();
         imprimirSeparador();
-        if (encontro == false){
+        if (!encontro){
             cout << "No hay transacciones de este tipo";
         }
         break;
@@ -2145,18 +2191,16 @@ void listarTransacciones(const char* archivoTransacciones){
         return;    
     }
     archivo.seekg(sizeof(ArchivoHeader), ios::beg);
+    
     imprimirSeparador(60, '=');
     cout << "LISTADO GENERAL DE TRANSACCIONES" << endl; 
+    encabezadoTransacciones();
+
     Transaccion trans;
     for (int i = 0; i < header.cantidadRegistros; i++){
-        archivo.read(reinterpret_cast<char*>(&trans), sizeof(Transaccion));
+        if(!archivo.read(reinterpret_cast<char*>(&trans), sizeof(Transaccion))) break;
         if (!trans.eliminado){
-            imprimirSeparador();
-            cout << "TRANSACCION #" << trans.id << " | FECHA: " << trans.fechaRegistro << endl;
-            cout << "TIPO: " << (strcmp(trans.tipo, "V") == 0 ? "VENTA" : "COMPRA")
-                 << " | ID RELACIONADO: " << trans.idRelacionado << endl;
-            cout << "DESCRIPCION: " << trans.descripcion << endl;
-            cout << "TOTAL: $" << fixed << setprecision(2) << trans.total << endl;
+            mostrarDetalleGeneralTransaccion(trans);
         }    
     }
     archivo.close();
@@ -2173,7 +2217,7 @@ void cancelarTransaccion(const char* archivoTransacciones, const char* archivoDe
     }
 
     int transID;
-    cout << endl << "===== CANCELAR TRANSACCIÓN =====" << endl;
+    cout << endl << "===== CANCELAR TRANSACCION =====" << endl;
     if (!solicitarEntero("Ingrese ID de la transacción a cancelar", transID)){
         return;
     }
@@ -2184,22 +2228,18 @@ void cancelarTransaccion(const char* archivoTransacciones, const char* archivoDe
     }
     Transaccion trans = obtenerRegistroPorIndice<Transaccion>(archivoTransacciones, indiceTrans);
 
-    cout << endl << "DATOS DE LA TRANSACCION A ANULAR:" << endl;
-    if (!trans.eliminado) {
-        imprimirSeparador();
-        cout << "TRANSACCION #" << trans.id << " | FECHA: " << trans.fechaRegistro << endl;
-        cout << "TIPO: " << (strcmp(trans.tipo, "VENTA") == 0 ? "VENTA" : "COMPRA")
-             << " | ID RELACIONADO: " << trans.idRelacionado << endl;
-        cout << "DESCRIPCION: " << trans.descripcion << endl;
-        cout << "TOTAL: $" << fixed << setprecision(2) << trans.total << endl;
-    } else {
-        cout << "Esta transaccion ya se encuentra anulada." << endl;
+    if (trans.eliminado) {
+        cout << endl << "Error: Esta transaccion ya se encuentra anulada." << endl;
+        return;
     }
     
+    cout << endl << "DATOS DE LA TRANSACCION A ANULAR:" << endl;
+    encabezadoDetalleTransaccion();
+    mostrarDetalleTransaccion(archivoTransacciones, archivoProductos, trans);
     imprimirSeparador();
 
     char confirmar;
-    cout << "¿Esta segura de que desea ANULAR esta transaccion? (S/N) ";
+    cout << "¿Esta seguro de que desea ANULAR esta transaccion? (S/N) ";
     cin >> confirmar;
 
     if (confirmar == 'S' || confirmar == 's'){
@@ -2238,15 +2278,15 @@ void cancelarTransaccion(const char* archivoTransacciones, const char* archivoDe
 
 void guardarDetalle(const char* archivoDetalles, int idTransaccion, const DetalleTransaccion &detalle) {
     // Asignamos el ID de la cabecera al detalle para vincularlos
-    DetalleTransaccion registroCopia = detalle;
-    registroCopia.idTransaccion = idTransaccion;
+    DetalleTransaccion nuevoDetalle = detalle;
+    nuevoDetalle.idTransaccion = idTransaccion;
 
     ofstream archivo(archivoDetalles, ios::binary | ios::app);
     if (archivo.is_open()) {
-        archivo.write(reinterpret_cast<const char*>(&registroCopia), sizeof(DetalleTransaccion));
+        archivo.write(reinterpret_cast<const char*>(&nuevoDetalle), sizeof(DetalleTransaccion));
         archivo.close();
     } else {
-        cout << "Error critico: No se pudo guardar el detalle en el archivo." << endl;
+        cout << "Error critico: No se guardaron los detalles en el archivo." << endl;
     }
 }
 
@@ -2321,6 +2361,19 @@ bool productoTieneTransacciones(const char* archivoTransacciones, const char* ar
         if (detalle.idProducto == idProducto) {
             archivo.close();
             return true; 
+        }
+    }
+    archivo.close();
+    return false;
+}
+
+bool verificarProductoEnTransaccion(const char* archivoDetalles, int idTrans, int idProd) {
+    ifstream archivo(archivoDetalles, ios::binary);
+    DetalleTransaccion trans;
+    while(archivo.read(reinterpret_cast<char*>(&trans), sizeof(DetalleTransaccion))) {
+        if(trans.idTransaccion == idTrans && trans.idProducto == idProd) {
+            archivo.close();
+            return true;
         }
     }
     archivo.close();
@@ -2529,11 +2582,12 @@ bool contieneSubstring(const char* texto, const char* busqueda){
 void mostrarLineaDetalle(const Transaccion& t, const char* nombreProd, int idProducto, int cantidad, float total) {
     cout << left << setw(10) << t.id 
          << setw(12) << t.fechaRegistro
-         << setw(6)  << t.tipo           // 'C' o 'V'
+         << setw(6)  << t.tipo           // COMPRA O VENTA
          << setw(10) << t.idRelacionado    // ID de Cliente o Proveedor
          << setw(20) << (strlen(nombreProd) > 19 ? string(nombreProd).substr(0, 17) + ".." : nombreProd) 
          << setw(8)  << cantidad
-         << "$" << fixed << setprecision(2) << setw(11) << total << endl;
+         << "$" << fixed << setprecision(2) << setw(11) << total << endl
+         << setw(15) << t.fechaUltimaModificacion << endl; 
 }
 
 void mostrarDetalleTransaccion(const char* archivoDetalles, const char* archivoProductos, const Transaccion& t) {
@@ -2553,7 +2607,7 @@ void mostrarDetalleTransaccion(const char* archivoDetalles, const char* archivoP
                 tieneDetalles = true;
             }
 
-            // Busca el nombre del producto en su archivo
+            // Busca el nombre del producto
             int indP = buscarPorId<Producto>(archivoProductos, d.idProducto);
             char nombreProd[100] = "No encontrado";
             
@@ -2562,10 +2616,9 @@ void mostrarDetalleTransaccion(const char* archivoDetalles, const char* archivoP
                 strcpy(nombreProd, p.nombre);
             }
 
-            // Calcula el total de esta línea (cantidad * precio de ese momento)
+            // Calcula el total de la línea (cantidad * precio de ese momento)
             float totalLinea = d.cantidad * d.precioUnitario;
 
-            // Llama la función de formato con los datos
             mostrarLineaDetalle(t, nombreProd, d.idProducto, d.cantidad, totalLinea);
         }
     }
@@ -2577,6 +2630,17 @@ void mostrarDetalleTransaccion(const char* archivoDetalles, const char* archivoP
     }
 
     archivo.close();
+}
+
+void mostrarDetalleGeneralTransaccion(const Transaccion &trans){
+
+    cout << left 
+         << setw(6)  << trans.id 
+         << setw(12) << trans.fechaRegistro
+         << setw(10) << (strcmp(trans.tipo, "VENTA") == 0 || strcmp(trans.tipo, "VENTA") == 0 ? "VENTA" : "COMPRA")
+         << setw(10) << trans.idRelacionado 
+         << setw(30) << (strlen(trans.descripcion) > 27 ? string(trans.descripcion).substr(0, 27) + "..." : trans.descripcion)
+         << "$" << fixed << setprecision(2) << setw(11) << trans.total << endl;
 }
 
 void mostrarDetalleProducto(const Producto& producto, const char* archivoProveedores) {
@@ -2624,16 +2688,29 @@ void mostrarDetalleCliente(const Cliente& cliente) {
 void encabezadoDetalleTransaccion() {
     cout << endl;
     imprimirSeparador();
-
     cout << left 
          << setw(10) << "ID TRANS" 
-         << setw(12) << "FECHA"
+         << setw(12) << "FECHA T."
          << setw(6)  << "TIPO" 
          << setw(10) << "ENTIDAD" 
          << setw(20) << "PRODUCTO"
          << setw(8)  << "CANT."
-         << setw(12) << "TOTAL" << endl;
+         << setw(12) << "TOTAL" 
+         << setw(15) << "ULT. MODIF." << endl;
     imprimirSeparador();
+}
+
+void encabezadoTransacciones(){
+    cout << endl;
+    imprimirSeparador();
+    cout << left 
+         << setw(6)  << "ID" 
+         << setw(12) << "FECHA" 
+         << setw(10) << "TIPO" 
+         << setw(10) << "ENTIDAD" 
+         << setw(30) << "DESCRIPCION" 
+         << setw(12) << "TOTAL" << endl;
+         imprimirSeparador();
 }
 
 void encabezadoProveedorCliente(){
