@@ -2734,7 +2734,6 @@ bool idTieneTransacciones(const char* archivoTransacciones, int idRelacionado){
     return false;
 }
 
-
 bool codigoDuplicado(const char* nombreArchivo, const char* codigo){
     ifstream archivo(nombreArchivo, ios::binary);
     if (!archivo.is_open()){
