@@ -559,36 +559,6 @@ void mostrarDetalleTransaccion(const char* archivoDetalles, const char* archivoP
     archivo.close();
 }
 
-// 5. MANTENIMIENTO E INTEGRIDAD (NUEVAS FUNCIONALIDADES)
-
-//5.1 Integridad Referencial
-//Debes programar un m�dulo de diagn�stico `verificarIntegridadReferencial()` que detecte "referencias rotas".
-
-//�Qu� debe hacer el algoritmo?
-
-//- Recorrer `productos.bin`. Por cada producto activo, extraer su `idProveedor`.
-//- Buscar en `proveedores.bin` si ese ID existe y no est� eliminado. Si no existe, registrar el error.
-//- Repetir la l�gica cruzada para Transacciones (verificar que el `idProducto` y el `idCliente/Proveedor` a�n existan).
-//- Imprimir un reporte de salud de la base de datos al finalizar.
-
-//5.2 Respaldo de Datos (Backup)
-//Implementar una funci�n `crearBackup()`:
-
-//- Debe crear una carpeta (o usar un prefijo en el nombre) con la fecha y hora actual.
-//- Debe copiar byte a byte los 5 archivos .bin operativos a este nuevo destino seguro.
-
-//5.3 Reportes Anal�ticos (Lectura en Lote)
-//Se requiere un submen� para leer datos y generar estad�sticas:
-
-//- **Productos con stock cr�tico:** Recorrer productos y filtrar los que tengan `stock <= stockMinimo`.
-//- **Historial de Cliente:** Dado un ID de cliente, imprimir sus datos b�sicos, buscar todas las transacciones asociadas a su arreglo `comprasIDs[]` e imprimir el detalle recuperando el nombre del producto involucrado.
-
-// 6. EXPERIENCIA DE USUARIO
-
-// 6.1. IMPRESI�N DE DATOS
-//- Todos los datos que se muestren en el sistema deben estar correctamente formateados usando tablas, colores, caracteres, etc
-
-
 // FUNCIONES CRUD - PRODUCTOS
 // Crear Productos
 void crearProducto(const char* archivoProductos, const char* archivoProveedores) {
@@ -619,6 +589,7 @@ void crearProducto(const char* archivoProductos, const char* archivoProveedores)
         if (!solicitarTexto("Ingrese descripcion del producto", nuevoProducto.descripcion, 200)) return;
         if (!solicitarFloat("Ingrese precio del producto", nuevoProducto.precio) || !floatesPositivo(nuevoProducto.precio)) return;
         if (!solicitarEntero("Ingrese Stock del producto", nuevoProducto.stock) || nuevoProducto.stock < 0) return;
+        if (!solicitarEntero("Ingrese Stock Minimo de seguridad", nuevoProducto.stockMinimo) || nuevoProducto.stockMinimo < 0) return;
         if (!solicitarEntero("Ingrese ID del proveedor", nuevoProducto.idProveedor) || !intesPositivo(nuevoProducto.idProveedor)) return;
         if (!existeEntidad<Proveedor>(archivoProveedores, nuevoProducto.idProveedor)) {
             cout << endl << "Error: El proveedor no existe. Debe crearlo primero" << endl;
@@ -749,28 +720,33 @@ void buscarProducto(const char* archivoProductos, const char* archivoProveedores
             case 4: { // Listar por proveedor
                 int idProv;
                 if (solicitarEntero("Ingrese ID del proveedor", idProv)) {
-                    ArchivoHeader header = leerHeader(archivoProductos);
-                    ifstream archivo(archivoProductos, ios::binary);
-                    if (!archivo.is_open()){
-                        cout << "Error: No se pudo abrir el archivo." << endl;
-                        return;
+                    int indProv = buscarPorId<Proveedor>(archivoProveedores, idProv);
+                    if (indProv == -1){
+                        cout << "Error: el proveedor no existe" << endl;
                     }
-                    archivo.seekg(sizeof(ArchivoHeader), ios::beg);
                     
-                    bool encontro = false;
-                    Producto producto;
-
+                    Proveedor prov = obtenerRegistroPorIndice<Proveedor>(archivoProveedores, indProv);
+                    if (prov.cantidadProductos == 0){
+                        cout << "El proveedor no tiene productos asociados en su historial de compras." << endl;
+                    }
+                    
+                    cout << "\n PRODUCTOS SUMINISTRADOS POR: " << prov.nombre << endl;
                     encabezadoProductos();
-                    for (int i = 0; i < header.cantidadRegistros; i++) {
-                        archivo.read(reinterpret_cast<char*>(&producto), sizeof(Producto));
-                        if (!producto.eliminado && producto.idProveedor == idProv) {
-                            mostrarDetalleProducto(producto, archivoProveedores);
-                            encontro = true;
+                    bool encontro = false;
+                    
+                    for (int i = 0; i < prov.cantidadProductos; i++){
+                        int idProd = prov.productosIDs[i];
+                        int indProd = buscarPorId<Producto>(archivoProductos, idProd);
+                        if (indProd != -1){
+                            Producto producto = obtenerRegistroPorIndice<Producto>(archivoProductos, indProd);
+                            if (!producto.eliminado){
+                                mostrarDetalleProducto(producto, archivoProveedores);
+                            }
                         }
                     }
                     imprimirSeparador();
                     if (!encontro) {
-                        cout << "No hay productos registrados para este proveedor." << endl;
+                        cout << "No se encontraron productos activos para este proveedor." << endl;
                     }
                 }
                 break;
@@ -813,10 +789,10 @@ void actualizarProducto(const char* archivoProductos, const char* archivoProveed
 
     char nombre[100], codigo[20], descripcion[200];
     float precio;
-    int stock, idProveedor;
+    int stock, idProveedor, stockMinimo;
     int seleccion; 
 
-    bool verNombre = false, verCodigo = false, verDescrip = false, verPrecio = false, verStock = false, verIdProveedor = false;
+    bool verStockMinimo = false, verNombre = false, verCodigo = false, verDescrip = false, verPrecio = false, verStock = false, verIdProveedor = false;
     
     // Menú de campos editables
     do {
@@ -827,7 +803,8 @@ void actualizarProducto(const char* archivoProductos, const char* archivoProveed
         cout << "4. Proveedor" << endl;
         cout << "5. Precio" << endl;
         cout << "6. Stock" << endl;
-        cout << "7. Guardar cambios" << endl;
+        cout << "7. Stock Minimo (Alerta)" << endl; 
+        cout << "8. Guardar cambios" << endl;
         cout << "0. Cancelar sin guardar" << endl;
         
         if (!solicitarEntero("Seleccione una opción", seleccion)) continue;
@@ -882,6 +859,13 @@ void actualizarProducto(const char* archivoProductos, const char* archivoProveed
                 }
                 break;
             case 7: {
+                if (solicitarEntero("Ingrese nuevo stock minimo", stockMinimo) && intesPositivo(stockMinimo)) {
+                producto.stockMinimo = stockMinimo;
+                verStockMinimo = true;
+                }
+            break;
+            }
+            case 8: {
                 if (!verNombre && !verCodigo && !verDescrip && !verPrecio && !verStock && !verIdProveedor) {
                     cout << "No se han realizado cambios para guardar." << endl;
                 } else {
@@ -899,6 +883,7 @@ void actualizarProducto(const char* archivoProductos, const char* archivoProveed
                 seleccion = 0; 
                 break;
             }
+
             case 0:
                 cout << "Operación cancelada. No se guardaron cambios." << endl;
                 break;
@@ -1880,6 +1865,25 @@ void registrarCompra(const char* archivoTransacciones, const char* archivoDetall
                 prov.transaccionesIds[prov.cantidadTransacciones] = trans.id;
                 prov.cantidadTransacciones++;
             }
+            
+            for (int i = 0; i < cantItems; i++) {
+                int idProdActual = carrito[i].idProducto;
+                bool yaExiste = false;
+
+                // Verifica si el producto ya estaba en la lista del proveedor 
+                for (int j = 0; j < prov.cantidadProductos; j++) {
+                    if (prov.productosIDs[j] == idProdActual) {
+                        yaExiste = true;
+                        break;
+                    }
+                }
+                // Si no esta en la lista del proveedor, se agrega
+                if (!yaExiste && prov.cantidadProductos < 100) {
+                    prov.productosIDs[prov.cantidadProductos] = idProdActual;
+                    prov.cantidadProductos++;
+                }
+            }
+            
             actualizarRegistro<Proveedor>(archivoProveedores, indProveedor, prov);
 
             cout << endl << "Compra registrada con exito! ID Ticket: " << trans.id << endl;
@@ -2110,7 +2114,7 @@ void buscarTransacciones(const char* archivoTransacciones, const char* archivoDe
             }
 	        break;
 		}
-    case 3: {
+    case 3: { // Busqueda por Cliente
 	
         int clienteID;
         if (!solicitarEntero("Ingrese ID del cliente", clienteID)){
@@ -2371,6 +2375,229 @@ void cancelarTransaccion(const char* archivoTransacciones, const char* archivoDe
         }
     } else {
         cout << endl << "Operación cancelada. No se realizaron cambios en la transacción." <<  endl;
+    }
+}
+
+// FUNCIONES DE MANTENIMIENTO E INTEGRIDAD 
+void verificarIntegridadReferencial(const char* archivoProductos, const char* archivoTransacciones, const char* archivoDetalles, const char* archivoProveedores, const char* archivoClientes) {
+    cout << "\n--- DIAGNOSTICO DE INTEGRIDAD REFERENCIAL ---" << endl;
+    int errores = 0;
+
+    // Productos -> Valida ID Proveedores
+    ifstream archProd(archivoProductos, ios::binary);
+    if (archProd.is_open()) {
+        archProd.seekg(sizeof(ArchivoHeader), ios::beg); // SALTA EL HEADER
+        Producto p;
+        while (archProd.read((char*)&p, sizeof(Producto))) {
+            if (!p.eliminado) {
+                if (!existeEntidad<Proveedor>(archivoProveedores, p.idProveedor)) {
+                    cout << "[ERROR] Producto ID " << p.id << " (" << p.nombre << ") refiere a Proveedor ID " << p.idProveedor << " inexistente." << endl;
+                    errores++;
+                }
+            }
+        }
+        archProd.close();
+    } else {
+        cout << "Error no se pudo abrir el archivo de Productos." << endl; 
+    }
+    
+    // Detalles -> Valida ID Productos y ID Transacciones
+    ifstream archDet(archivoDetalles, ios::binary);
+    if (archDet.is_open()) {
+        
+        DetalleTransaccion d;
+        while (archDet.read((char*)&d, sizeof(DetalleTransaccion))) {
+            if (!existeEntidad<Producto>(archivoProductos, d.idProducto)) {
+                cout << "[ERROR] Detalle refiere a Producto ID " << d.idProducto << " inexistente." << endl;
+                errores++;
+            }
+            if (!existeEntidad<Transaccion>(archivoTransacciones, d.idTransaccion)) {
+                cout << "[ERROR] Detalle refiere a Transaccion ID " << d.idTransaccion << " inexistente." << endl;
+                errores++;
+            }
+        }
+        archDet.close();
+    } else {
+        cout << "Error no se pudo abrir el archivo de Detalles transaccionales." << endl; 
+    }
+
+    // Clientes -> Valida ID transaccion
+    ifstream archCli(archivoClientes, ios::binary);
+    if (archCli.is_open()) {
+        archCli.seekg(sizeof(ArchivoHeader), ios::beg);
+        Cliente c;
+        while (archCli.read((char*)&c, sizeof(Cliente))) {
+            if (!c.eliminado) {
+                for (int j = 0; j < c.cantidadTransacciones; j++) {
+                    int idBusq = c.transaccionesIds[j];
+                    int indTrans = buscarPorId<Transaccion>(archivoTransacciones, idBusq);
+
+                    if (indTrans == -1) {
+                        cout << "[ERROR] Cliente ID " << c.id << " refiere a Transaccion ID " << idBusq << " inexistente." << endl;
+                        errores++;
+                    } else { // Valida que la transaccion asociada sea una "Venta"
+                        Transaccion t = obtenerRegistroPorIndice<Transaccion>(archivoTransacciones, indTrans);
+                        if (strcmp(t.tipo, "VENTA") != 0) {
+                            cout << "[ERROR] Cliente ID " << c.id << " tiene en su historial la Transaccion ID " << idBusq << " que NO es una VENTA." << endl;
+                            errores++;
+                        }
+                    }
+                }
+            }
+        }
+        archCli.close();
+    } else {
+        cout << "Error no se pudo abrir el archivo de Clientes." << endl; 
+    }
+
+    // Proveedores -> Validar ID transaccion(Compras) y ID Productos
+    ifstream archProv(archivoProveedores, ios::binary);
+    if (archProv.is_open()) {
+        archProv.seekg(sizeof(ArchivoHeader), ios::beg);
+        Proveedor prov;
+        
+        while (archProv.read((char*)&prov, sizeof(Proveedor))) {
+            if (!prov.eliminado) {
+                // Validación del historial de transacciones
+                for (int j = 0; j < prov.cantidadTransacciones; j++) {
+                    int idBusq = prov.transaccionesIds[j];
+                    int indTrans = buscarPorId<Transaccion>(archivoTransacciones, idBusq);
+
+                    if (indTrans == -1) {
+                        cout << "[ERROR] Proveedor ID " << prov.id << " refiere a Transaccion ID " << idBusq << " inexistente." << endl;
+                        errores++;
+                    } else {
+                        // Valida que la transaccion sea una COMPRA
+                        Transaccion t = obtenerRegistroPorIndice<Transaccion>(archivoTransacciones, indTrans);
+                        if (strcmp(t.tipo, "COMPRA") != 0) {
+                            cout << "[ERROR] Proveedor ID " << prov.id << " tiene en su historial la Transaccion ID " 
+                                 << idBusq << " que es una " << t.tipo << " (deberia ser COMPRA)." << endl;
+                            errores++;
+                        }
+                    }
+                }
+                // Valida la lista de productos suministrados
+                for (int k = 0; k < prov.cantidadProductos; k++) {
+                    int idProdBusq = prov.productosIDs[k];
+                    if (!existeEntidad<Producto>(archivoProductos, idProdBusq)) {
+                        cout << "[ERROR] Proveedor ID " << prov.id << " ofrece el Producto ID " 
+                             << idProdBusq << " que no existe en el inventario." << endl;
+                        errores++;
+                    }
+                }
+            }
+        }
+        archProv.close();
+    } else {
+        cout << "Error: No se pudo abrir el archivo de Proveedores." << endl; 
+    }
+
+    cout << "\nREPORTE FINAL: Se encontraron " << errores << " inconsistencias." << endl;
+}
+
+// --- RESPALDO DE DATOS (BACKUP) ---
+
+void copiarArchivo(const char* origen, const char* destino) {
+    ifstream src(origen, ios::binary);
+    if (!src.is_open()) {
+        cout << "Error: no se pudo abrir el archivo." << endl;
+        return;
+    }
+    ofstream dst(destino, ios::binary);
+    if (!dst.is_open()) {
+        cout << "Error: no se pudo abrir el archivo." << endl;
+        return;
+    }
+    dst << src.rdbuf(); // Copia archivos
+    
+    src.close();
+    dst.close();
+}
+
+void crearBackup(const char* archivoProductos, const char* archivoProveedores, const char* archivoTransacciones, const char* archivoDetalles, const char* archivoClientes) {
+    char fecha[20];
+    obtenerFechaActual(fecha); 
+    
+    // Lista de archivos a respaldar
+    const char* archivos[] = { archivoProductos, archivoProveedores, archivoClientes, archivoTransacciones, archivoDetalles };
+    char nombreDestino[150];
+
+    cout << "\nIniciando respaldo de seguridad..." << endl;
+    for (int i = 0; i < 5; i++) {
+        snprintf(nombreDestino, sizeof(nombreDestino), "%s_BACKUP_%s", fecha, archivos[i]);
+        
+        copiarArchivo(archivos[i], nombreDestino);
+        cout << "[OK] " << archivos[i] << " -> " << nombreDestino << endl;
+    }
+    cout << "Respaldo completado." << endl;
+}
+
+// --- REPORTES ANALÍTICOS ---
+
+void reporteStockCritico(const char* archivoProductos) {
+    ifstream arch(archivoProductos, ios::binary);
+    if (!arch.is_open()){ 
+        cout << "Error al abrir el archivo." << endl;
+        return;
+    }
+
+    ArchivoHeader header = leerHeader(archivoProductos);
+    arch.seekg(sizeof(ArchivoHeader), ios::beg);
+
+    Producto p;
+    cout << "\n" << setfill('=') << setw(50) << "" << endl;
+    cout << "      ALERTA: PRODUCTOS POR DEBAJO DEL MINIMO" << endl;
+    cout << setfill('=') << setw(50) << "" << setfill(' ') << endl;
+    cout << left << setw(10) << "ID" << setw(20) << "NOMBRE" << setw(10) << "STOCK" << setw(10) << "MINIMO" << endl;
+    imprimirSeparador(50, '-');
+
+    while (arch.read((char*)&p, sizeof(Producto))) {
+        if (!p.eliminado && p.stock <= p.stockMinimo) {
+            cout << left << setw(10) << p.id 
+                 << setw(20) << p.nombre 
+                 << setw(10) << p.stock 
+                 << setw(10) << p.stockMinimo << endl;
+        }
+    }
+    arch.close();
+}
+
+void historialCliente(const char* archivoClientes, const char* archivoTransacciones, const char* archivoDetalles, const char* archivoProductos) {
+    int idBusq;
+    if (!solicitarEntero("Ingrese ID del cliente para ver su historial", idBusq)) return;
+
+    int indClient = buscarPorId<Cliente>(archivoClientes, idBusq);
+    if (indClient == -1) {
+        cout << "Error: El cliente no existe." << endl;
+        return;
+    }
+    
+    Cliente client = obtenerRegistroPorIndice<Cliente>(archivoClientes, indClient);
+    
+    imprimirSeparador(60, '=');
+    cout << "\n--- HISTORIAL DEL CLIENTE " << client.nombre << " ---" << endl;
+    cout << "Cedula/RIF: " << client.cedula << " | Total Compras: $" << client.totalCompras << endl;
+    imprimirSeparador(60, '-');
+
+    if (client.cantidadTransacciones == 0) {
+        cout << "No registra movimientos financieros." << endl;
+        return;
+    }
+
+    for (int j = 0; j < client.cantidadTransacciones; j++) {
+        int idTrans = client.transaccionesIds[j];
+        int indTrans = buscarPorId<Transaccion>(archivoTransacciones, idTrans);
+            
+        if (indTrans != -1) {
+            Transaccion trans = obtenerRegistroPorIndice<Transaccion>(archivoTransacciones, indTrans);
+            if (!trans.eliminado) {
+                cout << "\n Transaccion ID " << trans.id << " | Fecha: " << trans.fechaRegistro << " | Total: $" << trans.total << endl;
+                encabezadoDetalleTransaccion();
+                mostrarDetalleTransaccion(archivoDetalles, archivoProductos, trans);
+            } else {
+                cout << "\n Transaccion ID" << trans.id << " [ANULADA]" << endl;
+            }
+        }
     }
 }
 
@@ -2759,13 +2986,19 @@ void mostrarDetalleProducto(const Producto& producto, const char* archivoProveed
          << setw(15) << producto.codigo
          << setw(20) << producto.nombre
          << setw(20) << producto.descripcion
-         << setw(10) << producto.stock
+         << setw(10) << producto.stock;
+         if (producto.stock <= producto.stockMinimo) {
+            cout << setw(12) << " [¡CRITICO!]"; 
+        } else {
+            cout << setw(12) << " ";
+        } cout
          << setw(12) << fixed << setprecision(2) << producto.precio
          << setw(12) << producto.idProveedor
          << setw(20) << prov.nombre
          << setw(12) << producto.idProveedor
          << setw(20) << prov.nombre
          << setw(15) << producto.fechaRegistro << endl;
+         
 }
 
 void mostrarDetalleProveedor(const Proveedor& proveedor) {
@@ -2846,7 +3079,8 @@ void encabezadoProductos() {
          << setw(15) << "CODIGO" 
          << setw(20) << "NOMBRE" 
          << setw(20) << "DESCRIPCION"
-         << setw(10) << "STOCK" 
+         << setw(10) << "STOCK"
+         << setw(12) << "ESTADO" 
          << setw(12) << "PRECIO" 
          << setw(12) << "ID PROV." 
          << setw(20) << "PROVEEDOR"
@@ -3166,7 +3400,7 @@ int main(){
                         break;
                     }
                     case 5: { // Cancelar transaccion
-                        cancelarTransaccion(ARCHIVO_TRANSACCIONES, ARCHIVO_DETALLES, ARCHIVO_PRODUCTOS);
+                        cancelarTransaccion(ARCHIVO_TRANSACCIONES, ARCHIVO_DETALLES, ARCHIVO_PRODUCTOS, ARCHIVO_PROVEEDORES, ARCHIVO_CLIENTES);
                         break;
                     }
                     case 0: { // Volver al menu principal
