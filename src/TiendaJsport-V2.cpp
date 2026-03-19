@@ -4,6 +4,7 @@
 #include <ctime>
 #include <limits>
 #include <fstream>
+#include <direct.h>
 
 using namespace std;
 
@@ -12,6 +13,16 @@ const char* ARCHIVO_PROVEEDORES = "proveedores.bin";
 const char* ARCHIVO_CLIENTES = "clientes.bin";
 const char* ARCHIVO_TRANSACCIONES = "transacciones.bin";
 const char* ARCHIVO_DETALLES = "detallesTransacciones.bin";
+const char* ARCHIVO_BACKUP = "backup.bin";
+
+// Definición de colores ANSI
+#define RESET   "\033[00m"
+#define ROJO    "\033[31m"      // Alertas y errores
+#define VERDE   "\033[32m"      // Éxito y confirmaciones
+#define AMARILLO "\033[33m"     // Advertencias y stock bajo
+#define AZUL    "\033[34m"      // Títulos
+#define CYAN    "\033[36m"      // Info secundaria
+#define NEGRITA "\033[1m"
 
 // STRUCTS
 struct Producto {
@@ -115,7 +126,6 @@ struct ArchivoHeader {
 
 // Inicialización y Liberación
 void inicializarTienda(Tienda* tienda, const char* nombre, const char* rif);
-void liberarTienda(Tienda* tienda);
 bool inicializarArchivo(const char* nombreArchivo);
 bool actualizarHeader(const char* nombreArchivo, ArchivoHeader header);
 
@@ -196,32 +206,19 @@ void inicializarTienda(Tienda* tienda, const char* nombre, const char* rif){
     strncpy(tienda->rif, rif, 19);
     tienda->rif[19] = '\0';
 
-    // Inicializar IDs Autoincrementales
-    tienda->siguienteIdTransaccion = 1;
-    tienda->siguienteIdCliente = 1;
-    tienda->siguienteIdProducto = 1;
-    tienda->siguienteIdProveedor = 1;
 
     bool prod = inicializarArchivo(ARCHIVO_PRODUCTOS);
     bool prov = inicializarArchivo(ARCHIVO_PROVEEDORES);
     bool cliente = inicializarArchivo(ARCHIVO_CLIENTES);
     bool trans = inicializarArchivo(ARCHIVO_TRANSACCIONES);
+    bool backUp = inicializarArchivo(ARCHIVO_BACKUP);
 
-    if (prod && prov && cliente && trans) {
-        cout << "Sistema de archivos inicializado correctamente." << endl;
+    if (prod && prov && cliente && trans && backUp) {
+        cout << VERDE << "Sistema de archivos inicializado correctamente." << endl;
     } else {
-        cout << "Advertencia: Algunos archivos no pudieron inicializarse." << endl;
+        cout << ROJO << "Advertencia: Algunos archivos no pudieron inicializarse." << endl;
     }
-}
-
-// Funcion de Liberación
-void liberarTienda(Tienda* tienda){
-    // Reiniciar IDs Autoincrementales
-    tienda->siguienteIdTransaccion = 0;
-    tienda->siguienteIdCliente = 0;
-    tienda->siguienteIdProducto = 0;
-    tienda->siguienteIdProveedor = 0;
-
+    cout << RESET;
 }
 
 //LOGICA DE OPERACIONES CON ARCHIVOS (CRUD)
@@ -240,7 +237,7 @@ bool inicializarArchivo(const char* nombreArchivo) {
     // Si no existe, lo crea
     ofstream archivo(nombreArchivo, ios::binary);
     if (!archivo.is_open()) {
-        cout << "Error: No se pudo crear el archivo " << nombreArchivo << endl;
+        cout << ROJO << "Error: No se pudo crear el archivo " << nombreArchivo << endl << RESET;
         return false;
     }
 
@@ -276,13 +273,13 @@ bool actualizarHeader(const char* nombreArchivo, ArchivoHeader header) {
     fstream archivo(nombreArchivo, ios::binary | ios::in | ios::out);
     
     if (!archivo.is_open()){
-        cout << "Error: No se pudo abrir el archivo " << nombreArchivo << endl;
+        cout << ROJO << "Error: No se pudo abrir el archivo " << nombreArchivo << endl << RESET;
         return false;
     }
 
-    // Nos posicionamos al byte 0 (principio del archivo)
+    // Se posiciona en el byte 0 (principio del archivo)
     archivo.seekp(0, ios::beg);
-    // Sobrescribimoscon los nuevos datos del header
+    // Sobrescribe los nuevos datos del header
     archivo.write(reinterpret_cast<const char*>(&header), sizeof(ArchivoHeader));
     
     bool resultado = archivo.good();
@@ -296,9 +293,8 @@ template <typename Registro> // Template para tomar cualquier registro (producto
 int buscarPorId(const char* nombreArchivo, int id){
     
     ifstream archivo(nombreArchivo, ios::binary);
-    if (!archivo.is_open())
-    {
-        cout << "Error: No se pudo abrir el archivo" << endl; 
+    if (!archivo.is_open()){
+        cout << ROJO << "Error: No se pudo abrir el archivo " << nombreArchivo << endl << RESET;
         return -1;
     }
 
@@ -362,7 +358,7 @@ bool eliminarRegistroLogico(const char* nombreArchivo, int id){
     }
     fstream archivo(nombreArchivo, ios::binary | ios::in | ios::out);
     if (!archivo.is_open()){
-        cout << "Error: No se pudo abrir el archivo " << nombreArchivo << endl;
+        cout << ROJO << "Error: No se pudo abrir el archivo " << nombreArchivo << endl << RESET;
         return false;
     }
     Registro temp;
@@ -393,7 +389,7 @@ int* buscarRegistroPorNombre(const char* nombreArchivo, const char* consulta, in
 
     ifstream archivo(nombreArchivo, ios::binary);
     if (!archivo.is_open()){
-        cout << "Error abriendo archivo de busqueda." << endl;
+        cout << ROJO << "Error abriendo archivo de busqueda." << endl << RESET;
         return nullptr;
     }
 
@@ -468,9 +464,8 @@ bool guardarNuevoRegistro(const char* nombreArchivo, Registro& nuevoRegistro){
     
     // Abrir el archivo para escritura binaria
     fstream archivo(nombreArchivo, ios::in | ios::out | ios::binary);
-    if (!archivo.is_open())
-    {
-        cout << "Error: no se pudo abrir el archivo " << nombreArchivo << endl; 
+    if (!archivo.is_open()){
+        cout << ROJO << "Error: No se pudo abrir el archivo " << nombreArchivo << endl << RESET;
         return false;
     }
     // Calculo de la posicion de escritura
@@ -480,7 +475,7 @@ bool guardarNuevoRegistro(const char* nombreArchivo, Registro& nuevoRegistro){
     archivo.write(reinterpret_cast<const char*>(&nuevoRegistro), sizeof(Registro));
     
     if (archivo.fail()) {
-    cout << "Error crítico: No se pudo escribir en el archivo." << endl;
+    cout << ROJO << "Error crítico: No se pudo escribir en el archivo." << endl << RESET;
     archivo.close();
     return false;
     }
@@ -2447,7 +2442,7 @@ void verificarIntegridadReferencial(const char* archivoProductos, const char* ar
         }
         archCli.close();
     } else {
-        cout << "Error no se pudo abrir el archivo de Clientes." << endl; 
+        cout << ROJO << "Error no se pudo abrir el archivo de Clientes." << endl; 
     }
 
     // Proveedores -> Validar ID transaccion(Compras) y ID Productos
@@ -2480,8 +2475,8 @@ void verificarIntegridadReferencial(const char* archivoProductos, const char* ar
                 for (int k = 0; k < prov.cantidadProductos; k++) {
                     int idProdBusq = prov.productosIDs[k];
                     if (!existeEntidad<Producto>(archivoProductos, idProdBusq)) {
-                        cout << "[ERROR] Proveedor ID " << prov.id << " ofrece el Producto ID " 
-                             << idProdBusq << " que no existe en el inventario." << endl;
+                        cout << ROJO << "[ERROR] Proveedor ID " << prov.id << " ofrece el Producto ID " 
+                             << idProdBusq << " que no existe en el inventario." << endl << RESET;
                         errores++;
                     }
                 }
@@ -2489,10 +2484,10 @@ void verificarIntegridadReferencial(const char* archivoProductos, const char* ar
         }
         archProv.close();
     } else {
-        cout << "Error: No se pudo abrir el archivo de Proveedores." << endl; 
+        cout << ROJO << "Error: No se pudo abrir el archivo de Proveedores." << endl; 
     }
 
-    cout << "\nREPORTE FINAL: Se encontraron " << errores << " inconsistencias." << endl;
+    cout << AMARILLO << "\nREPORTE FINAL: Se encontraron " << errores << " inconsistencias." << endl;
 }
 
 // --- RESPALDO DE DATOS (BACKUP) ---
@@ -2500,36 +2495,45 @@ void verificarIntegridadReferencial(const char* archivoProductos, const char* ar
 void copiarArchivo(const char* origen, const char* destino) {
     ifstream src(origen, ios::binary);
     if (!src.is_open()) {
-        cout << "Error: no se pudo abrir el archivo." << endl;
+        cout << ROJO << "Error: no se pudo abrir el archivo." << endl;
         return;
     }
     ofstream dst(destino, ios::binary);
     if (!dst.is_open()) {
-        cout << "Error: no se pudo abrir el archivo." << endl;
+        cout << ROJO << "Error: no se pudo abrir el archivo." << endl;
         return;
     }
     dst << src.rdbuf(); // Copia archivos
-    
+    cout << RESET;
     src.close();
     dst.close();
 }
 
-void crearBackup(const char* archivoProductos, const char* archivoProveedores, const char* archivoTransacciones, const char* archivoDetalles, const char* archivoClientes) {
+void crearBackup(const char* archProd, const char* archProv, const char* archTrans, const char* archDet, const char* archCli) {
     char fecha[20];
     obtenerFechaActual(fecha); 
-    
-    // Lista de archivos a respaldar
-    const char* archivos[] = { archivoProductos, archivoProveedores, archivoClientes, archivoTransacciones, archivoDetalles };
-    char nombreDestino[150];
 
-    cout << "\nIniciando respaldo de seguridad..." << endl;
-    for (int i = 0; i < 5; i++) {
-        snprintf(nombreDestino, sizeof(nombreDestino), "%s_BACKUP_%s", fecha, archivos[i]);
-        
-        copiarArchivo(archivos[i], nombreDestino);
-        cout << "[OK] " << archivos[i] << " -> " << nombreDestino << endl;
+    char nombreCarpeta[100];
+    snprintf(nombreCarpeta, sizeof(nombreCarpeta), "BACKUP_%s", fecha);
+
+    if (_mkdir(nombreCarpeta) == 0) {
+        cout << VERDE << "\nCarpeta de respaldo creada: " << nombreCarpeta << RESET << endl;
+    } else {
+        cout << AMARILLO << "\nActualizando respaldo en carpeta: " << nombreCarpeta << RESET << endl;
     }
-    cout << "Respaldo completado." << endl;
+
+    const char* archivos[] = { archProd, archProv, archCli, archTrans, archDet };
+    char rutaDestino[256];
+
+    for (int i = 0; i < 5; i++) {
+        // Construye la ruta interna: "BACKUP_19-03-2026/productos.bin"
+        snprintf(rutaDestino, sizeof(rutaDestino), "%s/%s", nombreCarpeta, archivos[i]);
+        
+        copiarArchivo(archivos[i], rutaDestino);
+        cout << "  " << VERDE << "[OK]" << RESET << " " << archivos[i] << " guardado." << endl;
+    }
+
+    cout << VERDE << NEGRITA << "\n¡Respaldo de seguridad finalizado!" << RESET << endl;
 }
 
 // --- REPORTES ANALÍTICOS ---
@@ -2537,7 +2541,7 @@ void crearBackup(const char* archivoProductos, const char* archivoProveedores, c
 void reporteStockCritico(const char* archivoProductos) {
     ifstream arch(archivoProductos, ios::binary);
     if (!arch.is_open()){ 
-        cout << "Error al abrir el archivo." << endl;
+        cout << ROJO << "Error al abrir el archivo." << endl << RESET;
         return;
     }
 
@@ -2545,20 +2549,45 @@ void reporteStockCritico(const char* archivoProductos) {
     arch.seekg(sizeof(ArchivoHeader), ios::beg);
 
     Producto p;
-    cout << "\n" << setfill('=') << setw(50) << "" << endl;
-    cout << "      ALERTA: PRODUCTOS POR DEBAJO DEL MINIMO" << endl;
-    cout << setfill('=') << setw(50) << "" << setfill(' ') << endl;
-    cout << left << setw(10) << "ID" << setw(20) << "NOMBRE" << setw(10) << "STOCK" << setw(10) << "MINIMO" << endl;
+    imprimirSeparador(60, '=');
+    cout << ROJO << NEGRITA << "      ALERTA: PRODUCTOS POR DEBAJO DEL MINIMO" << endl << RESET;
+    imprimirSeparador(60, '=');
+    cout << CYAN << left 
+        << setw(10) << "ID" 
+        << setw(20) << "NOMBRE" 
+        << setw(10) << "STOCK" 
+        << setw(10) << "MINIMO" << endl << RESET;
     imprimirSeparador(50, '-');
+
+    bool huboAlertas = false;
 
     while (arch.read((char*)&p, sizeof(Producto))) {
         if (!p.eliminado && p.stock <= p.stockMinimo) {
-            cout << left << setw(10) << p.id 
-                 << setw(20) << p.nombre 
-                 << setw(10) << p.stock 
-                 << setw(10) << p.stockMinimo << endl;
+            huboAlertas = true;
+            
+            if (p.stock == 0) {
+                cout << ROJO << NEGRITA; // Rojo brillante si no hay nada
+            } else {
+                cout << AMARILLO; // Amarillo si es solo advertencia
+            }
+
+            cout << left << setw(8) << p.id 
+                 << setw(25) << p.nombre 
+                 << setw(12) << p.stock 
+                 << setw(12) << p.stockMinimo;
+            
+            if (p.stock == 0) {
+                cout << " [AGOTADO]";
+            }
+            
+            cout << RESET << endl;
         }
     }
+
+    if (!huboAlertas) {
+        cout << VERDE << "No hay productos en estado crítico. ¡Todo en orden!" << RESET << endl;
+    }
+    imprimirSeparador();
     arch.close();
 }
 
@@ -2568,19 +2597,19 @@ void historialCliente(const char* archivoClientes, const char* archivoTransaccio
 
     int indClient = buscarPorId<Cliente>(archivoClientes, idBusq);
     if (indClient == -1) {
-        cout << "Error: El cliente no existe." << endl;
+        cout << ROJO << "Error: El cliente no existe." << endl << RESET;
         return;
     }
     
     Cliente client = obtenerRegistroPorIndice<Cliente>(archivoClientes, indClient);
     
     imprimirSeparador(60, '=');
-    cout << "\n--- HISTORIAL DEL CLIENTE " << client.nombre << " ---" << endl;
-    cout << "Cedula/RIF: " << client.cedula << " | Total Compras: $" << client.totalCompras << endl;
+    cout << AZUL << "\n--- HISTORIAL DEL CLIENTE " << client.nombre << " ---" << endl << RESET;
+    cout << CYAN << "Cedula/RIF: " << client.cedula << " | Total Compras: $" << client.totalCompras << endl << RESET;
     imprimirSeparador(60, '-');
 
     if (client.cantidadTransacciones == 0) {
-        cout << "No registra movimientos financieros." << endl;
+        cout << AMARILLO << "No registra movimientos financieros." << endl << RESET;
         return;
     }
 
@@ -2591,11 +2620,11 @@ void historialCliente(const char* archivoClientes, const char* archivoTransaccio
         if (indTrans != -1) {
             Transaccion trans = obtenerRegistroPorIndice<Transaccion>(archivoTransacciones, indTrans);
             if (!trans.eliminado) {
-                cout << "\n Transaccion ID " << trans.id << " | Fecha: " << trans.fechaRegistro << " | Total: $" << trans.total << endl;
+                cout << CYAN << "\n Transaccion ID " << trans.id << " | Fecha: " << trans.fechaRegistro << " | Total: $" << trans.total << endl << RESET;
                 encabezadoDetalleTransaccion();
                 mostrarDetalleTransaccion(archivoDetalles, archivoProductos, trans);
             } else {
-                cout << "\n Transaccion ID" << trans.id << " [ANULADA]" << endl;
+                cout << CYAN << "\n Transaccion ID" << trans.id << " [ANULADA]" << endl << RESET;
             }
         }
     }
@@ -2613,7 +2642,7 @@ void guardarDetalle(const char* archivoDetalles, int idTransaccion, const Detall
         archivo.write(reinterpret_cast<const char*>(&nuevoDetalle), sizeof(DetalleTransaccion));
         archivo.close();
     } else {
-        cout << "Error critico: No se guardaron los detalles en el archivo." << endl;
+        cout << ROJO << "Error critico: No se guardaron los detalles en el archivo." << endl << RESET;
     }
 }
 
@@ -2714,7 +2743,7 @@ bool idTieneTransacciones(const char* archivoTransacciones, int idRelacionado){
     }
     ifstream archivo(archivoTransacciones, ios::binary);
     if (!archivo.is_open()){
-        cout << "Error: No se pudo abrir el archivo." << endl;
+        cout << ROJO << "Error: No se pudo abrir el archivo." << endl<< RESET;
         return false;
     }
     archivo.seekg(sizeof(ArchivoHeader), ios::beg);
@@ -2737,7 +2766,7 @@ bool idTieneTransacciones(const char* archivoTransacciones, int idRelacionado){
 bool codigoDuplicado(const char* nombreArchivo, const char* codigo){
     ifstream archivo(nombreArchivo, ios::binary);
     if (!archivo.is_open()){
-        cout << "Error: No se pudo abrir el archivo " << nombreArchivo << endl;
+        cout << ROJO << "Error: No se pudo abrir el archivo " << nombreArchivo << endl<< RESET;
         return false;
     }
     ArchivoHeader header = leerHeader(nombreArchivo);
@@ -2761,7 +2790,7 @@ bool codigoDuplicado(const char* nombreArchivo, const char* codigo){
 bool rifDuplicado(const char* nombreArchivo, const char* rif){
     ifstream archivo(nombreArchivo, ios::binary);
     if (!archivo.is_open()){
-        cout << "Error: No se pudo abrir el archivo " << nombreArchivo << endl;
+        cout << ROJO << "Error: No se pudo abrir el archivo " << nombreArchivo << endl<< RESET;
         return false;
     }
     ArchivoHeader header = leerHeader(nombreArchivo);
@@ -2789,7 +2818,7 @@ bool rifDuplicado(const char* nombreArchivo, const char* rif){
 bool cedulaDuplicada(const char* nombreArchivo, const char* cedula){
     ifstream archivo(nombreArchivo, ios::binary);
     if (!archivo.is_open()){
-        cout << "Error: No se pudo abrir el archivo " << nombreArchivo << endl;
+        cout << ROJO << "Error: No se pudo abrir el archivo " << nombreArchivo << endl << RESET;
         return false;
     }
     ArchivoHeader header = leerHeader(nombreArchivo);
@@ -2824,7 +2853,7 @@ int* buscarProductoPorCodigo(const char* nombreArchivo, const char* consulta, in
 
     ifstream archivo(nombreArchivo, ios::binary);
     if (!archivo.is_open()){
-        cout << "Error abriendo archivo de busqueda." << endl;
+        cout << ROJO << "Error abriendo archivo de busqueda." << endl << RESET;
         return nullptr;
     }
 
@@ -2870,7 +2899,7 @@ int buscarProveedorPorRif(const char* nombreArchivo, const char* rif){
     ArchivoHeader header = leerHeader(nombreArchivo);
     ifstream archivo(nombreArchivo, ios::binary);
     if (!archivo.is_open()){
-        cout << "Error abriendo archivo de busqueda." << endl;
+        cout << ROJO << "Error abriendo archivo de busqueda." << endl << RESET;
         return -1;
     }
     
@@ -2893,7 +2922,7 @@ int buscarClientePorCedula(const char* nombreArchivo, const char* cedula){
     ArchivoHeader header = leerHeader(nombreArchivo);
     ifstream archivo(nombreArchivo, ios::binary);
     if (!archivo.is_open()){
-        cout << "Error abriendo archivo de busqueda." << endl;
+        cout << ROJO << "Error abriendo archivo de busqueda." << endl << RESET;
         return -1;
     }
     
@@ -2955,39 +2984,39 @@ bool contieneSubstring(const char* texto, const char* busqueda){
 }
 
 void mostrarLineaDetalle(const Transaccion& t, const char* nombreProd, int idProducto, int cantidad, float total) {
-    cout << left << setw(10) << t.id 
+    cout << CYAN << left << setw(10) << t.id 
          << setw(12) << t.fechaRegistro
          << setw(6)  << t.tipo           // COMPRA O VENTA
          << setw(10) << t.idRelacionado    // ID de Cliente o Proveedor
          << setw(20) << (strlen(nombreProd) > 19 ? string(nombreProd).substr(0, 17) + ".." : nombreProd) 
          << setw(8)  << cantidad
          << "$" << fixed << setprecision(2) << setw(11) << total << endl
-         << setw(15) << t.fechaUltimaModificacion << endl; 
+         << setw(15) << t.fechaUltimaModificacion << endl << RESET; 
 }
 
 void mostrarDetalleGeneralTransaccion(const Transaccion &trans){
 
-    cout << left 
+    cout << CYAN << left 
          << setw(6)  << trans.id 
          << setw(12) << trans.fechaRegistro
          << setw(10) << (strcmp(trans.tipo, "VENTA") == 0 || strcmp(trans.tipo, "VENTA") == 0 ? "VENTA" : "COMPRA")
          << setw(10) << trans.idRelacionado 
          << setw(30) << (strlen(trans.descripcion) > 27 ? string(trans.descripcion).substr(0, 27) + "..." : trans.descripcion)
-         << "$" << fixed << setprecision(2) << setw(11) << trans.total << endl;
+         << "$" << fixed << setprecision(2) << setw(11) << trans.total << endl<< RESET;
 }
 
 void mostrarDetalleProducto(const Producto& producto, const char* archivoProveedores) {
     
     Proveedor prov = obtenerRegistroPorId<Proveedor>(archivoProveedores, producto.idProveedor);
     
-    cout << left 
+    cout << CYAN << left 
          << setw(10) << producto.id
          << setw(15) << producto.codigo
          << setw(20) << producto.nombre
          << setw(20) << producto.descripcion
          << setw(10) << producto.stock;
          if (producto.stock <= producto.stockMinimo) {
-            cout << setw(12) << " [¡CRITICO!]"; 
+            cout << ROJO << setw(12) << " [¡CRITICO!]"; 
         } else {
             cout << setw(12) << " ";
         } cout
@@ -2996,38 +3025,38 @@ void mostrarDetalleProducto(const Producto& producto, const char* archivoProveed
          << setw(20) << prov.nombre
          << setw(12) << producto.idProveedor
          << setw(20) << prov.nombre
-         << setw(15) << producto.fechaRegistro << endl;
+         << setw(15) << producto.fechaRegistro << endl << RESET;
          
 }
 
 void mostrarDetalleProveedor(const Proveedor& proveedor) {
    
-    cout << left 
+    cout << CYAN << left 
          << setw(8)  << proveedor.id
          << setw(15) << proveedor.rif
          << setw(20) << proveedor.nombre
          << setw(20) << proveedor.telefono
          << setw(20) << fixed << setprecision(2) << proveedor.direccion
          << setw(20) << proveedor.email
-         << setw(15) << proveedor.fechaRegistro << endl;
+         << setw(15) << proveedor.fechaRegistro << endl << RESET;
 }
 
 void mostrarDetalleCliente(const Cliente& cliente) {
    
-    cout << left 
+    cout << CYAN << left 
          << setw(8)  << cliente.id
          << setw(15) << cliente.cedula
          << setw(20) << cliente.nombre
          << setw(20) << cliente.telefono
          << setw(20) << fixed << setprecision(2) << cliente.direccion
          << setw(20) << cliente.email
-         << setw(15) << cliente.fechaRegistro << endl;
+         << setw(15) << cliente.fechaRegistro << endl << RESET;
 }
 
 void encabezadoDetalleTransaccion() {
     cout << endl;
     imprimirSeparador();
-    cout << left 
+    cout << AZUL << left 
          << setw(10) << "ID TRANS" 
          << setw(12) << "FECHA T."
          << setw(6)  << "TIPO" 
@@ -3035,20 +3064,20 @@ void encabezadoDetalleTransaccion() {
          << setw(20) << "PRODUCTO"
          << setw(8)  << "CANT."
          << setw(12) << "TOTAL" 
-         << setw(15) << "ULT. MODIF." << endl;
+         << setw(15) << "ULT. MODIF." << endl << RESET;
     imprimirSeparador();
 }
 
 void encabezadoTransacciones(){
     cout << endl;
     imprimirSeparador();
-    cout << left 
+    cout << AZUL << left 
          << setw(6)  << "ID" 
          << setw(12) << "FECHA" 
          << setw(10) << "TIPO" 
          << setw(10) << "ENTIDAD" 
          << setw(30) << "DESCRIPCION" 
-         << setw(12) << "TOTAL" << endl;
+         << setw(12) << "TOTAL" << endl << RESET;
          imprimirSeparador();
 }
 
@@ -3056,14 +3085,14 @@ void encabezadoProveedorCliente(){
     cout << endl;
     imprimirSeparador();
 
-    cout << left 
+    cout << AZUL << left 
          << setw(8) << "ID" 
          << setw(15) << "C.I/RIF" 
          << setw(20) << "NOMBRE"
          << setw(20) << "TLF" 
          << setw(20) << "DIRECCION" 
          << setw(20) << "EMAIL"
-         << setw(15) << "F.REGISTRO"<< endl;
+         << setw(15) << "F.REGISTRO"<< endl << RESET;
 
     imprimirSeparador();
 }
@@ -3073,7 +3102,7 @@ void encabezadoProductos() {
     cout << endl;
     imprimirSeparador();
     
-    cout << left 
+    cout << AZUL << left 
          << setw(10)  << "ID PROD" 
          << setw(15) << "CODIGO" 
          << setw(20) << "NOMBRE" 
@@ -3083,18 +3112,18 @@ void encabezadoProductos() {
          << setw(12) << "PRECIO" 
          << setw(12) << "ID PROV." 
          << setw(20) << "PROVEEDOR"
-         << setw(15) << "F.REGISTRO" << endl; 
+         << setw(15) << "F.REGISTRO" << endl << RESET; 
          
     imprimirSeparador();
 }
 
 void imprimirSeparador(int ancho, char simbolo){
-    cout << setfill(simbolo) << setw(ancho) << "" << setfill(' ') << endl;
+    cout << NEGRITA << setfill(simbolo) << setw(ancho) << "" << setfill(' ') << endl << RESET;
 }
 
 bool floatesPositivo(float valor){
     if (valor <= 0){
-        cout << "Error: El valor debe ser mayor a cero." << endl;
+        cout << ROJO << "Error: El valor debe ser mayor a cero." << endl << RESET;
         return false;
     }
     return true;
@@ -3102,7 +3131,7 @@ bool floatesPositivo(float valor){
 
 bool intesPositivo(int valor){
     if (valor <= 0){
-        cout << "Error: El valor debe ser mayor a cero." << endl;
+        cout << ROJO << "Error: El valor debe ser mayor a cero." << endl << RESET;
         return false;
     }
     return true;
@@ -3142,7 +3171,7 @@ bool solicitarEntero(const char* prompt, int& valor) {
         valor = stoi(entrada);
         return true;
     } catch (...) {
-        cout << "Error: Debe ingresar un numero valido." << endl;
+        cout << ROJO << "Error: Debe ingresar un numero valido." << endl << RESET;
         return false; // 
     }
 }
@@ -3158,7 +3187,7 @@ bool solicitarFloat(const char* prompt, float& valor) {
         valor = stof(entrada);
         return true;
     } catch (...) {
-        cout << "Error: Numero decimal invalido." << endl;
+        cout << ROJO << "Error: Numero decimal invalido." << endl << RESET;
         return false;
     }
 }
@@ -3172,15 +3201,17 @@ int main(){
     do {
         system("cls");
         imprimirSeparador(60,'=');
-        cout << "             SISTEMA DE GESTION DE INVENTARIO" << endl
-         << "               Tienda: " << Negocio->nombre << endl;
+        cout << AZUL << "             SISTEMA DE GESTION DE INVENTARIO" << endl
+         << AZUL << "               Tienda: " << Negocio->nombre << endl << RESET;
         imprimirSeparador(60,'=');
-
-        cout << "1. Gestión de Productos" << endl
+        
+        cout << CYAN 
+             << "1. Gestión de Productos" << endl
              << "2. Gestión de Proveedores" << endl
              << "3. Gestión de Clientes" << endl
              << "4. Gestión de Transacciones" << endl
-             << "5. Salir" << endl;
+             << "5. Gestión de Reportes y Seguridad" << endl
+             << "6. Salir" << endl << RESET;
         while (!solicitarEntero("Seleccione una opción", op)){
             cout << endl;
         }
@@ -3196,15 +3227,16 @@ int main(){
             int opProd;
             do {
                 imprimirSeparador(60,'=');
-                cout << "             SISTEMA DE GESTION DE PRODUCTOS" << endl;
+                cout << AZUL << "             SISTEMA DE GESTION DE PRODUCTOS" << endl << RESET;
                 imprimirSeparador(60,'=');
-                cout<< "1. Registrar nuevo Productos" << endl
+                cout << CYAN
+                    << "1. Registrar nuevo Productos" << endl
                     << "2. Buscar Producto" << endl
                     << "3. Actualizar Producto" << endl
                     << "4. Actualizar Stock manualmente" << endl
                     << "5. Listar todos los Productos" << endl
                     << "6. Eliminar Producto" << endl
-                    << "0. Volver al menu principal" << endl;
+                    << "0. Volver al menu principal" << endl << RESET;
                 if (!solicitarEntero("Seleccione una opción", opProd)){
                     break;
                 }
@@ -3243,7 +3275,7 @@ int main(){
                         break;
                     }
                     default:
-                        cout << "Opción Invalida.";
+                        cout << ROJO << "Opción Invalida." << endl << RESET;
                         break;
                 }
             } while (opProd != 0);
@@ -3255,14 +3287,15 @@ int main(){
                 int opProv;
                 do {
                     imprimirSeparador(60,'=');
-                    cout << "             SISTEMA DE GESTION DE PROVEEDORES" << endl;
+                    cout << AZUL << "             SISTEMA DE GESTION DE PROVEEDORES" << endl << RESET;
                     imprimirSeparador(60,'=');
-                    cout << "1. Registrar nuevo Proveedor" << endl
+                    cout << CYAN  
+                        << "1. Registrar nuevo Proveedor" << endl
                         << "2. Buscar Proveedor" << endl
                         << "3. Actualizar Proveedor" << endl
                         << "4. Listar todos los Proveedores" << endl
                         << "5. Eliminar Proveedor" << endl
-                        << "0. Volver al menu principal" << endl;
+                        << "0. Volver al menu principal" << endl << RESET;
                     if (!solicitarEntero("Seleccione una opción", opProv)){
                         break;
                     }
@@ -3297,7 +3330,7 @@ int main(){
                             break;
                         }
                         default:
-                            cout << "Opción Invalida.";
+                            cout << ROJO << "Opción Invalida." << RESET;
                             break;
                     }
                 } while (opProv != 0);
@@ -3309,14 +3342,15 @@ int main(){
                 int opCliente;
                 do {
                     imprimirSeparador(60,'=');
-                    cout << "             SISTEMA DE GESTION DE CLIENTES" << endl;
+                    cout << AZUL << "             SISTEMA DE GESTION DE CLIENTES" << endl << RESET;
                     imprimirSeparador(60,'=');  
-                    cout << "1. Registrar nuevo Cliente" << endl
+                    cout << CYAN 
+                        << "1. Registrar nuevo Cliente" << endl
                         << "2. Buscar Cliente" << endl
                         << "3. Actualizar Cliente" << endl
                         << "4. Listar todos los Cliente" << endl
                         << "5. Eliminar Cliente" << endl
-                        << "0. Volver al menu principal" << endl;
+                        << "0. Volver al menu principal" << endl << RESET;
                     if (!solicitarEntero("Seleccione una opción", opCliente)){
                         break;
                     }
@@ -3352,7 +3386,7 @@ int main(){
                             break;
                         }
                         default:
-                            cout << "Opción Invalida.";
+                            cout << ROJO << "Opción Invalida." << endl << RESET;
                             break;
                     }
                 } while (opCliente != 0);
@@ -3364,14 +3398,15 @@ int main(){
                 int opTrans;
                 do {
                     imprimirSeparador(60,'=');
-                    cout << "             SISTEMA DE GESTION DE TRANSACCIONES" << endl;
+                    cout << AZUL << "             SISTEMA DE GESTION DE TRANSACCIONES" << endl << RESET;
                     imprimirSeparador(60,'=');
-                    cout << "1. Registrar Compra a Proveedor" << endl
+                    cout << CYAN
+                        << "1. Registrar Compra a Proveedor" << endl
                         << "2. Registrar Venta a Cliente" << endl
                         << "3. Buscar Transacciones" << endl
                         << "4. Listar Transacciones" << endl
                         << "5. Cancelar Transacción" << endl
-                        << "0. Volver al menu principal" << endl;
+                        << "0. Volver al menu principal" << endl << RESET;
                     if (!solicitarEntero("Seleccione una opción", opTrans)){
                         break;
                     }
@@ -3407,23 +3442,72 @@ int main(){
                         break;
                     }
                     default:
-                        cout << "Opción Invalida.";
+                        cout << ROJO << "Opción Invalida." << endl << RESET;
                         break;
                     }
                 } while (opTrans != 0);
                 break;
             }
-            case 5: { // Salir
+            case 5: { 
+                int opRep;
+                do {
+                    imprimirSeparador(60, '=');
+                    cout << AZUL << "             SISTEMA DE GESTION DE REPORTES Y SEGURIDAD" << endl << RESET;
+                    imprimirSeparador(60, '=');
+                    cout << CYAN
+                     << "1. Diagnostico de Intergridad y Referencial" << endl
+                     << "2. Reporte de Stock Minimo" << endl
+                     << "3. Crear respaldo (BACKUP) de los archivos de inventario" << endl
+                     << "4. Estadisticas de ventas totales por Cliente" << endl 
+                     << "0. Volver al menu principal"<< endl << RESET;
+                    if (!solicitarEntero("Seleccione una opción", opRep)){
+                    break;
+                    }
+                    imprimirSeparador(60, '=');
+                    if (!intesPositivo(opRep)){
+                        break;
+                    }
+
+                    switch (opRep)
+                    {
+                    case 1:{ // Diagnostico de Intergridad y Referencial
+                        verificarIntegridadReferencial(ARCHIVO_PRODUCTOS, ARCHIVO_TRANSACCIONES, ARCHIVO_DETALLES, ARCHIVO_PROVEEDORES, ARCHIVO_CLIENTES);
+                        break;
+                    }
+                    case 2:{ // Reporte de Stock Minimo
+                        reporteStockCritico(ARCHIVO_PRODUCTOS);
+                        break;
+                    }
+                    case 3:{ // Crear respaldo (BACKUP)
+                        crearBackup(ARCHIVO_PRODUCTOS, ARCHIVO_PROVEEDORES, ARCHIVO_TRANSACCIONES, ARCHIVO_DETALLES, ARCHIVO_CLIENTES);
+                        break;
+                    }
+                    case 4:{ // Ventas totales por Cliente
+                        historialCliente(ARCHIVO_CLIENTES, ARCHIVO_TRANSACCIONES, ARCHIVO_DETALLES, ARCHIVO_PRODUCTOS);                      
+                        break;
+                    }
+                    case 0:{ // Volver al menu principal
+                        cout << "Volviendo al menú principal...";
+                        break;
+                    }
+                    default:
+                        cout << ROJO << "Opción Invalida." << endl << RESET;
+                        break;
+                    }
+
+                } while (opRep != 0);
+                break;
+            }
+            case 6:{ // Salir
                 cout << "Saliendo del programa...";
                 break;
             }
             default:
-                cout << "Opción Invalida.";
+                cout << ROJO << "Opción Invalida." << endl << RESET;
                 break;
             }
-    } while (op != 5);
+    } while (op != 6);
 
-    liberarTienda(Negocio);
     delete Negocio;
     Negocio = nullptr;
 
