@@ -88,16 +88,16 @@ Durante el desarrollo de este proyecto, se fortalecieron conceptos de:
 ## Captions
 
 **Dashboard del Sistema - Interfaz de Navegación Principal**
-![Interfaz de Navegación Principal](image.png)
+![Interfaz de Navegación Principal](captions/image.png)
 
 
 **Submenus**
 
-![](image-3.png)
+![Submenus](captions/image-1.png)
 
 **Registros**
-![Registro de Proveedor](image-2.png)
-![Registro de producto](image-4.png)
-![Registro Cliente](image-5.png)
-![Registro de compra](image-6.png)
-![Registro de Venta](image-7.png)
+![Registro de Proveedor](captions/image-2.png)
+![Registro de producto](captions/image-4.png)
+![Registro Cliente](captions/image-5.png)
+![Registro de compra](captions/image-6.png)
+![Registro de Venta](captions/image-7.png)
