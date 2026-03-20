@@ -2084,7 +2084,6 @@ void buscarTransacciones(const char* archivoTransacciones, const char* archivoDe
                 mostrarDetalleGeneralTransaccion(trans);
                 
                 cout << endl << AZUL << NEGRITA << "DETALLE DE ARTICULOS:" << endl << RESET;
-                encabezadoDetalleTransaccion();
 	            mostrarDetalleTransaccion(archivoDetalles, archivoProductos, trans);
                 imprimirSeparador();
             } else {
@@ -2333,7 +2332,6 @@ void cancelarTransaccion(const char* archivoTransacciones, const char* archivoDe
     }
     
     cout << endl << AZUL << NEGRITA << "DATOS DE LA TRANSACCIÓN A ANULAR:" << endl << RESET;
-    encabezadoDetalleTransaccion();
     mostrarDetalleTransaccion(archivoDetalles, archivoProductos, trans);
     imprimirSeparador();
 
@@ -2638,7 +2636,6 @@ void historialCliente(const char* archivoClientes, const char* archivoTransaccio
             Transaccion trans = obtenerRegistroPorIndice<Transaccion>(archivoTransacciones, indTrans);
             if (!trans.eliminado) {
                 cout << CYAN << "\n Transacción ID " << trans.id << " | Fecha: " << trans.fechaRegistro << " | Total: $" << trans.total << endl << RESET;
-                encabezadoDetalleTransaccion();
                 mostrarDetalleTransaccion(archivoDetalles, archivoProductos, trans);
             } else {
                 cout << AMARILLO << "\n Transacción ID" << trans.id << " [ANULADA]" << endl << RESET;
@@ -3000,6 +2997,14 @@ bool contieneSubstring(const char* texto, const char* busqueda){
     return false; // Retorna False si no hubo coincidencias
 }
 
+string truncarTexto(string texto, int limite) {
+    if (texto.length() > limite) {
+        // Corta el texto y deja espacio para los 3 puntos
+        return texto.substr(0, limite - 3) + "...";
+    }
+    return texto;
+}
+
 void mostrarLineaDetalle(const Transaccion& t, const char* nombreProd, int idProducto, int cantidad, float total) {
     cout << CYAN << left << setw(10) << t.id 
          << setw(12) << t.fechaRegistro
@@ -3007,18 +3012,20 @@ void mostrarLineaDetalle(const Transaccion& t, const char* nombreProd, int idPro
          << setw(10) << t.idRelacionado    // ID de Cliente o Proveedor
          << setw(20) << (strlen(nombreProd) > 19 ? string(nombreProd).substr(0, 17) + ".." : nombreProd) 
          << setw(8)  << cantidad
-         << "$" << fixed << setprecision(2) << setw(11) << total << endl
+         << "$" << fixed << setprecision(2) << setw(11) << total
          << setw(15) << t.fechaUltimaModificacion << endl << RESET; 
 }
 
 void mostrarDetalleGeneralTransaccion(const Transaccion &trans){
-
+    
+    string descCorta = truncarTexto(trans.descripcion, 30);
+    
     cout << CYAN << left 
          << setw(6)  << trans.id 
          << setw(12) << trans.fechaRegistro
          << setw(10) << (strcmp(trans.tipo, "VENTA") == 0 || strcmp(trans.tipo, "VENTA") == 0 ? "VENTA" : "COMPRA")
          << setw(10) << trans.idRelacionado 
-         << setw(30) << (strlen(trans.descripcion) > 27 ? string(trans.descripcion).substr(0, 27) + "..." : trans.descripcion)
+         << setw(35) << descCorta
          << "$" << fixed << setprecision(2) << setw(11) << trans.total 
          << setw(15) << trans.fechaUltimaModificacion << endl << RESET;
 }
@@ -3027,20 +3034,23 @@ void mostrarDetalleProducto(const Producto& producto, const char* archivoProveed
     
     Proveedor prov = obtenerRegistroPorId<Proveedor>(archivoProveedores, producto.idProveedor);
     
+    string descCorta = truncarTexto(producto.descripcion, 30);
+    string provCorto = truncarTexto(prov.nombre, 20);
+
     cout << CYAN << left 
-         << setw(10) << producto.id
+         << setw(8) << producto.id
          << setw(15) << producto.codigo
          << setw(20) << producto.nombre
-         << setw(20) << producto.descripcion
-         << setw(10) << producto.stock;
+         << setw(30) << descCorta
+         << setw(8) << producto.stock;
          if (producto.stock <= producto.stockMinimo) {
             cout << ROJO << setw(15) << " [¡CRITICO!]"; 
         } else {
             cout << setw(15) << " ";
         } cout
          << setw(12) << fixed << setprecision(2) << producto.precio
-         << setw(12) << producto.idProveedor
-         << setw(20) << prov.nombre
+         << setw(10) << producto.idProveedor
+         << setw(20) << provCorto
          << setw(15) << producto.fechaRegistro 
          << setw(15) << producto.fechaUltimaModificacion << endl << RESET;
          
@@ -3048,26 +3058,31 @@ void mostrarDetalleProducto(const Producto& producto, const char* archivoProveed
 
 void mostrarDetalleProveedor(const Proveedor& proveedor) {
    
+    string nomCorto = truncarTexto(proveedor.nombre, 20);
+    string dirCorto = truncarTexto(proveedor.direccion, 20);
+
     cout << CYAN << left 
          << setw(8)  << proveedor.id
          << setw(15) << proveedor.rif
-         << setw(20) << proveedor.nombre
+         << setw(20) << nomCorto
          << setw(20) << proveedor.telefono
-         << setw(20) << fixed << setprecision(2) << proveedor.direccion
-         << setw(20) << proveedor.email
+         << setw(25) << fixed << setprecision(2) << dirCorto
+         << setw(30) << proveedor.email
          << setw(15) << proveedor.fechaRegistro 
          << setw(15) << proveedor.fechaUltimaModificacion << endl << RESET;
 }
 
 void mostrarDetalleCliente(const Cliente& cliente) {
-   
+
+    string dirCorto = truncarTexto(cliente.direccion, 20);
+
     cout << CYAN << left 
          << setw(8)  << cliente.id
          << setw(15) << cliente.cedula
          << setw(20) << cliente.nombre
          << setw(20) << cliente.telefono
-         << setw(20) << fixed << setprecision(2) << cliente.direccion
-         << setw(20) << cliente.email
+         << setw(25) << fixed << setprecision(2) << dirCorto
+         << setw(30) << cliente.email
          << setw(15) << cliente.fechaRegistro 
          << setw(15) << cliente.fechaUltimaModificacion << endl << RESET;
 }
@@ -3077,12 +3092,13 @@ void encabezadoDetalleTransaccion() {
     imprimirSeparador();
     cout << AZUL << NEGRITA << left 
          << setw(10) << "ID TRANS" 
-         << setw(12) << "FECHA T."
+         << setw(12) << "F.REGISTRO"
          << setw(6)  << "TIPO" 
          << setw(10) << "ENTIDAD" 
          << setw(20) << "PRODUCTO"
          << setw(8)  << "CANT."
-         << setw(12) << "TOTAL" << endl << RESET;
+         << setw(12) << "TOTAL" 
+         << setw(12) << "F.MODIF" << endl << RESET;
     imprimirSeparador();
 }
 
@@ -3094,7 +3110,7 @@ void encabezadoTransacciones(){
          << setw(12) << "FECHA" 
          << setw(10) << "TIPO" 
          << setw(10) << "ENTIDAD" 
-         << setw(30) << "DESCRIPCION" 
+         << setw(35) << "DESCRIPCION" 
          << setw(12) << "TOTAL" 
          << setw(15) << "ULT. MODIF." << endl << RESET;
          imprimirSeparador();
@@ -3109,8 +3125,8 @@ void encabezadoProveedorCliente(){
          << setw(15) << "C.I/RIF" 
          << setw(20) << "NOMBRE"
          << setw(20) << "TLF" 
-         << setw(20) << "DIRECCION" 
-         << setw(20) << "EMAIL"
+         << setw(25) << "DIRECCION" 
+         << setw(30) << "EMAIL"
          << setw(15) << "F.REGISTRO"
          << setw(15) << "ULT. MODIF." << endl << RESET;
 
@@ -3123,17 +3139,17 @@ void encabezadoProductos() {
     imprimirSeparador();
     
     cout << AZUL << NEGRITA << left 
-         << setw(10)  << "ID PROD" 
+         << setw(8)  << "ID PROD" 
          << setw(15) << "CODIGO" 
          << setw(20) << "NOMBRE" 
-         << setw(20) << "DESCRIPCION"
-         << setw(10) << "STOCK"
+         << setw(30) << "DESCRIPCION"
+         << setw(8) << "STOCK"
          << setw(15) << "ESTADO" 
          << setw(12) << "PRECIO" 
-         << setw(12) << "ID PROV." 
+         << setw(10) << "ID PROV." 
          << setw(20) << "PROVEEDOR"
          << setw(15) << "F.REGISTRO" 
-         << setw(15) << "ULT. MODIF." << endl << RESET; 
+         << setw(15) << "ULT. MODIF" << endl << RESET; 
          
     imprimirSeparador();
 }
