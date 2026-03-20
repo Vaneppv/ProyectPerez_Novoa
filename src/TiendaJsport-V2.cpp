@@ -2036,7 +2036,7 @@ void registrarVenta(const char* archivoTransacciones, const char* archivoDetalle
             }
             actualizarRegistro<Cliente>(archivoClientes, indCliente, client);
 
-            cout << VERDE << NEGRITA << endl << "Venta registrada con éxito! ID Ticket" << trans.id << endl << RESET;
+            cout << VERDE << NEGRITA << endl << "Venta registrada con éxito! ID Ticket " << trans.id << endl << RESET;
         } else {
             cout << endl << ROJO << "Venta cancelada." << endl << RESET;
         }
@@ -3270,7 +3270,7 @@ int main(){
                 cout << AZUL << NEGRITA << "             SISTEMA DE GESTIÓN DE PRODUCTOS" << endl << RESET;
                 imprimirSeparador(60,'=');
                 cout << CYAN
-                    << "1. Registrar nuevo Productos" << endl
+                    << "1. Registrar nuevo Producto" << endl
                     << "2. Buscar Producto" << endl
                     << "3. Actualizar Producto" << endl
                     << "4. Actualizar Stock manualmente" << endl
