@@ -1,0 +1,69 @@
+# Makefile para Módulo de Productos - Tienda JSPORT v2.0
+# Compilador: g++ (C++17)
+
+# Variables de configuración
+CXX = g++
+CXXFLAGS = -std=c++17 -Wall -Wextra -O2
+TARGET = TiendaJSPORT_Productos
+SRCDIR = src
+INCDIR = include
+OBJDIR = obj
+BINDIR = bin
+
+# Directorios de archivos
+INCLUDES = -I$(INCDIR)
+
+# Archivos fuente para el módulo de productos
+SOURCES = $(SRCDIR)/main_productos.cpp \
+          $(SRCDIR)/producto.cpp \
+          $(SRCDIR)/productomanager.cpp
+
+# Archivos objeto
+OBJECTS = $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+
+# Regla principal
+all: directories $(TARGET)
+
+# Crear directorios necesarios
+directories:
+	@mkdir -p $(OBJDIR) $(BINDIR)
+
+# Compilar el ejecutable
+$(TARGET): $(OBJECTS)
+	@echo "Enlazando $(TARGET)..."
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(BINDIR)/$(TARGET) $(OBJECTS)
+	@echo "¡Compilación exitosa! Ejecutable creado en $(BINDIR)/$(TARGET)"
+
+# Compilar archivos objeto
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	@echo "Compilando $<..."
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+
+# Ejecutar el programa
+run: all
+	@echo "Ejecutando $(TARGET)..."
+	./$(BINDIR)/$(TARGET)
+
+# Limpiar archivos compilados
+clean:
+	@echo "Limpiando archivos compilados..."
+	rm -rf $(OBJDIR) $(BINDIR)
+	rm -f *.o *.exe productos.bin proveedores.bin
+
+# Compilar en modo debug
+debug: CXXFLAGS += -g -DDEBUG
+debug: clean all
+
+# Regla de ayuda
+help:
+	@echo "Uso: make [OPCIÓN]"
+	@echo ""
+	@echo "Opciones disponibles:"
+	@echo "  all       - Compila el módulo de productos (por defecto)"
+	@echo "  run       - Compila y ejecuta el programa"
+	@echo "  debug     - Compila en modo debug"
+	@echo "  clean     - Elimina todos los archivos compilados"
+	@echo "  help      - Muestra esta ayuda"
+
+# Declarar que las reglas no son archivos
+.PHONY: all directories run clean debug help
