@@ -5,7 +5,7 @@
 #include "../utilidades/Formatos.hpp"
 #include <iostream>
 
-// Función auxiliar para verificar si un producto tiene transacciones asociadas
+// Función auxiliar
 bool productoTieneTransacciones(int idProducto) {
     // Buscar en archivo de detalles de transacciones
     ArchivoHeader headerDetalles = GestorArchivos::leerHeader(ARCHIVO_DETALLES);
