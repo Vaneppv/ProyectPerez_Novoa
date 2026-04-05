@@ -51,9 +51,9 @@ public:
     template<typename T>
     static int* buscarRegistroPorNombre(const char* nombreArchivo, const char* consulta, int* numResultados);
     
-    // Operaciones específicas para detalles de transacciones
-    static bool guardarDetalle(const char* archivoDetalles, int idTransaccion, const DetalleTransaccion& detalle);
-    static void mostrarDetalleTransaccion(const char* archivoDetalles, const char* archivoProductos, const Transaccion& t);
+    // Operaciones específicas para detalles de transacciones (TODO: Implementar cuando existan las clases)
+    // static bool guardarDetalle(const char* archivoDetalles, int idTransaccion, const DetalleTransaccion& detalle);
+    // static void mostrarDetalleTransaccion(const char* archivoDetalles, const char* archivoProductos, const Transaccion& t);
     
     // Utilidades
     template<typename T>

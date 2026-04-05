@@ -3,11 +3,17 @@
 #include "../persistencia/Constantes.hpp"
 #include "../utilidades/Validaciones.hpp"
 #include "../utilidades/Formatos.hpp"
+#include "../interfaz/Interfaz.hpp"
+#include "Producto.hpp"
+#include "../proveedores/Proveedor.hpp"
 #include <iostream>
+#include <string>
 
 // Función auxiliar
 bool productoTieneTransacciones(int idProducto) {
+    // TODO: Implementar cuando exista la clase DetalleTransaccion
     // Buscar en archivo de detalles de transacciones
+    
     ArchivoHeader headerDetalles = GestorArchivos::leerHeader(ARCHIVO_DETALLES);
     
     if (headerDetalles.registrosActivos == 0) {
@@ -32,7 +38,7 @@ bool productoTieneTransacciones(int idProducto) {
     }
     
     archivo.close();
-    return false; // No encontró transacciones con este producto
+    return false; // No hay transacciones
 }
 
 using namespace std;
@@ -173,7 +179,7 @@ void buscarProducto(Tienda& tienda) {
                 char codigo[20];
                 if (Interfaz::solicitarTexto("Ingrese el código (o parte) a buscar", codigo, MAX_CODIGO)) {
                     int numResultados = 0;
-                    int* indices = GestorArchivos::buscarRegistroPorCodigo<Producto>(ARCHIVO_PRODUCTOS, codigo);
+                    int* indices = GestorArchivos::buscarRegistroPorNombre<Producto>(ARCHIVO_PRODUCTOS, codigo, &numResultados);
                     if (indices != nullptr) {
                         Formatos::imprimirExito("Se encontraron coincidencias:");
                         for (int i = 0; i < numResultados; i++) {
@@ -222,7 +228,8 @@ void actualizarProducto(Tienda& tienda) {
 
     int indice = GestorArchivos::buscarPorId<Producto>(ARCHIVO_PRODUCTOS, idProducto);
     if (indice == -1) {
-        Formatos::imprimirError("El producto con ID " + to_string(idProducto) + " no existe.");
+        string errorMsg = "El producto con ID " + to_string(idProducto) + " no existe.";
+        Formatos::imprimirError(errorMsg.c_str());
         return;
     }
     
@@ -259,7 +266,7 @@ void actualizarProducto(Tienda& tienda) {
         switch (seleccion) {
             case 1: {
                 if (Interfaz::solicitarTexto("Ingrese nuevo código", codigo, MAX_CODIGO)) {
-                    if (!validaciones::validarCodigoProducto(codigo)) {
+                    if (!Validaciones::validarCodigoProducto(codigo)) {
                         Formatos::imprimirError("El código debe tener el formato correcto (Ej: PROD001)");
                         break;
                     } else {
@@ -271,7 +278,7 @@ void actualizarProducto(Tienda& tienda) {
             }
             case 2: {
                 if (Interfaz::solicitarTexto("Ingrese nuevo nombre", nombre, MAX_NOMBRE)){
-                    if (!validaciones::validarNombre(nombre)) {
+                    if (!Validaciones::validarNombre(nombre)) {
                         Formatos::imprimirError("El nombre debe tener al menos 3 caracteres");
                         break;
                     } else {
@@ -283,7 +290,7 @@ void actualizarProducto(Tienda& tienda) {
             }
             case 3: {
                 if (Interfaz::solicitarTexto("Ingrese nueva descripción", descripcion, MAX_DESCRIPCION)) {
-                    if (!validaciones::validarDescripcion(descripcion)) {
+                    if (!Validaciones::validarDescripcion(descripcion)) {
                         Formatos::imprimirError("La descripción debe tener al menos 10 caracteres");
                         break;
                     } else {
@@ -295,7 +302,7 @@ void actualizarProducto(Tienda& tienda) {
             }
             case 4: {
                 if (Interfaz::solicitarEntero("Ingrese ID del nuevo proveedor", idProveedor)) {
-                    if (!validaciones::validarRango(idProveedor, 1, 1000)) {
+                    if (!Validaciones::validarRango(idProveedor, 1, 1000)) {
                         Formatos::imprimirError("El ID del proveedor debe estar entre 1 y 1000");
                         break;
                     } else if (GestorArchivos::existeEntidad<Proveedor>(ARCHIVO_PROVEEDORES, idProveedor)) {
@@ -309,7 +316,7 @@ void actualizarProducto(Tienda& tienda) {
             }
             case 5: {
                 if (Interfaz::solicitarFloat("Ingrese nuevo precio", precio)) {
-                    if (!validaciones::validarRangoFloat(precio, 0.01, 999999.99)) {
+                    if (!Validaciones::validarRangoFloat(precio, 0.01, 999999.99)) {
                         Formatos::imprimirError("El precio debe estar entre 0.01 y 999999.99");
                         break;
                     } else {
@@ -321,7 +328,7 @@ void actualizarProducto(Tienda& tienda) {
             }
             case 6: {
                 if (Interfaz::solicitarEntero("Ingrese nuevo stock", stock)) {
-                    if (!validaciones::validarRango(stock, 0, 999999)) {
+                    if (!Validaciones::validarRango(stock, 0, 999999)) {
                         Formatos::imprimirError("El stock debe estar entre 0 y 999999");
                         break;
                     } else {
@@ -333,7 +340,7 @@ void actualizarProducto(Tienda& tienda) {
             }
             case 7: {
                 if (Interfaz::solicitarEntero("Ingrese nuevo stock minimo", stockMinimo)) {
-                    if (!validaciones::validarRango(stockMinimo, 0, 999999)) {
+                    if (!Validaciones::validarRango(stockMinimo, 0, 999999)) {
                         Formatos::imprimirError("El stock minimo debe estar entre 0 y 999999");
                         break;
                     } else {
@@ -382,7 +389,8 @@ void actualizarStockProducto(Tienda& tienda) {
 
     int indice = GestorArchivos::buscarPorId<Producto>(ARCHIVO_PRODUCTOS, idProducto);
     if (indice == -1) {
-        Formatos::imprimirError("El producto con ID " + to_string(idProducto) + " no existe.");
+        string errorMsg = "El producto con ID " + to_string(idProducto) + " no existe.";
+        Formatos::imprimirError(errorMsg.c_str());
         return;
     }
     
@@ -392,8 +400,10 @@ void actualizarStockProducto(Tienda& tienda) {
     int seleccion;
     do {
         Formatos::imprimirTitulo("Actualización de Stock");
-        Formatos::imprimirInformacion("Producto: " + producto.nombre);
-        Formatos::imprimirInformacion("Stock actual: " + to_string(producto.stock));
+        string infoMsg = "Producto: " + string(producto.getNombre());
+        Formatos::imprimirInformacion(infoMsg.c_str());
+        string stockMsg = "Stock actual: " + to_string(producto.getStock());
+        Formatos::imprimirInformacion(stockMsg.c_str());
         Formatos::imprimirSubtitulo("¿Qué desea editar?");
         cout << CYAN << "1. Agregar unidades" << endl;
         cout << "2. Quitar unidades" << endl;
@@ -408,7 +418,7 @@ void actualizarStockProducto(Tienda& tienda) {
                 int cantidad;
                 if (Interfaz::solicitarEntero("¿Cuantas unidades ingresan?", cantidad)) {
                     if (Validaciones::validarRango(cantidad, 1, 999999)) {
-                        producto.stock += cantidad;
+                        producto.setStock(producto.getStock() + cantidad);
                         Formatos::imprimirExito("Cantidad añadida al stock.");
                     } else {
                         Formatos::imprimirError("La cantidad debe ser positiva.");
@@ -419,8 +429,8 @@ void actualizarStockProducto(Tienda& tienda) {
             case 2: { // Agregar unidades
                 int cantidad;
                 if (Interfaz::solicitarEntero("¿Cuantas unidades se quitan?", cantidad)) {
-                    if (Validaciones::validarRango(cantidad, 1, 999999) && cantidad <= producto.stock) {
-                        producto.stock -= cantidad;
+                    if (Validaciones::validarRango(cantidad, 1, 999999) && cantidad <= producto.getStock()) {
+                        producto.setStock(producto.getStock() - cantidad);
                         Formatos::imprimirExito("Cantidad restada del stock.");
                     } else {
                         Formatos::imprimirError("La cantidad debe ser positiva y no mayor al stock actual.");
@@ -429,7 +439,7 @@ void actualizarStockProducto(Tienda& tienda) {
                 break;
             }
             case 3: { // Guardar cambios
-                if (GestorArchivos::modificarRegistro<Producto>(ARCHIVO_PRODUCTOS, indice, producto)) {
+                if (GestorArchivos::actualizarRegistro<Producto>(ARCHIVO_PRODUCTOS, indice, producto)) {
                     Formatos::imprimirExito("Stock actualizado correctamente.");
                 } else {
                     Formatos::imprimirError("Error al actualizar el stock.");
@@ -491,7 +501,8 @@ void eliminarProducto(Tienda& tienda) {
 
     int indice = GestorArchivos::buscarPorId<Producto>(ARCHIVO_PRODUCTOS, idProducto);
     if (indice == -1) {
-        Formatos::imprimirError("El producto con ID " + to_string(idProducto) + " no existe.");
+        string errorMsg = "El producto con ID " + to_string(idProducto) + " no existe.";
+        Formatos::imprimirError(errorMsg.c_str());
         return;
     }
     
@@ -505,12 +516,12 @@ void eliminarProducto(Tienda& tienda) {
     // Verificar si el producto tiene transacciones asociadas
     if (productoTieneTransacciones(idProducto)) {
         Formatos::imprimirError("Este producto tiene transacciones asociadas.");
-        Formatos::imprimirInformacion("Eliminarlo podria afectar la integridad de de los registros historicos.") << endl;
+        Formatos::imprimirInformacion("Eliminarlo podria afectar la integridad de de los registros historicos.");
     }
 
     if (Interfaz::solicitarConfirmacion("¿Está seguro que desea eliminar este producto? Esta acción no se puede deshacer.")) {
         // Marcar como eliminado lógicamente
-        GestorArchivos::borrarRegistroLogico<Producto>(ARCHIVO_PRODUCTOS, idProducto);
+        GestorArchivos::eliminarRegistroLogico<Producto>(ARCHIVO_PRODUCTOS, idProducto);
         Formatos::imprimirExito("Producto eliminado correctamente.");
     } else {
         Formatos::imprimirInformacion("Operación cancelada. No se guardaron cambios.");

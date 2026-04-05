@@ -1,9 +1,12 @@
-#include "../productos/operacionesProveedor.hpp"
+#include "operacionesproveedor.hpp"
 #include "../persistencia/GestorArchivos.hpp"
 #include "../persistencia/Constantes.hpp"
 #include "../utilidades/Validaciones.hpp"
 #include "../utilidades/Formatos.hpp"
+#include "../interfaz/Interfaz.hpp"
+#include "Proveedor.hpp"
 #include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -19,21 +22,21 @@ void registrarProveedor(Tienda& tienda) {
     int valorEntero;
     float valorFloat;
     
-    // Solicitar datos del producto
+    // Solicitar datos del proveedor
     if (!Interfaz::solicitarTexto("Ingrese nombre del proveedor", buffer, MAX_NOMBRE)) return;
     nuevoProveedor.setNombre(buffer);
     
     if (!Interfaz::solicitarTexto("Ingrese rif del proveedor", buffer, MAX_RIF)) return;
     
     // Validar que el código no exista
-    if (GestorArchivos::existeEntidad<Proveedor>(ARCHIVO_PROVEEDOR, atoi(buffer))) {
+    if (GestorArchivos::existeEntidad<Proveedor>(ARCHIVO_PROVEEDORES, atoi(buffer))) {
         Formatos::imprimirError("El rif ya existe");
         Formatos::pausar();
         return;
     }
     nuevoProveedor.setRif(buffer);
     
-    if (!Interfaz::solicitarTexto("Ingrese el telefono del proveedor", buffer, MAX_TLF)) return;
+    if (!Interfaz::solicitarTexto("Ingrese el telefono del proveedor", buffer, MAX_TELEFONO)) return;
     nuevoProveedor.setTlf(buffer);
     
     if (!Interfaz::solicitarTexto("Ingrese la direccion del proveedor", buffer, MAX_DIRECCION)) return;
@@ -44,8 +47,8 @@ void registrarProveedor(Tienda& tienda) {
     nuevoProveedor.mostrarInformacionCompleta();
     
     if (Interfaz::solicitarConfirmacion("¿Desea guardar este proveedor?")) {
-        if (GestorArchivos::guardarNuevoRegistro<Producto>(ARCHIVO_PROVEEDOR, nuevoProveedor)) {
-            Formatos::imprimirExito("Producto guardado correctamente");
+        if (GestorArchivos::guardarNuevoRegistro<Proveedor>(ARCHIVO_PROVEEDORES, nuevoProveedor)) {
+            Formatos::imprimirExito("Proveedor guardado correctamente");
             cout << "ID asignado: " << nuevoProveedor.getId() << endl;
         } else {
             Formatos::imprimirError("Error al guardar el proveedor");
@@ -58,7 +61,7 @@ void registrarProveedor(Tienda& tienda) {
 }
 
 void buscarProveedor(Tienda& tienda) {
-    ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PROVEEDOR);
+    ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PROVEEDORES);
     if (header.registrosActivos == 0) {
         Formatos::imprimirAdvertencia("No hay proveedores registrados en el sistema");
         Formatos::pausar();
@@ -81,12 +84,12 @@ void buscarProveedor(Tienda& tienda) {
         switch (opcion) {
             case 1: {
                 int id;
-                if (Interfaz::solicitarEntero("Ingrese el ID del producto", id)) {
+                if (Interfaz::solicitarEntero("Ingrese el ID del proveedor", id)) {
                     int indice = GestorArchivos::buscarPorId<Proveedor>(ARCHIVO_PROVEEDORES, id);
                     if (indice != -1) {
-                        Producto producto = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, indice);
+                        Proveedor proveedor = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, indice);
                         Formatos::imprimirExito("Proveedor encontrado:");
-                        producto.mostrarInformacionCompleta();
+                        proveedor.mostrarInformacionCompleta();
                     } else {
                         Formatos::imprimirError("Proveedor no encontrado");
                     }
@@ -104,8 +107,8 @@ void buscarProveedor(Tienda& tienda) {
                     if (indices != nullptr) {
                         Formatos::imprimirExito("Se encontraron coincidencias:");
                         for (int i = 0; i < numResultados; i++) {
-                            Producto producto = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, indices[i]);
-                            producto.mostrarInformacionBasica();
+                            Proveedor proveedor = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, indices[i]);
+                            proveedor.mostrarInformacionBasica();
                         }
                         delete[] indices;
                     } else {
@@ -117,15 +120,15 @@ void buscarProveedor(Tienda& tienda) {
             }
             
             case 3: {
-                char codigo[20];
+                char rif[20];
                 if (Interfaz::solicitarTexto("Ingrese el rif a buscar", rif, MAX_RIF)) {
                     int numResultados = 0;
-                    int* indices = GestorArchivos::buscarRegistroPorRif<Proveedor>(ARCHIVO_PROVEEDORES, rif);
+                    int* indices = GestorArchivos::buscarRegistroPorNombre<Proveedor>(ARCHIVO_PROVEEDORES, rif, &numResultados);
                     if (indices != nullptr) {
                         Formatos::imprimirExito("Se encontraron coincidencias:");
                         for (int i = 0; i < numResultados; i++) {
-                            Producto producto = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, indices[i]);
-                            producto.mostrarInformacionBasica();
+                            Proveedor proveedor = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, indices[i]);
+                            proveedor.mostrarInformacionBasica();
                         }
                         delete[] indices;
                     } else {
@@ -148,30 +151,31 @@ void buscarProveedor(Tienda& tienda) {
     } while (opcion != 0);
 }
 
-void actualizarProducto(Tienda& tienda) {
+void actualizarProveedor(Tienda& tienda) {
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PROVEEDORES);
     if (header.registrosActivos == 0){
         Formatos::imprimirAdvertencia("No hay proveedores en el Sistema.");
         return;
     }
     
-    int idProducto;
+    int idProveedor;
     if (!Interfaz::solicitarEntero("Ingrese el ID del proveedor a buscar", idProveedor)) return;
 
     int indice = GestorArchivos::buscarPorId<Proveedor>(ARCHIVO_PROVEEDORES, idProveedor);
     if (indice == -1) {
-        Formatos::imprimirError("El producto con ID " + to_string(idProveedor) + " no existe.");
+        string errorMsg = "El proveedor con ID " + to_string(idProveedor) + " no existe.";
+        Formatos::imprimirError(errorMsg.c_str());
         return;
     }
     
-    Proveedor proveedir = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, indice);
+    Proveedor proveedor = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, indice);
 
     Formatos::imprimirSubtitulo("DATOS ACTUALES DEL PROVEEDOR:");
     Formatos::imprimirEncabezadoTabla();
-    producto.mostrarInformacionBasica();
+    proveedor.mostrarInformacionBasica();
     Formatos::imprimirSeparador();
 
-    char nombre[100], rif[20], telefono[20], email[100] direccion[200];
+    char nombre[100], rif[20], telefono[20], email[100], direccion[200];
     int seleccion; 
 
     bool verNombre = false, verRif = false, verTlf = false, verEmail = false, verDireccion = false;
@@ -193,7 +197,7 @@ void actualizarProducto(Tienda& tienda) {
         switch (seleccion) {
             case 1: {
                 if (Interfaz::solicitarTexto("Ingrese nuevo rif", rif, MAX_RIF)) {
-                    if (!validaciones::validarRIF(rif)) {
+                    if (!Validaciones::validarRIF(rif)) {
                         Formatos::imprimirError("El rif debe tener el formato correcto (Ej: PROD001)");
                         break;
                     } else {
@@ -205,7 +209,7 @@ void actualizarProducto(Tienda& tienda) {
             }
             case 2: {
                 if (Interfaz::solicitarTexto("Ingrese nuevo nombre", nombre, MAX_NOMBRE)){
-                    if (!validaciones::validarNombre(nombre)) {
+                    if (!Validaciones::validarNombre(nombre)) {
                         Formatos::imprimirError("El nombre debe tener al menos 3 caracteres");
                         break;
                     } else {
@@ -216,12 +220,12 @@ void actualizarProducto(Tienda& tienda) {
                 break;
             }
             case 3: {
-                if (Interfaz::solicitarTexto("Ingrese nuevo telefono", telefono, MAX_TLF)) {
-                    if (!validaciones::validarTelefono(telefono)) {
+                if (Interfaz::solicitarTexto("Ingrese nuevo telefono", telefono, MAX_TELEFONO)) {
+                    if (!Validaciones::validarTelefono(telefono)) {
                         Formatos::imprimirError("El telefono debe tener al menos 10 caracteres");
                         break;
                     } else {
-                        producto.setTlf(Telefono);
+                        proveedor.setTlf(telefono);
                         verTlf = true;
                     }
                 }
@@ -229,7 +233,7 @@ void actualizarProducto(Tienda& tienda) {
             }
             case 4: {
                 if (Interfaz::solicitarTexto("Ingrese el nuevo email", email, MAX_EMAIL)) {
-                    if (!validaciones::validarEmail(email)) {
+                    if (!Validaciones::validarEmail(email)) {
                         Formatos::imprimirError("El email tiene que tener un @");
                         break;
                     } else {
@@ -240,10 +244,9 @@ void actualizarProducto(Tienda& tienda) {
                 break;
             }
             case 5: {
-                if (Interfaz::solicitarTExto("Ingrese nueva direccion", direccion)) {
-                   
-                        proveedor.setDireccion(direccion);
-                        verDireccion = true;
+                if (Interfaz::solicitarTexto("Ingrese nueva direccion", direccion, MAX_DIRECCION)) {
+                    proveedor.setDireccion(direccion);
+                    verDireccion = true;
                 }
                 break;
             }
@@ -318,22 +321,22 @@ void eliminarProveedor(Tienda& tienda) {
 
     int indice = GestorArchivos::buscarPorId<Proveedor>(ARCHIVO_PROVEEDORES, idProveedor);
     if (indice == -1) {
-        Formatos::imprimirError("El producto con ID " + to_string(idProveedor) + " no existe.");
+        string errorMsg = "El proveedor con ID " + to_string(idProveedor) + " no existe.";
+        Formatos::imprimirError(errorMsg.c_str());
         return;
     }
     
     Proveedor proveedor = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, indice);
     
-    Formatos::imprimirSubtitulo("DATOS DEL PROVEEDORES A ELIMINAR:");
+    Formatos::imprimirSubtitulo("DATOS DEL PROVEEDOR A ELIMINAR:");
     Formatos::imprimirEncabezadoTabla();
-    producto.mostrarInformacionBasica();
+    proveedor.mostrarInformacionBasica();
     Formatos::imprimirSeparador();    
     
-    // Verificar si el producto tiene transacciones asociadas
 
     if (Interfaz::solicitarConfirmacion("¿Está seguro que desea eliminar este proveedor? Esta acción no se puede deshacer.")) {
         // Marcar como eliminado lógicamente
-        GestorArchivos::borrarRegistroLogico<Proveedor>(ARCHIVO_PROVEEDORES, idProveedor);
+        GestorArchivos::eliminarRegistroLogico<Proveedor>(ARCHIVO_PROVEEDORES, idProveedor);
         Formatos::imprimirExito("Proveedor eliminado correctamente.");
     } else {
         Formatos::imprimirInformacion("Operación cancelada. No se guardaron cambios.");
@@ -347,7 +350,7 @@ void menuProveedores(Tienda& tienda) {
     
     do {
         Formatos::limpiarPantalla();
-        Formatos::imprimirSubtitulo("GESTIÓN DE PRODUCTOS");
+        Formatos::imprimirSubtitulo("GESTIÓN DE PROVEEDORES");
         
         cout << CYAN
                   << "1. Registrar nuevo Proveedor" << endl
@@ -372,10 +375,10 @@ void menuProveedores(Tienda& tienda) {
                 actualizarProveedor(tienda);
                 break;
             case 4:
-                listarProveedores(Tienda& tienda);
+                listarProveedores(tienda);
                 break;
             case 5:
-                eliminarProveedor(Tienda& tienda);
+                eliminarProveedor(tienda);
                 break;
             case 0:
                 break;

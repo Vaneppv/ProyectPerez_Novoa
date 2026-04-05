@@ -13,8 +13,8 @@ Proveedor::Proveedor() {
     rif[MAX_RIF - 1] = '\0';
     strncpy(nombre, "", MAX_NOMBRE - 1);
     nombre[MAX_NOMBRE - 1] = '\0';
-    strncpy(telefono, "", MAX_TLF - 1);
-    telefono[MAX_TLF - 1] = '\0';
+    strncpy(telefono, "", MAX_TELEFONO - 1);
+    telefono[MAX_TELEFONO - 1] = '\0';
     strncpy(email, "", MAX_EMAIL - 1);
     email[MAX_EMAIL - 1] = '\0';
     strncpy(direccion, "", MAX_DIRECCION - 1);
@@ -27,18 +27,17 @@ Proveedor::Proveedor() {
     eliminado = false;
     strncpy(fechaUltimaModificacion, "", MAX_FECHA - 1);
     fechaUltimaModificacion[MAX_FECHA - 1] = '\0';
-    // me pregunto como hacer productos id y transsacciones id
-    for (int i = 0; i < MAX_ID_PRODUCTOS; i++) {
-    	productosIDs[MAX_ID_PRODUCTOS - 1] = 0;
+    for (int i = 0; i < MAX_PRODUCTOS_PROVEEDOR; i++) {
+    	productosIDs[MAX_PRODUCTOS_PROVEEDOR - 1] = 0;
 	}
-	for (int i = 0; i < MAX_ID_TRANSACCIONES; i++) {
-    	transaccionesIds[MAX_ID_TRANSACCIONES - 1] = 0;
+	for (int i = 0; i < MAX_TRANSACCIONES_ENTIDAD; i++) {
+    	transaccionesIds[MAX_TRANSACCIONES_ENTIDAD - 1] = 0;
 	}
 }
 
 // Constructor parametrizado
-Proveedor::Proveedor((int id, const char* rif, const char* nombre, const char* telefono, 
-             const char* email, const char* direccion, int cantidadProductos
+Proveedor::Proveedor(int id, const char* rif, const char* nombre, const char* telefono, 
+             const char* email, const char* direccion, int cantidadProductos,
 			 int productosIDs, float totalCompras, int transaccionesIds, int cantidadTransacciones) {
 			 	
     this->id = id;
@@ -46,8 +45,8 @@ Proveedor::Proveedor((int id, const char* rif, const char* nombre, const char* t
     this->rif[MAX_RIF - 1] = '\0';
     strncpy(this->nombre, nombre, MAX_NOMBRE - 1);
     this->nombre[MAX_NOMBRE - 1] = '\0';
-    strncpy(this->telefono, telefono, MAX_TLF - 1);
-    this->telefono[MAX_TLF - 1] = '\0';
+    strncpy(this->telefono, telefono, MAX_TELEFONO - 1);
+    this->telefono[MAX_TELEFONO - 1] = '\0';
     strncpy(this->email, email, MAX_EMAIL - 1);
     this->email[MAX_EMAIL - 1] = '\0';
     strncpy(this->direccion, direccion, MAX_DIRECCION - 11);
@@ -60,11 +59,11 @@ Proveedor::Proveedor((int id, const char* rif, const char* nombre, const char* t
     eliminado = false;
     strncpy(fechaUltimaModificacion, "", MAX_FECHA - 1);
     fechaUltimaModificacion[MAX_FECHA - 1] = '\0';
-    for (int i = 0; i < MAX_ID_PRODUCTOS; i++) {
-    	this->productosIDs[MAX_ID_PRODUCTOS - 1] = 0;
+    for (int i = 0; i < MAX_PRODUCTOS_PROVEEDOR; i++) {
+    	this->productosIDs[MAX_PRODUCTOS_PROVEEDOR - 1] = 0;
 	}
-	for (int i = 0; i < MAX_ID_TRANSACCIONES; i++) {
-    	this->transaccionesIds[MAX_ID_TRANSACCIONES - 1] = 0;
+	for (int i = 0; i < MAX_TRANSACCIONES_ENTIDAD; i++) {
+    	this->transaccionesIds[MAX_TRANSACCIONES_ENTIDAD - 1] = 0;
 	}
 }
 
@@ -80,10 +79,10 @@ const char* Proveedor::getTlf() const { return telefono; }
 const char* Proveedor::getEmail() const { return email; }
 const char* Proveedor::getDireccion() const { return direccion; }
 int Proveedor::getCantidadproductos() const { return cantidadProductos; }
-int Proveedor::getProductosIDs() const { return productosIDs; }
+int Proveedor::getProductosIDs() const { return productosIDs[MAX_PRODUCTOS_PROVEEDOR]; }
 float Proveedor::getTotalcompras() const { return totalCompras; }
 const char* Proveedor::getFechaRegistro() const { return fechaRegistro; }
-int Proveedor::getTransaccionesIds() const { return transaccionesIds; }
+int Proveedor::getTransaccionesIds() const { return transaccionesIds[MAX_TRANSACCIONES_ENTIDAD]; }
 int Proveedor::getCantidadTransacciones() const { return cantidadTransacciones; }
 bool Proveedor::isEliminado() const { return eliminado; }
 const char* Proveedor::getFechaUltimaModificacion() const { return fechaUltimaModificacion; }
@@ -122,8 +121,8 @@ void Proveedor::setDireccion(const char* direccion) {
 }
 
 void Proveedor::setTlf(const char* telefono){
-	strncpy(this->telefono, telefono, MAX_TLF - 1);
-    this->telefono[MAX_TLF - 1] = '\0';
+	strncpy(this->telefono, telefono, MAX_TELEFONO - 1);
+    this->telefono[MAX_TELEFONO - 1] = '\0';
 }
 
 void Proveedor::setCantidadProductos(int cantidadProductos) {

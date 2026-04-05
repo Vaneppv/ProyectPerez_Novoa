@@ -3,22 +3,23 @@
 
 #include "../persistencia/Constantes.hpp"
 
+
 class Proveedor {
 private:
    
 	int id;
     char nombre[MAX_NOMBRE];
     char rif[MAX_RIF];         
-    char telefono[MAX_TLF];
+    char telefono[MAX_TELEFONO];
     char email[MAX_EMAIL];       
     char direccion[MAX_DIRECCION];
     char fechaRegistro[MAX_FECHA];
 	
     int cantidadProductos;     // Cantidad de productos bajo el proveedor
-    int productosIDs[MAX_ID];     // Arreglo de todos los productos comprados a ese proveedor
+    int productosIDs[MAX_PRODUCTOS_PROVEEDOR];     // Arreglo de todos los productos comprados a ese proveedor
     float totalCompras;
 
-    int transaccionesIds[MAX_ID];
+    int transaccionesIds[MAX_TRANSACCIONES_ENTIDAD];
     int cantidadTransacciones;
 
     bool eliminado;            // Para BORRADO LOGICO
@@ -28,8 +29,9 @@ public:
     // Constructores
     Proveedor();
     Proveedor(int id, const char* rif, const char* nombre, const char* telefono, 
-             const char* email, const char* direccion, int cantidadProductos
-			 int productosIDs, float totalCompras, int transaccionesIds, int cantidadTransacciones);
+             const char* email, const char* direccion, int cantidadProductos = 0,
+			 const int* productosIDs = nullptr, float totalCompras = 0.0f, 
+			 const int* transaccionesIds = nullptr, int cantidadTransacciones = 0);
     
     // Destructor
     ~Proveedor();
@@ -59,10 +61,9 @@ public:
     void setDireccion(const char* direccion);
     void setFechaRegistro(const char* fechaRegistro);
     void setCantidadProductos(int cantidadProductos);
-    void setFechaRegistro(const char* fechaRegistro);
-    void setProductosIDs(int productosIDs);
-    void setTotalCompras(int totalCompras);
-    void setTransaccionesIds(int transaccionesIds);
+    void setProductosIDs(const int* productosIDs, int cantidad);
+    void setTotalCompras(float totalCompras);
+    void setTransaccionesIds(const int* transaccionesIds, int cantidad);
     void setCantidadTransacciones(int cantidadTransacciones);
     void setEliminado(bool eliminado);
     void setFechaUltimaModificacion(const char* fechaUltimaModificacion);
