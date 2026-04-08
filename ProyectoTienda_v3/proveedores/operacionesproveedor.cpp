@@ -42,9 +42,17 @@ void registrarProveedor(Tienda& tienda) {
     if (!Interfaz::solicitarTexto("Ingrese la direccion del proveedor", buffer, MAX_DIRECCION)) return;
     nuevoProveedor.setDireccion(buffer);
     
+    if (!Interfaz::solicitarTexto("Ingrese el email del proveedor", buffer, MAX_EMAIL)) return;
+    if (!Validaciones::validarEmail(buffer)) {
+        Formatos::imprimirError("El email necesita un @");
+        Formatos::pausar();
+        return;
+    }
+    nuevoProveedor.setEmail(buffer);
+    
     // Mostrar resumen
     Formatos::imprimirSubtitulo("RESUMEN DEL PROVEEDOR");
-    nuevoProveedor.mostrarInformacionCompleta();
+    nuevoProveedor.mostrarInformacionBasica();
     
     if (Interfaz::solicitarConfirmacion("¿Desea guardar este proveedor?")) {
         if (GestorArchivos::guardarNuevoRegistro<Proveedor>(ARCHIVO_PROVEEDORES, nuevoProveedor)) {

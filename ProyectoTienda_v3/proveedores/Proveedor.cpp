@@ -180,7 +180,7 @@ bool Proveedor::tieneDatosCompletos() const {
 // Métodos de presentación
 void Producto::mostrarInformacionBasica() const {
     cout << CYAN << "ID: " << id << " | RIF: " << rif << " | Nombre: " << nombre 
-              << " | Telefono: " << telefono << " | Direccion: " << direccion << RESET << endl;
+              << " | Telefono: " << telefono << " | Direccion: " << direccion << " | Email: " << email << RESET << endl;
 }
 
 void Producto::mostrarInformacionCompleta() const {
@@ -190,6 +190,7 @@ void Producto::mostrarInformacionCompleta() const {
     cout << "Nombre: " << nombre << endl;
     cout << "Telefono: " << telefono << endl;
     cout << "Direccion: " << direccion << endl;
+    cout << "Email: " << email << endl;
     cout << "Cantidad de Productos:" << cantidadProductos << endl;
     cout << "Total de Compras:" << totalCompras << endl;
     cout << "Cantidad de Transacciones: " << cantidadTransacciones << endl;
