@@ -11,9 +11,10 @@
 using namespace std;
 
 void registrarCliente(Tienda& tienda) {
+    Interfaz interfaz;
     Formatos::imprimirSubtitulo("REGISTRAR NUEVO CLIENTE");
     
-    if (!Interfaz::solicitarConfirmacion("¿Desea registrar un nuevo cliente?")) {
+    if (!interfaz.solicitarConfirmacion("¿Desea registrar un nuevo cliente?")) {
         return;
     }
     
@@ -23,10 +24,10 @@ void registrarCliente(Tienda& tienda) {
     float valorFloat;
     
     // Solicitar datos del cliente
-    if (!Interfaz::solicitarTexto("Ingrese nombre del cliente", buffer, MAX_NOMBRE)) return;
+    if (!interfaz.solicitarTexto("Ingrese nombre del cliente", buffer, MAX_NOMBRE)) return;
     nuevoCliente.setNombre(buffer);
     
-    if (!Interfaz::solicitarTexto("Ingrese cedula del cliente", buffer, MAX_CEDULA)) return;
+    if (!interfaz.solicitarTexto("Ingrese cedula del cliente", buffer, MAX_CEDULA)) return;
     
     // Validar que el código no exista
     if (GestorArchivos::existeEntidad<Cliente>(ARCHIVO_CLIENTES, atoi(buffer))) {
@@ -36,15 +37,15 @@ void registrarCliente(Tienda& tienda) {
     }
     nuevoCliente.setCedula(buffer);
     
-    if (!Interfaz::solicitarTexto("Ingrese el telefono del cliente", buffer, MAX_TELEFONO)) return;
+    if (!interfaz.solicitarTexto("Ingrese el telefono del cliente", buffer, MAX_TELEFONO)) return;
     nuevoCliente.setTlf(buffer);
     
-    if (!Interfaz::solicitarTexto("Ingrese la direccion del cliente", buffer, MAX_DIRECCION)) return;
+    if (!interfaz.solicitarTexto("Ingrese la direccion del cliente", buffer, MAX_DIRECCION)) return;
     nuevoCliente.setDireccion(buffer);
     
-    if (!Interfaz::solicitarTexto("Ingrese el email del cliente", buffer, MAX_EMAIL)) return;
+    if (!interfaz.solicitarTexto("Ingrese el email del cliente", buffer, MAX_EMAIL)) return;
     
-    if (Validaciones::validarEmail(email)) {
+    if (Validaciones::validarEmail(buffer)) {
         Formatos::imprimirError("El email necesita una @");
         Formatos::pausar();
         return;
@@ -53,9 +54,10 @@ void registrarCliente(Tienda& tienda) {
     
     // Mostrar resumen
     Formatos::imprimirSubtitulo("RESUMEN DEL CLIENTE");
+    Formatos::EncabezadoBasicoCliente();
     nuevoCliente.mostrarInformacionBasica();
 
-    if (Interfaz::solicitarConfirmacion("¿Desea guardar este cliente?")) {
+    if (interfaz.solicitarConfirmacion("¿Desea guardar este cliente?")) {
         if (GestorArchivos::guardarNuevoRegistro<Cliente>(ARCHIVO_CLIENTES, nuevoCliente)) {
             Formatos::imprimirExito("Cliente guardado correctamente");
             cout << "ID asignado: " << nuevoCliente.getId() << endl;
@@ -70,6 +72,7 @@ void registrarCliente(Tienda& tienda) {
 }
 
 void buscarCliente(Tienda& tienda) {
+    Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_CLIENTES);
     if (header.registrosActivos == 0) {
         Formatos::imprimirAdvertencia("No hay clientes registrados en el sistema");
@@ -86,18 +89,19 @@ void buscarCliente(Tienda& tienda) {
                   << "3. Buscar por cedula" << endl
                   << "0. Cancelar" << endl << RESET;
         
-        if (!Interfaz::solicitarEntero("Seleccione una opción", opcion)) {
+        if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
             opcion = -1;
         }
         
         switch (opcion) {
             case 1: {
                 int id;
-                if (Interfaz::solicitarEntero("Ingrese el ID del cliente", id)) {
+                if (interfaz.solicitarEntero("Ingrese el ID del cliente", id)) {
                     int indice = GestorArchivos::buscarPorId<Cliente>(ARCHIVO_CLIENTES, id);
                     if (indice != -1) {
                         Cliente cliente = GestorArchivos::obtenerRegistroPorIndice<Cliente>(ARCHIVO_CLIENTES, indice);
                         Formatos::imprimirExito("Cliente encontrado:");
+                        Formatos::EncabezadoCompletoCliente();
                         cliente.mostrarInformacionCompleta();
                     } else {
                         Formatos::imprimirError("Cliente no encontrado");
@@ -109,12 +113,13 @@ void buscarCliente(Tienda& tienda) {
             
             case 2: {
                 char nombre[100];
-                if (Interfaz::solicitarTexto("Ingrese el nombre (o parte) a buscar", nombre, MAX_NOMBRE)) {
+                if (interfaz.solicitarTexto("Ingrese el nombre (o parte) a buscar", nombre, MAX_NOMBRE)) {
                     int numResultados = 0;
                     int* indices = GestorArchivos::buscarRegistroPorNombre<Cliente>(ARCHIVO_CLIENTES, nombre, &numResultados);
                     
                     if (indices != nullptr) {
                         Formatos::imprimirExito("Se encontraron coincidencias:");
+                        Formatos::EncabezadoBasicoCliente();
                         for (int i = 0; i < numResultados; i++) {
                             Cliente cliente = GestorArchivos::obtenerRegistroPorIndice<Cliente>(ARCHIVO_CLIENTES, indices[i]);
                             cliente.mostrarInformacionBasica();
@@ -129,12 +134,13 @@ void buscarCliente(Tienda& tienda) {
             }
             
             case 3: {
-                char cedula[20];
-                if (Interfaz::solicitarTexto("Ingrese el cedula a buscar", cedula, MAX_CEDULA)) {
+                char cedulaBusqueda[20];
+                if (interfaz.solicitarTexto("Ingrese el cedula a buscar", cedulaBusqueda, MAX_CEDULA)) {
                     int numResultados = 0;
-                    int* indices = GestorArchivos::buscarRegistroPorNombre<Cliente>(ARCHIVO_CLIENTES, cedula, &numResultados);
+                    int* indices = GestorArchivos::buscarRegistroPorNombre<Cliente>(ARCHIVO_CLIENTES, cedulaBusqueda, &numResultados);
                     if (indices != nullptr) {
                         Formatos::imprimirExito("Se encontraron coincidencias:");
+                        Formatos::EncabezadoBasicoCliente();
                         for (int i = 0; i < numResultados; i++) {
                             Cliente cliente = GestorArchivos::obtenerRegistroPorIndice<Cliente>(ARCHIVO_CLIENTES, indices[i]);
                             cliente.mostrarInformacionBasica();
@@ -161,6 +167,7 @@ void buscarCliente(Tienda& tienda) {
 }
 
 void actualizarCliente(Tienda& tienda) {
+    Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_CLIENTES);
     if (header.registrosActivos == 0){
         Formatos::imprimirAdvertencia("No hay clientes en el Sistema.");
@@ -168,7 +175,7 @@ void actualizarCliente(Tienda& tienda) {
     }
     
     int idCliente;
-    if (!Interfaz::solicitarEntero("Ingrese el ID del cliente a buscar", idCliente)) return;
+    if (!interfaz.solicitarEntero("Ingrese el ID del cliente a buscar", idCliente)) return;
 
     int indice = GestorArchivos::buscarPorId<Cliente>(ARCHIVO_CLIENTES, idCliente);
     if (indice == -1) {
@@ -180,7 +187,7 @@ void actualizarCliente(Tienda& tienda) {
     Cliente cliente = GestorArchivos::obtenerRegistroPorIndice<Cliente>(ARCHIVO_CLIENTES, indice);
 
     Formatos::imprimirSubtitulo("DATOS ACTUALES DEL CLIENTE:");
-    Formatos::imprimirEncabezadoTabla();
+    Formatos::EncabezadoBasicoCliente();
     cliente.mostrarInformacionBasica();
     Formatos::imprimirSeparador();
 
@@ -201,11 +208,11 @@ void actualizarCliente(Tienda& tienda) {
                   << "6. Guardar cambios" << endl
                   << "0. Cancelar sin guardar" << endl << RESET;
         
-        if (!Interfaz::solicitarEntero("Seleccione una opción", seleccion)) continue;
+        if (!interfaz.solicitarEntero("Seleccione una opción", seleccion)) continue;
 
         switch (seleccion) {
             case 1: {
-                if (Interfaz::solicitarTexto("Ingrese nuevo cedula", cedula, MAX_CEDULA)) {
+                if (interfaz.solicitarTexto("Ingrese nuevo cedula", cedula, MAX_CEDULA)) {
                     if (!Validaciones::validarCedula(cedula)) {
                         Formatos::imprimirError("El cedula debe tener el formato correcto (Ej: V-12345678)");
                         break;
@@ -217,7 +224,7 @@ void actualizarCliente(Tienda& tienda) {
                 break;
             }
             case 2: {
-                if (Interfaz::solicitarTexto("Ingrese nuevo nombre", nombre, MAX_NOMBRE)){
+                if (interfaz.solicitarTexto("Ingrese nuevo nombre", nombre, MAX_NOMBRE)){
                     if (!Validaciones::validarNombre(nombre)) {
                         Formatos::imprimirError("El nombre debe tener al menos 3 caracteres");
                         break;
@@ -229,7 +236,7 @@ void actualizarCliente(Tienda& tienda) {
                 break;
             }
             case 3: {
-                if (Interfaz::solicitarTexto("Ingrese nuevo telefono", telefono, MAX_TELEFONO)) {
+                if (interfaz.solicitarTexto("Ingrese nuevo telefono", telefono, MAX_TELEFONO)) {
                     if (!Validaciones::validarTelefono(telefono)) {
                         Formatos::imprimirError("El telefono debe tener al menos 10 caracteres");
                         break;
@@ -241,7 +248,7 @@ void actualizarCliente(Tienda& tienda) {
                 break;
             }
             case 4: {
-                if (Interfaz::solicitarTexto("Ingrese el nuevo email", email, MAX_EMAIL)) {
+                if (interfaz.solicitarTexto("Ingrese el nuevo email", email, MAX_EMAIL)) {
                     if (!Validaciones::validarEmail(email)) {
                         Formatos::imprimirError("El email tiene que tener un @");
                         break;
@@ -253,7 +260,7 @@ void actualizarCliente(Tienda& tienda) {
                 break;
             }
             case 5: {
-                if (Interfaz::solicitarTexto("Ingrese nueva direccion", direccion, MAX_DIRECCION)) {
+                if (interfaz.solicitarTexto("Ingrese nueva direccion", direccion, MAX_DIRECCION)) {
                     cliente.setDireccion(direccion);
                     verDireccion = true;
                 }
@@ -264,7 +271,7 @@ void actualizarCliente(Tienda& tienda) {
                 if (!verNombre && !verCedula && !verTlf && !verEmail && !verDireccion) {
                     Formatos::imprimirAdvertencia("No se han realizado cambios para guardar.");
                 } else {
-                    if (Interfaz::solicitarConfirmacion("¿Desea guardar los cambios hechos al cliente")) {
+                    if (interfaz.solicitarConfirmacion("¿Desea guardar los cambios hechos al cliente")) {
                         if (GestorArchivos::actualizarRegistro<Cliente>(ARCHIVO_CLIENTES, indice, cliente)){
                             Formatos::imprimirExito("¡Cambios aplicados exitosamente!");
                         } else {
@@ -305,6 +312,7 @@ void listarClientes(Tienda& tienda) {
         
         Cliente cliente;
         int count = 0;
+        Formatos::EncabezadoCompletoCliente();
         while (archivo.read(reinterpret_cast<char*>(&cliente), sizeof(Cliente)) && count < header.cantidadRegistros) {
             if (!cliente.isEliminado()) {
                 cliente.mostrarInformacionCompleta();
@@ -319,6 +327,7 @@ void listarClientes(Tienda& tienda) {
 }
 
 void eliminarCliente(Tienda& tienda) {
+    Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_CLIENTES);
     if (header.registrosActivos == 0){
         Formatos::imprimirAdvertencia("No hay clientes en el Sistema.");
@@ -326,7 +335,7 @@ void eliminarCliente(Tienda& tienda) {
     }
 
     int idCliente;
-    if (!Interfaz::solicitarEntero("Ingrese el ID del cliente a buscar", idCliente)) return;
+    if (!interfaz.solicitarEntero("Ingrese el ID del cliente a buscar", idCliente)) return;
 
     int indice = GestorArchivos::buscarPorId<Cliente>(ARCHIVO_CLIENTES, idCliente);
     if (indice == -1) {
@@ -338,12 +347,12 @@ void eliminarCliente(Tienda& tienda) {
     Cliente cliente = GestorArchivos::obtenerRegistroPorIndice<Cliente>(ARCHIVO_CLIENTES, indice);
     
     Formatos::imprimirSubtitulo("DATOS DEL CLIENTE A ELIMINAR:");
-    Formatos::imprimirEncabezadoTabla();
+    Formatos::EncabezadoBasicoCliente();
     cliente.mostrarInformacionBasica();
     Formatos::imprimirSeparador();    
     
 
-    if (Interfaz::solicitarConfirmacion("¿Está seguro que desea eliminar este cliente? Esta acción no se puede deshacer.")) {
+    if (interfaz.solicitarConfirmacion("¿Está seguro que desea eliminar este cliente? Esta acción no se puede deshacer.")) {
         // Marcar como eliminado lógicamente
         GestorArchivos::eliminarRegistroLogico<Cliente>(ARCHIVO_CLIENTES, idCliente);
         Formatos::imprimirExito("Cliente eliminado correctamente.");
@@ -354,7 +363,8 @@ void eliminarCliente(Tienda& tienda) {
 }
 
 
-void menu(Tienda& tienda) {
+void menuClientes(Tienda& tienda) {
+    Interfaz interfaz;
     int opcion;
     
     do {
@@ -369,7 +379,7 @@ void menu(Tienda& tienda) {
                         << "5. Eliminar Cliente" << endl
                         << "0. Volver al menú principal" << endl << RESET;
         
-        if (!Interfaz::solicitarEntero("Seleccione una opción", opcion)) {
+        if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
             opcion = -1;
         }
         

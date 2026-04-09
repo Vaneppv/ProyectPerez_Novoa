@@ -6,25 +6,25 @@
 class Interfaz {
 public:
     // Método principal de ejecución
-    static void ejecutar();
+    void ejecutar();
     
     // Menú principal
-    static void menuPrincipal(Tienda& tienda);
+    void menuPrincipal(Tienda& tienda);
     
     // Submenús
-    static void menuMantenimiento(Tienda& tienda);
-    static void menuReportes(Tienda& tienda);
+    void menuMantenimiento(Tienda& tienda);
+    void menuReportes(Tienda& tienda);
     
     // Utilidades de interfaz
-    static void mostrarBienvenida();
-    static void mostrarDespedida();
-    static void mostrarEncabezadoSistema();
+    void mostrarBienvenida();
+    void mostrarDespedida();
+    void mostrarEncabezadoSistema();
     
     // Métodos de entrada de datos (para uso en módulos)
-    static bool solicitarTexto(const char* prompt, char* destino, int largo);
-    static bool solicitarEntero(const char* prompt, int& valor);
-    static bool solicitarFloat(const char* prompt, float& valor);
-    static bool solicitarConfirmacion(const char* mensaje);
+    bool solicitarTexto(const char* prompt, char* destino, int largo);
+    bool solicitarEntero(const char* prompt, int& valor);
+    bool solicitarFloat(const char* prompt, float& valor);
+    bool solicitarConfirmacion(const char* mensaje);
 
 private:
     

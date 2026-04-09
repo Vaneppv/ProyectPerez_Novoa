@@ -11,6 +11,7 @@ Tienda::Tienda() {
     nombre[MAX_NOMBRE - 1] = '\0';
     strncpy(rif, "J-123456789", MAX_RIF - 1);
     rif[MAX_RIF - 1] = '\0';
+    eliminado = false;
     
     siguienteIdProducto = 1;
     siguienteIdProveedor = 1;
@@ -24,6 +25,7 @@ Tienda::Tienda(const char* nombre, const char* rif) {
     this->nombre[MAX_NOMBRE - 1] = '\0';
     strncpy(this->rif, rif, MAX_RIF - 1);
     this->rif[MAX_RIF - 1] = '\0';
+    eliminado = false;
     
     siguienteIdProducto = 1;
     siguienteIdProveedor = 1;
@@ -59,6 +61,31 @@ int Tienda::getSiguienteIdCliente() const {
 
 int Tienda::getSiguienteIdTransaccion() const {
     return siguienteIdTransaccion;
+}
+
+// Métodos adicionales para compatibilidad con template
+int Tienda::getId() const {
+    return 1; // Tienda siempre tiene ID 1
+}
+
+bool Tienda::isEliminado() const {
+    return eliminado;
+}
+
+void Tienda::setEliminado(bool eliminado) {
+    this->eliminado = eliminado;
+}
+
+void Tienda::setId(int id) {
+    // Tienda no puede cambiar su ID, siempre será 1
+}
+
+void Tienda::setFechaRegistro(const char* fecha) {
+    // Tienda no tiene fecha de registro, pero implementado para compatibilidad
+}
+
+void Tienda::setFechaUltimaModificacion(const char* fecha) {
+    // Tienda no tiene fecha de última modificación, pero implementado para compatibilidad
 }
 
 // Setters

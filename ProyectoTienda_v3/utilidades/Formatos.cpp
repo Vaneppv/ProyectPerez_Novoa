@@ -2,8 +2,10 @@
 #include <ctime>
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include <cstring>
 #include <cstdlib>
+#include <limits>
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -131,10 +133,15 @@ void Formatos::alinearDerecha(int ancho) {
 }
 
 void Formatos::alinearCentro(int ancho) {
-    cout << setw(ancho) << center;
+    cout << setw(ancho);
 }
 
-void Formatos::imprimirEncabezadoTabla() {
+void Formatos::EncabezadoBasicoProducto() {
+    cout << CYAN << setw(5) << "ID" << setw(15) << "Código" << setw(30) << "Nombre" 
+         << setw(10) << "Precio" << setw(10) << "Stock" << RESET << endl;
+}
+
+void Formatos::EncabezadoCompletoProducto() {
     imprimirSeparador(160, '=');
     cout << CYAN << NEGRITA;
     cout << left;
@@ -142,12 +149,56 @@ void Formatos::imprimirEncabezadoTabla() {
     cout << setw(15) << "CÓDIGO";
     cout << setw(30) << "NOMBRE";
     cout << setw(50) << "DESCRIPCIÓN";
-    cout << setw(10) << "STOCK";
-    cout << setw(15) << "PRECIO";
-    cout << setw(15) << "PROVEEDOR";
-    cout << setw(20) << "ESTADO";
-    cout << RESET << endl;
+    cout << setw(5) << "PROVEEDOR";
+    cout << setw(10) << "PRECIO";
+    cout << setw(10) << "STOCK ACT";
+    cout << setw(10) << "STOCK MIN";
+    cout << setw(15) << "TOTAL VENDIDO";
+    cout << setw(15) << "FECHA REG";
+    cout << setw(15) << "FECHA MOD";
+    cout << setw(20) << "ESTADO" << RESET << endl;
     imprimirSeparador(160, '-');
+}
+
+void Formatos::EncabezadoBasicoProveedor() {
+    cout << CYAN << setw(5) << "ID" << setw(15) << "RIF" << setw(30) << "Nombre" << setw(10) << "Telefono" << setw(50) << "Direccion" << RESET << endl;
+}
+
+void Formatos::EncabezadoCompletoProveedor() {
+    cout << CYAN;
+    cout << left;
+    cout << setw(5) << "ID";
+    cout << setw(15) << "Rif";
+    cout << setw(30) << "Nombre";
+    cout << setw(10) << "Telefono";
+    cout << setw(50) << "Direccion";
+    cout << setw(20) << "Email";
+    cout << setw(15) << "Cantidad de Productos";
+    cout << setw(5) << "Total de Compras";
+    cout << setw(5) << "Cantidad de Transacciones";
+    cout << setw(15) << "Fecha Registro";
+    cout << setw(15) << "Fecha Última Modificación";
+    cout << setw(15) << "Estado" << RESET << endl;
+}
+
+void Formatos::EncabezadoBasicoCliente() {
+    cout << CYAN << setw(5) << "ID" << setw(15) << "Cedula" << setw(30) << "Nombre" << setw(10) << "Telefono" << setw(50) << "Direccion" << RESET << endl;
+}
+
+void Formatos::EncabezadoCompletoCliente() {
+    cout << CYAN;
+    cout << left;
+    cout << setw(5) << "ID";
+    cout << setw(15) << "Cedula";
+    cout << setw(30) << "Nombre";
+    cout << setw(10) << "Telefono";
+    cout << setw(50) << "Direccion";
+    cout << setw(20) << "Email";
+    cout << setw(5) << "Total de Compras";
+    cout << setw(5) << "Cantidad de Transacciones";
+    cout << setw(15) << "Fecha Registro";
+    cout << setw(15) << "Fecha Última Modificación";
+    cout << setw(15) << "Estado" << RESET << endl;
 }
 
 void Formatos::imprimirPieTabla() {

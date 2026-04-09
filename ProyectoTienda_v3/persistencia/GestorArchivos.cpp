@@ -79,73 +79,6 @@ bool GestorArchivos::actualizarHeader(const char* nombreArchivo, ArchivoHeader h
     return resultado;
 }
 
-bool GestorArchivos::guardarDetalle(const char* archivoDetalles, int idTransaccion, const DetalleTransaccion& detalle) {
-    ofstream archivo(archivoDetalles, ios::binary | ios::app);
-    if (!archivo.is_open()) {
-        cout << ROJO << "Error: No se pudo abrir el archivo de detalles" << endl << RESET;
-        return false;
-    }
-
-    archivo.write(reinterpret_cast<const char*>(&detalle), sizeof(DetalleTransaccion));
-    archivo.close();
-    return true;
-}
-
-void GestorArchivos::mostrarDetalleTransaccion(const char* archivoDetalles, const char* archivoProductos, const Transaccion& t) {
-    ifstream archivo(archivoDetalles, ios::binary);
-    if (!archivo.is_open()) {
-        cout << ROJO << "Error: no se pudo abrir el archivo de detalles." << endl << RESET;
-        return;
-    }
-
-    DetalleTransaccion d;
-    bool tieneDetalles = false;
-
-    while (archivo.read(reinterpret_cast<char*>(&d), sizeof(DetalleTransaccion))) {
-        if (d.getIdTransaccion() == t.getId()) {
-            if (!tieneDetalles) {
-                Formatos::imprimirSubtitulo("DETALLES DE TRANSACCIÓN");
-                tieneDetalles = true;
-            }
-
-            int indP = buscarPorId<Producto>(archivoProductos, d.getIdProducto());
-            char nombreProd[MAX_NOMBRE] = "No encontrado";
-            
-            if (indP != -1) {
-                Producto p = obtenerRegistroPorIndice<Producto>(archivoProductos, indP);
-                strncpy(nombreProd, p.getNombre(), MAX_NOMBRE - 1);
-                nombreProd[MAX_NOMBRE - 1] = '\0';
-            }
-
-            float totalLinea = d.calcularSubtotal();
-
-            cout << CYAN;
-            cout << "ID Producto: " << d.getIdProducto() << " | ";
-            cout << "Nombre: " << nombreProd << " | ";
-            cout << "Cantidad: " << d.getCantidad() << " | ";
-            cout << "Precio Unitario: $" << Formatos::formatearMoneda(d.getPrecioUnitario()) << " | ";
-            cout << "Subtotal: $" << Formatos::formatearMoneda(totalLinea) << RESET << endl;
-        }
-    }
-    
-    if (!tieneDetalles) {
-        cout << AMARILLO << "No se encontraron detalles para la transacción " << t.getId() << endl << RESET;
-    } else {
-        Formatos::imprimirSeparador();
-        cout << CYAN;
-        cout << right << setw(72) << "TOTAL GENERAL: $" << Formatos::formatearMoneda(t.getTotal()) << endl << RESET;
-    }
-
-    archivo.close();
-}
-
-// Métodos privados
-void GestorArchivos::obtenerFechaActual(char* buffer) {
-    time_t tiempo_actual = time(nullptr);
-    struct tm* tm_info = localtime(&tiempo_actual);
-    strftime(buffer, MAX_FECHA, "%d/%m/%Y", tm_info);
-}
-
 bool GestorArchivos::contieneSubstring(const char* texto, const char* busqueda) {
     if (!texto || !busqueda) return false;
     
@@ -166,4 +99,170 @@ bool GestorArchivos::contieneSubstring(const char* texto, const char* busqueda) 
     }
     
     return strstr(textoLower, busquedaLower) != nullptr;
+}
+
+void GestorArchivos::obtenerFechaActual(char* buffer) {
+    time_t tiempo_actual = time(nullptr);
+    struct tm* tm_info = localtime(&tiempo_actual);
+    strftime(buffer, MAX_FECHA, "%d/%m/%Y", tm_info);
+}
+
+// Implementación de métodos específicos para transacciones
+Transaccion* GestorArchivos::buscarTransaccionesPorTipo(const char* nombreArchivo, const char* tipo, int* numResultados) {
+    ifstream archivo(nombreArchivo, ios::binary);
+    if (!archivo.is_open()) {
+        cout << ROJO << "Error: No se pudo abrir el archivo " << nombreArchivo << endl << RESET;
+        return nullptr;
+    }
+
+    ArchivoHeader header;
+    archivo.read(reinterpret_cast<char*>(&header), sizeof(ArchivoHeader));
+    archivo.close();
+
+    if (header.registrosActivos == 0) {
+        *numResultados = 0;
+        return nullptr;
+    }
+
+    // Contar cuántas transacciones coinciden con el tipo
+    int count = 0;
+    for (int i = 0; i < header.cantidadRegistros; i++) {
+        Transaccion temp;
+        archivo.read(reinterpret_cast<char*>(&temp), sizeof(Transaccion));
+        if (!temp.isEliminado() && strcmp(temp.getTipo(), tipo) == 0) {
+            count++;
+        }
+    }
+
+    if (count == 0) {
+        *numResultados = 0;
+        return nullptr;
+    }
+
+    // Crear array de resultados
+    Transaccion* resultados = new Transaccion[count];
+    int j = 0;
+
+    // Leer nuevamente y guardar las coincidencias
+    archivo.open(nombreArchivo, ios::binary);
+    archivo.seekg(sizeof(ArchivoHeader), ios::beg);
+    
+    for (int i = 0; i < header.cantidadRegistros; i++) {
+        Transaccion temp;
+        archivo.read(reinterpret_cast<char*>(&temp), sizeof(Transaccion));
+        if (!temp.isEliminado() && strcmp(temp.getTipo(), tipo) == 0) {
+            resultados[j] = temp;
+            j++;
+        }
+    }
+
+    archivo.close();
+    *numResultados = count;
+    return resultados;
+}
+
+Transaccion* GestorArchivos::buscarTransaccionesPorFecha(const char* nombreArchivo, const char* fecha, int* numResultados) {
+    ifstream archivo(nombreArchivo, ios::binary);
+    if (!archivo.is_open()) {
+        cout << ROJO << "Error: No se pudo abrir el archivo " << nombreArchivo << endl << RESET;
+        return nullptr;
+    }
+
+    ArchivoHeader header;
+    archivo.read(reinterpret_cast<char*>(&header), sizeof(ArchivoHeader));
+    archivo.close();
+
+    if (header.registrosActivos == 0) {
+        *numResultados = 0;
+        return nullptr;
+    }
+
+    // Contar cuántas transacciones coinciden con la fecha
+    int count = 0;
+    for (int i = 0; i < header.cantidadRegistros; i++) {
+        Transaccion temp;
+        archivo.read(reinterpret_cast<char*>(&temp), sizeof(Transaccion));
+        if (!temp.isEliminado() && strstr(temp.getFechaRegistro(), fecha) != nullptr) {
+            count++;
+        }
+    }
+
+    if (count == 0) {
+        *numResultados = 0;
+        return nullptr;
+    }
+
+    // Crear array de resultados
+    Transaccion* resultados = new Transaccion[count];
+    int j = 0;
+
+    // Leer nuevamente y guardar las coincidencias
+    archivo.open(nombreArchivo, ios::binary);
+    archivo.seekg(sizeof(ArchivoHeader), ios::beg);
+    
+    for (int i = 0; i < header.cantidadRegistros; i++) {
+        Transaccion temp;
+        archivo.read(reinterpret_cast<char*>(&temp), sizeof(Transaccion));
+        if (!temp.isEliminado() && strstr(temp.getFechaRegistro(), fecha) != nullptr) {
+            resultados[j] = temp;
+            j++;
+        }
+    }
+
+    archivo.close();
+    *numResultados = count;
+    return resultados;
+}
+
+Transaccion* GestorArchivos::buscarTransaccionesPorRelacionado(const char* nombreArchivo, int idRelacionado, int* numResultados) {
+    ifstream archivo(nombreArchivo, ios::binary);
+    if (!archivo.is_open()) {
+        cout << ROJO << "Error: No se pudo abrir el archivo " << nombreArchivo << endl << RESET;
+        return nullptr;
+    }
+
+    ArchivoHeader header;
+    archivo.read(reinterpret_cast<char*>(&header), sizeof(ArchivoHeader));
+    archivo.close();
+
+    if (header.registrosActivos == 0) {
+        *numResultados = 0;
+        return nullptr;
+    }
+
+    // Contar cuántas transacciones coinciden con el ID relacionado
+    int count = 0;
+    for (int i = 0; i < header.cantidadRegistros; i++) {
+        Transaccion temp;
+        archivo.read(reinterpret_cast<char*>(&temp), sizeof(Transaccion));
+        if (!temp.isEliminado() && temp.getIdRelacionado() == idRelacionado) {
+            count++;
+        }
+    }
+
+    if (count == 0) {
+        *numResultados = 0;
+        return nullptr;
+    }
+
+    // Crear array de resultados
+    Transaccion* resultados = new Transaccion[count];
+    int j = 0;
+
+    // Leer nuevamente y guardar las coincidencias
+    archivo.open(nombreArchivo, ios::binary);
+    archivo.seekg(sizeof(ArchivoHeader), ios::beg);
+    
+    for (int i = 0; i < header.cantidadRegistros; i++) {
+        Transaccion temp;
+        archivo.read(reinterpret_cast<char*>(&temp), sizeof(Transaccion));
+        if (!temp.isEliminado() && temp.getIdRelacionado() == idRelacionado) {
+            resultados[j] = temp;
+            j++;
+        }
+    }
+
+    archivo.close();
+    *numResultados = count;
+    return resultados;
 }

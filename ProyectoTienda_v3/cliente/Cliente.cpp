@@ -33,10 +33,10 @@ Cliente::Cliente() {
 
 // Constructor parametrizado
 Cliente::Cliente(int id, const char* cedula, const char* nombre, const char* telefono, 
-             const char* email, const char* direccion, float totalCompras, int transaccionesIds, int cantidadTransacciones) {
+             const char* email, const char* direccion, float totalCompras, const int* transaccionesIds, int cantidadTransacciones) {
 			 	
     this->id = id;
-    strncpy(this-cedula, cedula, MAX_CEDULA - 1);
+    strncpy(this->cedula, cedula, MAX_CEDULA - 1);
     this->cedula[MAX_CEDULA - 1] = '\0';
     strncpy(this->nombre, nombre, MAX_NOMBRE - 1);
     this->nombre[MAX_NOMBRE - 1] = '\0';
@@ -85,8 +85,8 @@ void Cliente::setId(int id) {
 
 void Cliente::setCedula(const char* cedula) {
     if (Validaciones::validarCedula(cedula)) {
-    	strncpy(this-cedula, cedula, MAX_CEDULA - 1);
-	    this->cedula[MAX_CEDULA - 1] = '\0';
+        strncpy(this->cedula, cedula, MAX_CEDULA - 1);
+        this->cedula[MAX_CEDULA - 1] = '\0';
     }
 }
 
@@ -114,7 +114,7 @@ void Cliente::setTlf(const char* telefono){
     this->telefono[MAX_TELEFONO - 1] = '\0';
 }
 
-void Cliente::setTotalCompras(int totalCompras); {
+void Cliente::setTotalCompras(float totalCompras) {
     this->totalCompras = totalCompras;
 }
 
@@ -125,9 +125,9 @@ void Cliente::setFechaRegistro(const char* fechaRegistro) {
     }
 }
 
-void Cliente::setTransaccionesIds(int transaccionesIds);{
-	for (int i = 0; i < MAX_ID_TRANSACCIONES; i++) {
-    	this->transaccionesIds[MAX_ID_TRANSACCIONES - 1] = 0;
+void Cliente::setTransaccionesIds(const int* transaccionesIds, int cantidad){
+	for (int i = 0; i < cantidad && i < MAX_TRANSACCIONES_ENTIDAD; i++) {
+    	this->transaccionesIds[i] = transaccionesIds[i];
 	}
 }
 
@@ -152,29 +152,29 @@ bool Cliente::esValido() const {
 }
 
 bool Cliente::tieneDatosCompletos() const {
-    return strlen(cedula) > 0 && strlen(nombre) > 0 && idCliente > 0;
+    return strlen(cedula) > 0 && strlen(nombre) > 0 && id > 0;
 }
-
 
 // Métodos de presentación
-void Producto::mostrarInformacionBasica() const {
-    cout << CYAN << "ID: " << id << " | Cedula: " << cedula << " | Nombre: " << nombre 
-              << " | Telefono: " << telefono << " | Direccion: " << direccion << " | Email: " << email << RESET << endl;
+void Cliente::mostrarInformacionBasicaTabla() const {
+    cout << CYAN << setw(5) << id << setw(15) << cedula << setw(30) << nombre 
+              << setw(10) << telefono << setw(50) << direccion << RESET << endl;
 }
 
-void Producto::mostrarInformacionCompleta() const {
+void Cliente::mostrarInformacionCompleta() const {
     cout << CYAN;
-    cout << "ID: " << id << endl;
-    cout << "Cedula: " << cedula << endl;
-    cout << "Nombre: " << nombre << endl;
-    cout << "Telefono: " << telefono << endl;
-    cout << "Direccion: " << direccion << endl;
-    cout << "Email:" << email << endl;
-    cout << "Total de Compras:" << totalCompras << endl;
-    cout << "Cantidad de Transacciones: " << cantidadTransacciones << endl;
-    cout << "Fecha Registro: " << fechaRegistro << endl;
-    cout << "Fecha Última Modificación: " << fechaUltimaModificacion << endl;
-    cout << "Estado: " << (eliminado ? "Eliminado" : "Activo") << RESET << endl;
+    cout << left;
+    cout << setw(5) << id;
+    cout << setw(15) << rif;
+    cout << setw(30) << nombre;
+    cout << setw(10) << telefono;
+    cout << setw(50) << direccion;
+    cout << setw(20) << email;
+    cout << setw(5) << totalCompras;
+    cout << setw(5) << cantidadTransacciones;
+    cout << setw(15) << fechaRegistro;
+    cout << setw(15) << fechaUltimaModificacion;
+    cout << setw(15) << (eliminado ? "Eliminado" : "Activo") << RESET << endl;
 }
 
 // Método estático

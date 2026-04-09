@@ -46,7 +46,8 @@ using namespace std;
 void registrarProducto(Tienda& tienda) {
     Formatos::imprimirSubtitulo("REGISTRAR NUEVO PRODUCTO");
     
-    if (!Interfaz::solicitarConfirmacion("¿Desea registrar un nuevo producto?")) {
+    Interfaz interfaz;
+    if (!interfaz.solicitarConfirmacion("¿Desea registrar un nuevo producto?")) {
         return;
     }
     
@@ -64,10 +65,10 @@ void registrarProducto(Tienda& tienda) {
     float valorFloat;
     
     // Solicitar datos del producto
-    if (!Interfaz::solicitarTexto("Ingrese nombre del producto", buffer, MAX_NOMBRE)) return;
+    if (!interfaz.solicitarTexto("Ingrese nombre del producto", buffer, MAX_NOMBRE)) return;
     nuevoProducto.setNombre(buffer);
     
-    if (!Interfaz::solicitarTexto("Ingrese código del producto", buffer, MAX_CODIGO)) return;
+    if (!interfaz.solicitarTexto("Ingrese código del producto", buffer, MAX_CODIGO)) return;
     
     // Validar que el código no exista
     if (GestorArchivos::existeEntidad<Producto>(ARCHIVO_PRODUCTOS, atoi(buffer))) {
@@ -77,19 +78,19 @@ void registrarProducto(Tienda& tienda) {
     }
     nuevoProducto.setCodigo(buffer);
     
-    if (!Interfaz::solicitarTexto("Ingrese descripción del producto", buffer, MAX_DESCRIPCION)) return;
+    if (!interfaz.solicitarTexto("Ingrese descripción del producto", buffer, MAX_DESCRIPCION)) return;
     nuevoProducto.setDescripcion(buffer);
     
-    if (!Interfaz::solicitarFloat("Ingrese precio del producto", valorFloat)) return;
+    if (!interfaz.solicitarFloat("Ingrese precio del producto", valorFloat)) return;
     nuevoProducto.setPrecio(valorFloat);
     
-    if (!Interfaz::solicitarEntero("Ingrese stock inicial", valorEntero)) return;
+    if (!interfaz.solicitarEntero("Ingrese stock inicial", valorEntero)) return;
     nuevoProducto.setStock(valorEntero);
     
-    if (!Interfaz::solicitarEntero("Ingrese stock mínimo de seguridad", valorEntero)) return;
+    if (!interfaz.solicitarEntero("Ingrese stock mínimo de seguridad", valorEntero)) return;
     nuevoProducto.setStockMinimo(valorEntero);
     
-    if (!Interfaz::solicitarEntero("Ingrese ID del proveedor", valorEntero)) return;
+    if (!interfaz.solicitarEntero("Ingrese ID del proveedor", valorEntero)) return;
     if (!GestorArchivos::existeEntidad<Proveedor>(ARCHIVO_PROVEEDORES, valorEntero)) {
         Formatos::imprimirError("El proveedor no existe");
         Formatos::pausar();
@@ -99,9 +100,10 @@ void registrarProducto(Tienda& tienda) {
     
     // Mostrar resumen
     Formatos::imprimirSubtitulo("RESUMEN DEL PRODUCTO");
+    Formatos::EncabezadoCompletoProducto();
     nuevoProducto.mostrarInformacionCompleta();
     
-    if (Interfaz::solicitarConfirmacion("¿Desea guardar este producto?")) {
+    if (interfaz.solicitarConfirmacion("¿Desea guardar este producto?")) {
         if (GestorArchivos::guardarNuevoRegistro<Producto>(ARCHIVO_PRODUCTOS, nuevoProducto)) {
             Formatos::imprimirExito("Producto guardado correctamente");
             cout << "ID asignado: " << nuevoProducto.getId() << endl;
@@ -116,6 +118,7 @@ void registrarProducto(Tienda& tienda) {
 }
 
 void buscarProducto(Tienda& tienda) {
+    Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PRODUCTOS);
     if (header.registrosActivos == 0) {
         Formatos::imprimirAdvertencia("No hay productos registrados en el sistema");
@@ -133,18 +136,19 @@ void buscarProducto(Tienda& tienda) {
                   << "4. Listar por proveedor" << endl
                   << "0. Cancelar" << endl << RESET;
         
-        if (!Interfaz::solicitarEntero("Seleccione una opción", opcion)) {
+        if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
             opcion = -1;
         }
         
         switch (opcion) {
             case 1: {
                 int id;
-                if (Interfaz::solicitarEntero("Ingrese el ID del producto", id)) {
+                if (interfaz.solicitarEntero("Ingrese el ID del producto", id)) {
                     int indice = GestorArchivos::buscarPorId<Producto>(ARCHIVO_PRODUCTOS, id);
                     if (indice != -1) {
                         Producto producto = GestorArchivos::obtenerRegistroPorIndice<Producto>(ARCHIVO_PRODUCTOS, indice);
                         Formatos::imprimirExito("Producto encontrado:");
+                        Formatos::EncabezadoCompletoProducto();
                         producto.mostrarInformacionCompleta();
                     } else {
                         Formatos::imprimirError("Producto no encontrado");
@@ -156,12 +160,13 @@ void buscarProducto(Tienda& tienda) {
             
             case 2: {
                 char nombre[100];
-                if (Interfaz::solicitarTexto("Ingrese el nombre (o parte) a buscar", nombre, MAX_NOMBRE)) {
+                if (interfaz.solicitarTexto("Ingrese el nombre (o parte) a buscar", nombre, MAX_NOMBRE)) {
                     int numResultados = 0;
                     int* indices = GestorArchivos::buscarRegistroPorNombre<Producto>(ARCHIVO_PRODUCTOS, nombre, &numResultados);
                     
                     if (indices != nullptr) {
                         Formatos::imprimirExito("Se encontraron coincidencias:");
+                        Formatos::EncabezadoBasicoProducto();
                         for (int i = 0; i < numResultados; i++) {
                             Producto producto = GestorArchivos::obtenerRegistroPorIndice<Producto>(ARCHIVO_PRODUCTOS, indices[i]);
                             producto.mostrarInformacionBasica();
@@ -177,11 +182,12 @@ void buscarProducto(Tienda& tienda) {
             
             case 3: {
                 char codigo[20];
-                if (Interfaz::solicitarTexto("Ingrese el código (o parte) a buscar", codigo, MAX_CODIGO)) {
+                if (interfaz.solicitarTexto("Ingrese el código (o parte) a buscar", codigo, MAX_CODIGO)) {
                     int numResultados = 0;
                     int* indices = GestorArchivos::buscarRegistroPorNombre<Producto>(ARCHIVO_PRODUCTOS, codigo, &numResultados);
                     if (indices != nullptr) {
                         Formatos::imprimirExito("Se encontraron coincidencias:");
+                        Formatos::EncabezadoBasicoProducto();
                         for (int i = 0; i < numResultados; i++) {
                             Producto producto = GestorArchivos::obtenerRegistroPorIndice<Producto>(ARCHIVO_PRODUCTOS, indices[i]);
                             producto.mostrarInformacionBasica();
@@ -197,7 +203,7 @@ void buscarProducto(Tienda& tienda) {
             
             case 4: {
                 int idProveedor;
-                if (Interfaz::solicitarEntero("Ingrese ID del proveedor", idProveedor)) {
+                if (interfaz.solicitarEntero("Ingrese ID del proveedor", idProveedor)) {
                     listarPorProveedor(tienda, idProveedor);
                 }
                 Formatos::pausar();
@@ -217,6 +223,7 @@ void buscarProducto(Tienda& tienda) {
 }
 
 void actualizarProducto(Tienda& tienda) {
+    Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PRODUCTOS);
     if (header.registrosActivos == 0){
         Formatos::imprimirAdvertencia("No hay productos en el Sistema.");
@@ -224,7 +231,7 @@ void actualizarProducto(Tienda& tienda) {
     }
     
     int idProducto;
-    if (!Interfaz::solicitarEntero("Ingrese el ID del producto a buscar", idProducto)) return;
+    if (!interfaz.solicitarEntero("Ingrese el ID del producto a buscar", idProducto)) return;
 
     int indice = GestorArchivos::buscarPorId<Producto>(ARCHIVO_PRODUCTOS, idProducto);
     if (indice == -1) {
@@ -236,7 +243,7 @@ void actualizarProducto(Tienda& tienda) {
     Producto producto = GestorArchivos::obtenerRegistroPorIndice<Producto>(ARCHIVO_PRODUCTOS, indice);
 
     Formatos::imprimirSubtitulo("DATOS ACTUALES DEL PRODUCTO:");
-    Formatos::imprimirEncabezadoTabla();
+    Formatos::EncabezadoBasicoProducto();
     producto.mostrarInformacionBasica();
     Formatos::imprimirSeparador();
 
@@ -261,11 +268,11 @@ void actualizarProducto(Tienda& tienda) {
                   << "8. Guardar cambios" << endl
                   << "0. Cancelar sin guardar" << endl << RESET;
         
-        if (!Interfaz::solicitarEntero("Seleccione una opción", seleccion)) continue;
+        if (!interfaz.solicitarEntero("Seleccione una opción", seleccion)) continue;
 
         switch (seleccion) {
             case 1: {
-                if (Interfaz::solicitarTexto("Ingrese nuevo código", codigo, MAX_CODIGO)) {
+                if (interfaz.solicitarTexto("Ingrese nuevo código", codigo, MAX_CODIGO)) {
                     if (!Validaciones::validarCodigoProducto(codigo)) {
                         Formatos::imprimirError("El código debe tener el formato correcto (Ej: PROD001)");
                         break;
@@ -277,7 +284,7 @@ void actualizarProducto(Tienda& tienda) {
                 break;
             }
             case 2: {
-                if (Interfaz::solicitarTexto("Ingrese nuevo nombre", nombre, MAX_NOMBRE)){
+                if (interfaz.solicitarTexto("Ingrese nuevo nombre", nombre, MAX_NOMBRE)){
                     if (!Validaciones::validarNombre(nombre)) {
                         Formatos::imprimirError("El nombre debe tener al menos 3 caracteres");
                         break;
@@ -289,7 +296,7 @@ void actualizarProducto(Tienda& tienda) {
                 break;
             }
             case 3: {
-                if (Interfaz::solicitarTexto("Ingrese nueva descripción", descripcion, MAX_DESCRIPCION)) {
+                if (interfaz.solicitarTexto("Ingrese nueva descripción", descripcion, MAX_DESCRIPCION)) {
                     if (!Validaciones::validarDescripcion(descripcion)) {
                         Formatos::imprimirError("La descripción debe tener al menos 10 caracteres");
                         break;
@@ -301,7 +308,7 @@ void actualizarProducto(Tienda& tienda) {
                 break;
             }
             case 4: {
-                if (Interfaz::solicitarEntero("Ingrese ID del nuevo proveedor", idProveedor)) {
+                if (interfaz.solicitarEntero("Ingrese ID del nuevo proveedor", idProveedor)) {
                     if (!Validaciones::validarRango(idProveedor, 1, 1000)) {
                         Formatos::imprimirError("El ID del proveedor debe estar entre 1 y 1000");
                         break;
@@ -315,7 +322,7 @@ void actualizarProducto(Tienda& tienda) {
                 break;
             }
             case 5: {
-                if (Interfaz::solicitarFloat("Ingrese nuevo precio", precio)) {
+                if (interfaz.solicitarFloat("Ingrese nuevo precio", precio)) {
                     if (!Validaciones::validarRangoFloat(precio, 0.01, 999999.99)) {
                         Formatos::imprimirError("El precio debe estar entre 0.01 y 999999.99");
                         break;
@@ -327,7 +334,7 @@ void actualizarProducto(Tienda& tienda) {
                 break;
             }
             case 6: {
-                if (Interfaz::solicitarEntero("Ingrese nuevo stock", stock)) {
+                if (interfaz.solicitarEntero("Ingrese nuevo stock", stock)) {
                     if (!Validaciones::validarRango(stock, 0, 999999)) {
                         Formatos::imprimirError("El stock debe estar entre 0 y 999999");
                         break;
@@ -339,7 +346,7 @@ void actualizarProducto(Tienda& tienda) {
                 break;
             }
             case 7: {
-                if (Interfaz::solicitarEntero("Ingrese nuevo stock minimo", stockMinimo)) {
+                if (interfaz.solicitarEntero("Ingrese nuevo stock minimo", stockMinimo)) {
                     if (!Validaciones::validarRango(stockMinimo, 0, 999999)) {
                         Formatos::imprimirError("El stock minimo debe estar entre 0 y 999999");
                         break;
@@ -354,7 +361,7 @@ void actualizarProducto(Tienda& tienda) {
                 if (!verNombre && !verCodigo && !verDescrip && !verPrecio && !verStock && !verIdProveedor) {
                     Formatos::imprimirAdvertencia("No se han realizado cambios para guardar.");
                 } else {
-                    if (Interfaz::solicitarConfirmacion("¿Desea guardar los cambios hechos al producto?")) {
+                    if (interfaz.solicitarConfirmacion("¿Desea guardar los cambios hechos al producto?")) {
                         if (GestorArchivos::actualizarRegistro<Producto>(ARCHIVO_PRODUCTOS, indice, producto)){
                             Formatos::imprimirExito("¡Cambios aplicados exitosamente!");
                         } else {
@@ -378,6 +385,7 @@ void actualizarProducto(Tienda& tienda) {
 }
 
 void actualizarStockProducto(Tienda& tienda) {
+    Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PRODUCTOS);
     if (header.registrosActivos == 0){
         Formatos::imprimirAdvertencia("No hay productos en el Sistema.");
@@ -385,7 +393,7 @@ void actualizarStockProducto(Tienda& tienda) {
     }
     
     int idProducto;
-    if (!Interfaz::solicitarEntero("Ingrese el ID del producto a buscar", idProducto)) return;
+    if (!interfaz.solicitarEntero("Ingrese el ID del producto a buscar", idProducto)) return;
 
     int indice = GestorArchivos::buscarPorId<Producto>(ARCHIVO_PRODUCTOS, idProducto);
     if (indice == -1) {
@@ -409,14 +417,14 @@ void actualizarStockProducto(Tienda& tienda) {
         cout << "2. Quitar unidades" << endl;
         cout << "3. Guardar cambios" << endl;
         cout << "0. Cancelar sin guardar" << endl << RESET;
-        if (!Interfaz::solicitarEntero("Seleccione una opción", seleccion)) {
+        if (!interfaz.solicitarEntero("Seleccione una opción", seleccion)) {
             return;
         }
 
         switch (seleccion) {
             case 1: { // Quitar unidades
                 int cantidad;
-                if (Interfaz::solicitarEntero("¿Cuantas unidades ingresan?", cantidad)) {
+                if (interfaz.solicitarEntero("¿Cuantas unidades ingresan?", cantidad)) {
                     if (Validaciones::validarRango(cantidad, 1, 999999)) {
                         producto.setStock(producto.getStock() + cantidad);
                         Formatos::imprimirExito("Cantidad añadida al stock.");
@@ -428,7 +436,7 @@ void actualizarStockProducto(Tienda& tienda) {
             }
             case 2: { // Agregar unidades
                 int cantidad;
-                if (Interfaz::solicitarEntero("¿Cuantas unidades se quitan?", cantidad)) {
+                if (interfaz.solicitarEntero("¿Cuantas unidades se quitan?", cantidad)) {
                     if (Validaciones::validarRango(cantidad, 1, 999999) && cantidad <= producto.getStock()) {
                         producto.setStock(producto.getStock() - cantidad);
                         Formatos::imprimirExito("Cantidad restada del stock.");
@@ -468,7 +476,7 @@ void listarProductos(Tienda& tienda) {
     }
     
     Formatos::imprimirSubtitulo("LISTADO DE PRODUCTOS");
-    Formatos::imprimirEncabezadoTabla();
+    Formatos::EncabezadoCompletoProducto();
     
     ifstream archivo(ARCHIVO_PRODUCTOS, ios::binary);
     if (archivo.is_open()) {
@@ -490,6 +498,7 @@ void listarProductos(Tienda& tienda) {
 }
 
 void eliminarProducto(Tienda& tienda) {
+    Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PRODUCTOS);
     if (header.registrosActivos == 0){
         Formatos::imprimirAdvertencia("No hay productos en el Sistema.");
@@ -497,7 +506,7 @@ void eliminarProducto(Tienda& tienda) {
     }
 
     int idProducto;
-    if (!Interfaz::solicitarEntero("Ingrese el ID del producto a buscar", idProducto)) return;
+    if (!interfaz.solicitarEntero("Ingrese el ID del producto a buscar", idProducto)) return;
 
     int indice = GestorArchivos::buscarPorId<Producto>(ARCHIVO_PRODUCTOS, idProducto);
     if (indice == -1) {
@@ -509,7 +518,7 @@ void eliminarProducto(Tienda& tienda) {
     Producto producto = GestorArchivos::obtenerRegistroPorIndice<Producto>(ARCHIVO_PRODUCTOS, indice);
     
     Formatos::imprimirSubtitulo("DATOS DEL PRODUCTO A ELIMINAR:");
-    Formatos::imprimirEncabezadoTabla();
+    Formatos::EncabezadoBasicoProducto();
     producto.mostrarInformacionBasica();
     Formatos::imprimirSeparador();    
     
@@ -519,7 +528,7 @@ void eliminarProducto(Tienda& tienda) {
         Formatos::imprimirInformacion("Eliminarlo podria afectar la integridad de de los registros historicos.");
     }
 
-    if (Interfaz::solicitarConfirmacion("¿Está seguro que desea eliminar este producto? Esta acción no se puede deshacer.")) {
+    if (interfaz.solicitarConfirmacion("¿Está seguro que desea eliminar este producto? Esta acción no se puede deshacer.")) {
         // Marcar como eliminado lógicamente
         GestorArchivos::eliminarRegistroLogico<Producto>(ARCHIVO_PRODUCTOS, idProducto);
         Formatos::imprimirExito("Producto eliminado correctamente.");
@@ -609,7 +618,7 @@ void listarPorProveedor(Tienda& tienda, int idProveedor) {
         int count = 0;
         bool encontrados = false;
         
-        Formatos::imprimirEncabezadoTabla();
+        Formatos::EncabezadoCompletoProducto();
         
         while (archivo.read(reinterpret_cast<char*>(&producto), sizeof(Producto)) && count < header.cantidadRegistros) {
             if (!producto.isEliminado() && producto.getIdProveedor() == idProveedor) {
@@ -631,6 +640,7 @@ void listarPorProveedor(Tienda& tienda, int idProveedor) {
 }
 
 void menuProductos(Tienda& tienda) {
+    Interfaz interfaz;
     int opcion;
     
     do {
@@ -647,7 +657,7 @@ void menuProductos(Tienda& tienda) {
                   << "7. Reporte de Stock Crítico" << endl
                   << "0. Volver al Menú Principal" << endl << RESET;
         
-        if (!Interfaz::solicitarEntero("Seleccione una opción", opcion)) {
+        if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
             opcion = -1;
         }
         

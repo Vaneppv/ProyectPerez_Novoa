@@ -5,6 +5,7 @@
 #include <cstring>
 #include <iostream>
 #include "Constantes.hpp"
+#include "../transacciones/Transaccion.hpp"
 
 using namespace std;
 
@@ -51,16 +52,19 @@ public:
     template<typename T>
     static int* buscarRegistroPorNombre(const char* nombreArchivo, const char* consulta, int* numResultados);
     
-    // Operaciones específicas para detalles de transacciones (TODO: Implementar cuando existan las clases)
-    // static bool guardarDetalle(const char* archivoDetalles, int idTransaccion, const DetalleTransaccion& detalle);
-    // static void mostrarDetalleTransaccion(const char* archivoDetalles, const char* archivoProductos, const Transaccion& t);
+    // Operaciones específicas para transacciones
+    static Transaccion* buscarTransaccionesPorTipo(const char* nombreArchivo, const char* tipo, int* numResultados);
+    static Transaccion* buscarTransaccionesPorFecha(const char* nombreArchivo, const char* fecha, int* numResultados);
+    static Transaccion* buscarTransaccionesPorRelacionado(const char* nombreArchivo, int idRelacionado, int* numResultados);
     
     // Utilidades
     template<typename T>
     static int calcularPosicionRegistro(int indice);
     
-private:
+    // Métodos adicionales para el template
     static void obtenerFechaActual(char* buffer);
+    
+private:
     static bool contieneSubstring(const char* texto, const char* busqueda);
 };
 

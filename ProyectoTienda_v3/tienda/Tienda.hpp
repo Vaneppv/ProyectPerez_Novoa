@@ -7,6 +7,7 @@ class Tienda {
 private:
     char nombre[MAX_NOMBRE];
     char rif[MAX_RIF];
+    bool eliminado;
     
     // Contadores para IDs autoincrementales
     int siguienteIdProducto;
@@ -29,6 +30,14 @@ public:
     int getSiguienteIdProveedor() const;
     int getSiguienteIdCliente() const;
     int getSiguienteIdTransaccion() const;
+    
+    // Métodos adicionales para compatibilidad con template
+    int getId() const;
+    bool isEliminado() const;
+    void setEliminado(bool eliminado);
+    void setId(int id);
+    void setFechaRegistro(const char* fecha);
+    void setFechaUltimaModificacion(const char* fecha);
     
     // Setters
     void setNombre(const char* nombre);

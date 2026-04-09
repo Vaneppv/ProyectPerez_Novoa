@@ -162,24 +162,29 @@ bool Producto::stockValido(int stock) const {
 
 // Métodos de presentación
 void Producto::mostrarInformacionBasica() const {
-    cout << CYAN << "ID: " << id << " | Código: " << codigo << " | Nombre: " << nombre 
-              << " | Precio: $" << Formatos::formatearMoneda(precio) << " | Stock: " << stock << RESET << endl;
+    cout << CYAN << setw(5) << id << setw(15) << codigo << setw(30) << nombre 
+         << setw(10) << Formatos::formatearMoneda(precio) << setw(10) << stock << RESET << endl;
 }
 
 void Producto::mostrarInformacionCompleta() const {
+    int indice = GestorArchivos::buscarPorId<Proveedor>(ARCHIVO_PROVEEDORES, idProveedor);
+    Proveedor proveedor;
+    if (indice != -1) {
+        proveedor = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, indice);
+    }
     cout << CYAN;
-    cout << "ID: " << id << endl;
-    cout << "Código: " << codigo << endl;
-    cout << "Nombre: " << nombre << endl;
-    cout << "Descripción: " << descripcion << endl;
-    cout << "ID Proveedor: " << idProveedor << endl;
-    cout << "Precio: $" << Formatos::formatearMoneda(precio) << endl;
-    cout << "Stock Actual: " << stock << endl;
-    cout << "Stock Mínimo: " << stockMinimo << endl;
-    cout << "Total Vendido: " << totalVendido << endl;
-    cout << "Fecha Registro: " << fechaRegistro << endl;
-    cout << "Fecha Última Modificación: " << fechaUltimaModificacion << endl;
-    cout << "Estado: " << (eliminado ? "Eliminado" : "Activo") << RESET << endl;
+    cout << setw(5) << id;
+    cout << setw(15) << codigo;
+    cout << setw(30) << nombre;
+    cout << setw(50) << descripcion;
+    cout << setw(5) << proveedor.getNombre();
+    cout << setw(10) << Formatos::formatearMoneda(precio);
+    cout << setw(10) << stock;
+    cout << setw(10) << stockMinimo;
+    cout << setw(15) << totalVendido;
+    cout << setw(15) << fechaRegistro;
+    cout << setw(15) << fechaUltimaModificacion;
+    cout << setw(20) << (eliminado ? "Eliminado" : "Activo") << RESET << endl;
     
     if (estaBajoStockMinimo()) {
         cout << AMARILLO << "⚠ ADVERTENCIA: Stock por debajo del mínimo" << RESET << endl;

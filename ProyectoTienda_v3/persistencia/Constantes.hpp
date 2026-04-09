@@ -2,13 +2,13 @@
 #define CONSTANTES_HPP
 
 // Rutas de archivos binarios
-const char* ARCHIVO_TIENDA = "datos/tienda.bin";
-const char* ARCHIVO_PRODUCTOS = "datos/productos.bin";
-const char* ARCHIVO_PROVEEDORES = "datos/proveedores.bin";
-const char* ARCHIVO_CLIENTES = "datos/clientes.bin";
-const char* ARCHIVO_TRANSACCIONES = "datos/transacciones.bin";
-const char* ARCHIVO_DETALLES = "datos/detallesTransacciones.bin";
-const char* ARCHIVO_BACKUP = "datos/backup.bin";
+extern const char* ARCHIVO_TIENDA;
+extern const char* ARCHIVO_PRODUCTOS;
+extern const char* ARCHIVO_PROVEEDORES;
+extern const char* ARCHIVO_CLIENTES;
+extern const char* ARCHIVO_TRANSACCIONES;
+extern const char* ARCHIVO_DETALLES;
+extern const char* ARCHIVO_BACKUP;
 
 // Límites y constantes del sistema
 const int MAX_PRODUCTOS_PROVEEDOR = 100;
@@ -22,6 +22,7 @@ const int MAX_EMAIL = 100;
 const int MAX_DIRECCION = 200;
 const int MAX_FECHA = 11;
 const int MAX_TIPO_TRANSACCION = 10;
+const int MAX_CEDULA = 20;
 
 // Códigos de colores ANSI para la interfaz
 #define RESET   "\033[00m"

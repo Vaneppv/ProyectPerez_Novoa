@@ -35,7 +35,10 @@ public:
     // Formatos de presentación de datos
     static void alinearDerecha(int ancho);
     static void alinearCentro(int ancho);
-    static void imprimirEncabezadoTabla();
+    static void EncabezadoBasicoProducto();
+    static void EncabezadoCompletoProducto();
+    static void EncabezadoBasicoProveedor();
+    static void EncabezadoCompletoProveedor();
     static void imprimirPieTabla();
     
     // Colores y estilos

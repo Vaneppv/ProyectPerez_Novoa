@@ -1,4 +1,5 @@
 #include "Validaciones.hpp"
+#include "../persistencia/Constantes.hpp"
 #include <cstring>
 #include <cctype>
 #include <iostream>

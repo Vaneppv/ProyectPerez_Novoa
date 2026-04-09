@@ -1,12 +1,14 @@
 #include "Interfaz.hpp"
 #include "../productos/operacionesProductos.hpp"
-#include "../proveedores/operacionesProveedores.hpp"
-#include "../clientes/operacionesClientes.hpp"
+#include "../proveedores/operacionesproveedor.hpp"
+#include "../cliente/operacionescliente.hpp"
 #include "../transacciones/operacionesTransacciones.hpp"
 #include "../persistencia/GestorArchivos.hpp"
 #include "../utilidades/Formatos.hpp"
 #include <iostream>
 #include <limits>
+
+using namespace std;
 
 // Método principal de ejecución
 void Interfaz::ejecutar() {
@@ -30,6 +32,7 @@ void Interfaz::ejecutar() {
 
 // Menú principal
 void Interfaz::menuPrincipal(Tienda& tienda) {
+    Interfaz interfaz;
     int opcion;
     
     do {
@@ -48,7 +51,7 @@ void Interfaz::menuPrincipal(Tienda& tienda) {
                   << "0. Salir del Sistema" << std::endl << RESET;
         Formatos::imprimirSeparador(60, '=');
         
-        if (!solicitarEntero("Seleccione una opción", opcion)) {
+        if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
             opcion = -1;
         }
         
@@ -78,19 +81,20 @@ void Interfaz::menuPrincipal(Tienda& tienda) {
                 Formatos::imprimirError("Opción no válida. Intente nuevamente.");
                 Formatos::pausar();
                 break;
-        }
+        }   
         
     } while (opcion != 0);
 }
 
 // Submenús
 void Interfaz::menuMantenimiento(Tienda& tienda) {
+    Interfaz interfaz;
     int opcion;
     
     do {
         Formatos::limpiarPantalla();
-        Formatos::imprimirTitulo("MANTENIMIENTO DEL SISTEMA");
-        
+        Formatos::imprimirTitulo("MENÚ DE MANTENIMIENTO DEL SISTEMA");
+        Formatos::imprimirSeparador(60, '=');
         std::cout << CYAN
                   << "1. Verificar Integridad Referencial" << std::endl
                   << "2. Crear Respaldo (Backup)" << std::endl
@@ -99,7 +103,7 @@ void Interfaz::menuMantenimiento(Tienda& tienda) {
                   << "0. Volver al Menú Principal" << std::endl << RESET;
         Formatos::imprimirSeparador(60, '=');
         
-        if (!solicitarEntero("Seleccione una opción", opcion)) {
+        if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
             opcion = -1;
         }
         
@@ -131,11 +135,11 @@ void Interfaz::menuMantenimiento(Tienda& tienda) {
                 Formatos::pausar();
                 break;
         }
-        
     } while (opcion != 0);
 }
 
 void Interfaz::menuReportes(Tienda& tienda) {
+    Interfaz interfaz;
     int opcion;
     
     do {
@@ -151,7 +155,7 @@ void Interfaz::menuReportes(Tienda& tienda) {
                   << "0. Volver al Menú Principal" << std::endl << RESET;
         Formatos::imprimirSeparador(60, '=');
         
-        if (!solicitarEntero("Seleccione una opción", opcion)) {
+        if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
             opcion = -1;
         }
         
@@ -200,9 +204,6 @@ void Interfaz::mostrarBienvenida() {
     std::cout << std::setw(25) << "" << "BIENVENIDO AL SISTEMA DE INVENTARIO" << std::endl;
     std::cout << std::setw(28) << "" << "TIENDA JSPORT - VERSIÓN 3.0" << std::endl;
     std::cout << RESET;
-    Formatos::imprimirSeparador(80, '=');
-    std::cout << CYAN << "Sistema modularizado con Programación Orientada a Objetos" << std::endl;
-    std::cout << "Desarrollado en C++ con manejo de archivos binarios" << RESET << std::endl;
     Formatos::imprimirSeparador(80, '=');
     Formatos::pausar();
 }
