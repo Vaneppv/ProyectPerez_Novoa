@@ -74,7 +74,8 @@ void registrarCompra(Tienda& tienda) {
         
         int indiceProducto = GestorArchivos::buscarPorId<Producto>(ARCHIVO_PRODUCTOS, productoId);
         if (indiceProducto == -1) {
-            Formatos::imprimirError("El producto no existe.");
+            string infoMsg = "Indice de producto no encontrado: " + to_string(productoId);
+            Formatos::imprimirError(infoMsg.c_str());
             continue;
         }
         
@@ -104,7 +105,8 @@ void registrarCompra(Tienda& tienda) {
         totalCompra += cantidad * costo;
         cantItems++;
         
-        Formatos::imprimirExito("Producto agregado al carrito.");
+        string infoMsg = "Producto agregado al carrito. ID: " + to_string(productoId);
+        Formatos::imprimirExito(infoMsg.c_str());
         
         if (cantItems < 100) {
             cout << "¿Desea agregar otro producto? (S/N): ";
@@ -117,14 +119,15 @@ void registrarCompra(Tienda& tienda) {
     } while ((continuar == 's' || continuar == 'S') && cantItems < 100);
     
     if (cantItems == 0) {
-        Formatos::imprimirError("Compra cancelada: No se agregaron productos al carrito.");
+        string infoMsg = "Compra cancelada: No se agregaron productos al carrito.";
+        Formatos::imprimirError(infoMsg.c_str());
         Formatos::pausar();
         return;
     }
     
     // Mostrar resumen de la compra
     Formatos::imprimirSubtitulo("RESUMEN DE COMPRA");
-    Formatos::imprimirEncabezadoTabla();
+    cout << CYAN << left << setw(20) << "PRODUCTO" << setw(8) << "CANT." << setw(12) << "SUBTOTAL" << endl;
     
     for (int i = 0; i < cantItems; i++) {
         int indProd = GestorArchivos::buscarPorId<Producto>(ARCHIVO_PRODUCTOS, carrito[i].getIdProducto());
@@ -157,7 +160,8 @@ void registrarCompra(Tienda& tienda) {
                 detalle.setPrecioUnitario(carrito[i].getPrecioUnitario());
                 
                 if (!GestorArchivos::guardarNuevoRegistro<DetalleTransaccion>(ARCHIVO_DETALLES, detalle)) {
-                    Formatos::imprimirError("Error al guardar detalle de transacción");
+                    string errorMsg = "Error al guardar detalle de transacción";
+                    Formatos::imprimirError(errorMsg.c_str());
                     continue;
                 }
             }
@@ -166,13 +170,42 @@ void registrarCompra(Tienda& tienda) {
             for (int i = 0; i < cantItems; i++) {
                 int indProd = GestorArchivos::buscarPorId<Producto>(ARCHIVO_PRODUCTOS, carrito[i].getIdProducto());
                 Producto producto = GestorArchivos::obtenerRegistroPorIndice<Producto>(ARCHIVO_PRODUCTOS, indProd);
-                producto.setStock(producto.getStock() - carrito[i].getCantidad());
+                producto.setStock(producto.getStock() + carrito[i].getCantidad());
                 
                 if (!GestorArchivos::actualizarRegistro<Producto>(ARCHIVO_PRODUCTOS, indProd, producto)) {
-                    Formatos::imprimirError("Error al actualizar stock del producto");
+                    string errorMsg = "Error al actualizar stock del producto";
+                    Formatos::imprimirError(errorMsg.c_str());
+                }
+            }
+
+            Proveedor prov = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, indProveedor);
+            prov.setTotalCompras(prov.getTotalCompras() + totalCompra);       // Acumula el gasto/inversion
+            
+            if (prov.getCantidadTransacciones() < 100){
+                prov.getTransaccionesIds()[prov.getCantidadTransacciones()] = transaccion.getId();
+                prov.setCantidadTransacciones(prov.getCantidadTransacciones() + 1);
+            }
+
+            for (int i = 0; i < cantItems; i++) {
+                int idProdActual = carrito[i].getIdProducto();
+                bool yaExiste = false;
+
+                // Verifica si el producto ya estaba en la lista del proveedor 
+                for (int j = 0; j < prov.getCantidadProductos(); j++) {
+                    if (prov.getProductosIds()[j] == idProdActual) {
+                        yaExiste = true;
+                        break;
+                    }
+                }
+                // Si no esta en la lista del proveedor, se agrega
+                if (!yaExiste && prov.getCantidadProductos() < 100) {
+                    prov.getProductosIds()[prov.getCantidadProductos()] = idProdActual;
+                    prov.setCantidadProductos(prov.getCantidadProductos() + 1);
                 }
             }
             
+            GestorArchivos::actualizarRegistro<Proveedor>(ARCHIVO_PROVEEDORES, indProveedor, prov);
+
             string successMsg = "Compra registrada correctamente. ID Transacción: " + to_string(transaccion.getId());
             Formatos::imprimirExito(successMsg.c_str());
         } else {
@@ -181,7 +214,7 @@ void registrarCompra(Tienda& tienda) {
     } else {
         Formatos::imprimirInformacion("Operación cancelada.");
     }
-    
+
     Formatos::pausar();
 }
 
@@ -244,7 +277,8 @@ void registrarVenta(Tienda& tienda) {
         
         int indiceProducto = GestorArchivos::buscarPorId<Producto>(ARCHIVO_PRODUCTOS, productoId);
         if (indiceProducto == -1) {
-            Formatos::imprimirError("El producto no existe.");
+            string errorMsg = "El producto con ID " + to_string(productoId) + " no existe.";
+            Formatos::imprimirError(errorMsg.c_str());
             continue;
         }
         
@@ -255,20 +289,21 @@ void registrarVenta(Tienda& tienda) {
         }
         
         if (cantidad <= 0) {
-            Formatos::imprimirError("La cantidad debe ser mayor a cero.");
+            string errorMsg = "La cantidad debe ser mayor a cero.";
+            Formatos::imprimirError(errorMsg.c_str());
             continue;
         }
-        
-        if (!interfaz.solicitarFloat("Ingrese precio unitario", precio)) {
-            break;
-        }
-        
+
         // Validar stock disponible
         if (cantidad > producto.getStock()) {
             string errorMsg = "Stock insuficiente. Disponible: " + to_string(producto.getStock());
             Formatos::imprimirError(errorMsg.c_str());
             Formatos::pausar();
             continue;
+        }
+        
+        if (!interfaz.solicitarFloat("Ingrese precio unitario", precio)) {
+            break;
         }
                 
         // Agregar al carrito
@@ -295,14 +330,15 @@ void registrarVenta(Tienda& tienda) {
     } while ((continuar == 's' || continuar == 'S') && cantItems < 100);
     
     if (cantItems == 0) {
-        Formatos::imprimirError("Venta cancelada: No se agregaron productos al carrito.");
+        string errorMsg = "Venta cancelada: No se agregaron productos al carrito.";
+        Formatos::imprimirError(errorMsg.c_str());
         Formatos::pausar();
         return;
     }
     
     // Mostrar resumen de la venta
     Formatos::imprimirSubtitulo("RESUMEN DE VENTA");
-    Formatos::imprimirEncabezadoTabla();
+    cout << CYAN << left << setw(20) << "PRODUCTO" << setw(8) << "CANT." << setw(12) << "SUBTOTAL" << endl;
     
     for (int i = 0; i < cantItems; i++) {
         int indProd = GestorArchivos::buscarPorId<Producto>(ARCHIVO_PRODUCTOS, carrito[i].getIdProducto());
@@ -335,7 +371,8 @@ void registrarVenta(Tienda& tienda) {
                 detalle.setPrecioUnitario(carrito[i].getPrecioUnitario());
                 
                 if (!GestorArchivos::guardarNuevoRegistro<DetalleTransaccion>(ARCHIVO_DETALLES, detalle)) {
-                    Formatos::imprimirError("Error al guardar detalle de transacción");
+                    string errorMsg = "Error al guardar detalle de transacción";
+                    Formatos::imprimirError(errorMsg.c_str());
                     continue;
                 }
             }
@@ -347,10 +384,20 @@ void registrarVenta(Tienda& tienda) {
                 producto.setStock(producto.getStock() - carrito[i].getCantidad());
                 
                 if (!GestorArchivos::actualizarRegistro<Producto>(ARCHIVO_PRODUCTOS, indProd, producto)) {
-                    Formatos::imprimirError("Error al actualizar stock del producto");
+                    string errorMsg = "Error al actualizar stock del producto";
+                    Formatos::imprimirError(errorMsg.c_str());
                 }
             }
             
+            Cliente client = GestorArchivos::obtenerRegistroPorIndice<Cliente>(ARCHIVO_CLIENTES, indCliente);
+            client.setTotalCompras(client.getTotalCompras() + totalVenta);      // Sumar gasto del cliente (Venta)
+
+            if (client.getCantidadTransacciones() < 100){
+                client.getTransaccionesIds()[client.getCantidadTransacciones()] = transaccion.getId();
+                client.setCantidadTransacciones(client.getCantidadTransacciones() + 1);
+            }
+            GestorArchivos::actualizarRegistro<Cliente>(ARCHIVO_CLIENTES, indCliente, client);
+
             string successMsg = "Venta registrada correctamente. ID Transacción: " + to_string(transaccion.getId());
             Formatos::imprimirExito(successMsg.c_str());
         } else {
@@ -376,10 +423,11 @@ void buscarTransacciones(Tienda& tienda) {
     do {
         Formatos::imprimirSubtitulo("BUSCAR TRANSACCIONES");
         cout << CYAN
-                  << "1. Buscar por ID" << endl
-                  << "2. Buscar por tipo (COMPRA/VENTA)" << endl
-                  << "3. Buscar por fecha" << endl
-                  << "4. Buscar por proveedor/cliente" << endl
+                  << "1. Buscar por ID de Transacción" << endl 
+                  << "2. Buscar por ID de Producto" << endl
+                  << "3. Buscar por tipo (COMPRA/VENTA)" << endl
+                  << "4. Buscar por fecha" << endl
+                  << "5. Buscar por ID de Proveedor/Cliente" << endl
                   << "0. Cancelar" << endl << RESET;
         
         if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
@@ -394,7 +442,17 @@ void buscarTransacciones(Tienda& tienda) {
                     if (indice != -1) {
                         Transaccion transaccion = GestorArchivos::obtenerRegistroPorIndice<Transaccion>(ARCHIVO_TRANSACCIONES, indice);
                         Formatos::imprimirExito("Transacción encontrada:");
+                        Formatos::EncabezadoCompletoTransacciones();
                         transaccion.mostrarInformacionCompleta();
+                        DetalleTransaccion* detalles = GestorArchivos::obtenerDetallesPorTransaccion(ARCHIVO_DETALLES, transaccion.getId(), nullptr);
+                        if (detalles != nullptr) {
+                            Formatos::imprimirInformacion("Detalles de la transacción:");
+                            Formatos::EncabezadoDetalles();
+                            for (int i = 0; i < transaccion.getCantidadItemsDiferentes(); i++) {
+                                detalles[i].mostrarInformacion();
+                            }
+                            delete[] detalles;
+                        }
                     } else {
                         Formatos::imprimirError("Transacción no encontrada.");
                     }
@@ -404,6 +462,51 @@ void buscarTransacciones(Tienda& tienda) {
             }
             
             case 2: {
+                int id;
+                if (interfaz.solicitarEntero("Ingrese ID del producto", id)) {
+                    int indice = GestorArchivos::buscarPorId<Producto>(ARCHIVO_PRODUCTOS, id);
+                    if (indice == -1) {
+                        Formatos::imprimirError("Producto no encontrado");
+                    } else {
+                        // Buscar todos los detalles de transacción para este producto
+                        int idsTransacciones[100];
+                        int cantidadTransacciones = 0;
+                        
+                        ifstream archivoDetalles(ARCHIVO_DETALLES, ios::binary);
+                        if (archivoDetalles.is_open()) {
+                            archivoDetalles.seekg(sizeof(ArchivoHeader), ios::beg);
+                            DetalleTransaccion detalle;
+                            
+                            while (archivoDetalles.read(reinterpret_cast<char*>(&detalle), sizeof(DetalleTransaccion)) && cantidadTransacciones < 100) {
+                                if (!detalle.isEliminado() && detalle.getIdProducto() == id) {
+                                    idsTransacciones[cantidadTransacciones] = detalle.getIdTransaccion();
+                                    cantidadTransacciones++;
+                                }
+                            }
+                            archivoDetalles.close();
+                        }
+                        
+                        if (cantidadTransacciones == 0) {
+                            Formatos::imprimirAdvertencia("No se encontraron transacciones para este producto");
+                        } else {
+                            Formatos::imprimirExito("Transacciones encontradas para el producto:");
+                            Formatos::EncabezadoBasicoTransacciones();
+                            // Mostrar información de cada transacción encontrada
+                            for (int i = 0; i < cantidadTransacciones; i++) {
+                                int indiceTrans = GestorArchivos::buscarPorId<Transaccion>(ARCHIVO_TRANSACCIONES, idsTransacciones[i]);
+                                if (indiceTrans != -1) {
+                                    Transaccion transaccion = GestorArchivos::obtenerRegistroPorIndice<Transaccion>(ARCHIVO_TRANSACCIONES, indiceTrans);
+                                    transaccion.mostrarInformacionBasica();
+                                }
+                            }
+                        }
+                    }
+                }
+                Formatos::pausar();
+                break;
+            }
+
+            case 3: {
                 char tipo[20];
                 if (interfaz.solicitarTexto("Ingrese tipo (COMPRA/VENTA)", tipo, 20)) {
                     int numResultados = 0;
@@ -411,10 +514,9 @@ void buscarTransacciones(Tienda& tienda) {
                     
                     if (transacciones != nullptr && numResultados > 0) {
                         Formatos::imprimirExito("Transacciones encontradas:");
+                        Formatos::encabezadoTransacciones();
                         for (int i = 0; i < numResultados; i++) {
-                            cout << "ID: " << transacciones[i].getId() 
-                                 << " | Tipo: " << transacciones[i].getTipo()
-                                 << " | Total: $" << transacciones[i].getTotal() << endl;
+                            transacciones[i].mostrarInformacionBasica();
                         }
                         delete[] transacciones;
                     } else {
@@ -425,7 +527,7 @@ void buscarTransacciones(Tienda& tienda) {
                 break;
             }
             
-            case 3: {
+            case 4: {
                 char fecha[11];
                 if (interfaz.solicitarTexto("Ingrese fecha (DD/MM/AAAA)", fecha, 11)) {
                     int numResultados = 0;
@@ -434,10 +536,7 @@ void buscarTransacciones(Tienda& tienda) {
                     if (transacciones != nullptr && numResultados > 0) {
                         Formatos::imprimirExito("Transacciones encontradas:");
                         for (int i = 0; i < numResultados; i++) {
-                            cout << "ID: " << transacciones[i].getId()
-                                 << " | Fecha: " << transacciones[i].getFechaRegistro()
-                                 << " | Tipo: " << transacciones[i].getTipo()
-                                 << " | Total: $" << transacciones[i].getTotal() << endl;
+                            transacciones[i].mostrarInformacionBasica();
                         }
                         delete[] transacciones;
                     } else {
@@ -448,7 +547,7 @@ void buscarTransacciones(Tienda& tienda) {
                 break;
             }
             
-            case 4: {
+            case 5: {
                 int idRelacionado;
                 if (interfaz.solicitarEntero("Ingrese ID del proveedor o cliente", idRelacionado)) {
                     int numResultados = 0;
@@ -456,11 +555,9 @@ void buscarTransacciones(Tienda& tienda) {
                     
                     if (transacciones != nullptr && numResultados > 0) {
                         Formatos::imprimirExito("Transacciones encontradas:");
+                        Formatos::EncabezadoBasicoTransacciones();
                         for (int i = 0; i < numResultados; i++) {
-                            cout << "ID: " << transacciones[i].getId()
-                                 << " | Fecha: " << transacciones[i].getFechaRegistro()
-                                 << " | Tipo: " << transacciones[i].getTipo()
-                                 << " | Total: $" << transacciones[i].getTotal() << endl;
+                            transacciones[i].mostrarInformacionBasica();
                         }
                         delete[] transacciones;
                     } else {
@@ -492,7 +589,7 @@ void listarTransacciones(Tienda& tienda) {
     }
     
     Formatos::imprimirSubtitulo("LISTADO DE TRANSACCIONES");
-    Formatos::imprimirEncabezadoTabla();
+    Formatos::EncabezadoCompletoTransacciones();
     
     // Leer y mostrar todas las transacciones
     ifstream archivo(ARCHIVO_TRANSACCIONES, ios::binary);
@@ -512,6 +609,18 @@ void listarTransacciones(Tienda& tienda) {
         if (!transaccion.isEliminado()) {
             transaccion.mostrarInformacionCompleta();
             count++;
+            
+            // Mostrar detalles de la transacción
+            int numDetalles = 0;
+            DetalleTransaccion* detalles = GestorArchivos::obtenerDetallesPorTransaccion(ARCHIVO_DETALLES, transaccion.getId(), &numDetalles);
+            if (detalles != nullptr && numDetalles > 0) {
+                Formatos::imprimirInformacion("Detalles de la transacción:");
+                Formatos::EncabezadoDetalles();
+                for (int i = 0; i < numDetalles; i++) {
+                    detalles[i].mostrarInformacion();
+                }
+                delete[] detalles;
+            }
         }
     }
     
@@ -551,6 +660,7 @@ void cancelarTransaccion(Tienda& tienda) {
     Transaccion transaccion = GestorArchivos::obtenerRegistroPorIndice<Transaccion>(ARCHIVO_TRANSACCIONES, indice);
     
     Formatos::imprimirSubtitulo("DATOS DE LA TRANSACCIÓN A CANCELAR");
+    Formatos::EncabezadoCompletoTransacciones();
     transaccion.mostrarInformacionCompleta();
     
     if (interfaz.solicitarConfirmacion("¿Está seguro que desea cancelar esta transacción? Esta acción no se puede deshacer.")) {

@@ -70,19 +70,14 @@ bool DetalleTransaccion::precioValido(float precio) const {
 }
 
 // Métodos de presentación
-void DetalleTransaccion::mostrarInformacionBasica() const {
-    cout << CYAN << "ID Producto: " << idProducto << " | Cantidad: " << cantidad 
-              << " | Precio Unitario: $" << Formatos::formatearMoneda(precioUnitario) 
-              << " | Subtotal: $" << Formatos::formatearMoneda(calcularSubtotal()) << RESET << endl;
-}
 
-void DetalleTransaccion::mostrarInformacionCompleta() const {
+void DetalleTransaccion::mostrarInformacion() const {
     cout << CYAN;
-    cout << "ID Producto: " << idProducto << endl;
-    cout << "Cantidad: " << cantidad << endl;
-    cout << "Precio Unitario: $" << Formatos::formatearMoneda(precioUnitario) << endl;
-    cout << "ID Transacción: " << idTransaccion << endl;
-    cout << "Subtotal: $" << Formatos::formatearMoneda(calcularSubtotal()) << RESET << endl;
+    cout << setw(5) << idProducto;
+    cout << setw(10) << cantidad;
+    cout << setw(15) << Formatos::formatearMoneda(precioUnitario);
+    cout << setw(5) << idTransaccion;
+    cout << setw(15) << Formatos::formatearMoneda(calcularSubtotal()) << RESET << endl;
 }
 
 // Métodos de negocio

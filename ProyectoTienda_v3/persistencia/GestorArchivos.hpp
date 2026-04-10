@@ -6,6 +6,7 @@
 #include <iostream>
 #include "Constantes.hpp"
 #include "../transacciones/Transaccion.hpp"
+#include "../transacciones/DetalleTransaccion.hpp"
 
 using namespace std;
 
@@ -56,6 +57,8 @@ public:
     static Transaccion* buscarTransaccionesPorTipo(const char* nombreArchivo, const char* tipo, int* numResultados);
     static Transaccion* buscarTransaccionesPorFecha(const char* nombreArchivo, const char* fecha, int* numResultados);
     static Transaccion* buscarTransaccionesPorRelacionado(const char* nombreArchivo, int idRelacionado, int* numResultados);
+    static int verificarProductoEnTransaccion(const char* archivoDetalles, int idProd);
+    static DetalleTransaccion* obtenerDetallesPorTransaccion(const char* archivoDetalles, int idTransaccion, int* numResultados);
     
     // Utilidades
     template<typename T>

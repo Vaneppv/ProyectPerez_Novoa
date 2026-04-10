@@ -37,8 +37,7 @@ public:
     bool precioValido(float precio) const;
     
     // Métodos de presentación
-    void mostrarInformacionBasica() const;
-    void mostrarInformacionCompleta() const;
+    void mostrarInformacion() const;
     
     // Métodos de negocio
     float calcularSubtotal() const;

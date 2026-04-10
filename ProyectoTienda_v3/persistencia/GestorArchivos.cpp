@@ -266,3 +266,80 @@ Transaccion* GestorArchivos::buscarTransaccionesPorRelacionado(const char* nombr
     *numResultados = count;
     return resultados;
 }
+
+int GestorArchivos::verificarProductoEnTransaccion(const char* archivoDetalles, int idProd) {
+    ifstream archivo(archivoDetalles, ios::binary);
+    if (!archivo.is_open()) {
+        cout << ROJO << "Error: No se pudo abrir el archivo " << archivoDetalles << endl << RESET;
+        return -1;
+    }
+    
+    // Saltar el header del archivo
+    archivo.seekg(sizeof(ArchivoHeader), ios::beg);
+    
+    DetalleTransaccion trans;
+    while(archivo.read(reinterpret_cast<char*>(&trans), sizeof(DetalleTransaccion))) {
+        if(!trans.isEliminado() && trans.getIdProducto() == idProd) {
+            archivo.close();
+            return trans.getIdTransaccion();
+        }
+    }
+    archivo.close();
+    return -1;
+}
+
+DetalleTransaccion* GestorArchivos::obtenerDetallesPorTransaccion(const char* archivoDetalles, int idTransaccion, int* numResultados) {
+    ifstream archivo(archivoDetalles, ios::binary);
+    if (!archivo.is_open()) {
+        cout << ROJO << "Error: No se pudo abrir el archivo " << archivoDetalles << endl << RESET;
+        if (numResultados) *numResultados = 0;
+        return nullptr;
+    }
+
+    ArchivoHeader header;
+    archivo.read(reinterpret_cast<char*>(&header), sizeof(ArchivoHeader));
+    archivo.close();
+
+    if (header.registrosActivos == 0) {
+        if (numResultados) *numResultados = 0;
+        return nullptr;
+    }
+
+    // Contar cuántos detalles coinciden con la transacción
+    int count = 0;
+    ifstream archivoConteo(archivoDetalles, ios::binary);
+    archivoConteo.seekg(sizeof(ArchivoHeader), ios::beg);
+    
+    DetalleTransaccion temp;
+    while (archivoConteo.read(reinterpret_cast<char*>(&temp), sizeof(DetalleTransaccion))) {
+        if (!temp.isEliminado() && temp.getIdTransaccion() == idTransaccion) {
+            count++;
+        }
+    }
+    archivoConteo.close();
+
+    if (count == 0) {
+        if (numResultados) *numResultados = 0;
+        return nullptr;
+    }
+
+    // Crear array de resultados
+    DetalleTransaccion* resultados = new DetalleTransaccion[count];
+    int j = 0;
+
+    // Leer nuevamente y guardar las coincidencias
+    ifstream archivoLectura(archivoDetalles, ios::binary);
+    archivoLectura.seekg(sizeof(ArchivoHeader), ios::beg);
+    
+    while (archivoLectura.read(reinterpret_cast<char*>(&temp), sizeof(DetalleTransaccion))) {
+        if (!temp.isEliminado() && temp.getIdTransaccion() == idTransaccion) {
+            resultados[j] = temp;
+            j++;
+        }
+    }
+
+    archivoLectura.close();
+    
+    if (numResultados) *numResultados = count;
+    return resultados;
+}

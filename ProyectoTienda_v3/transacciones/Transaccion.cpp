@@ -131,21 +131,28 @@ bool Transaccion::totalValido(float total) const {
 
 // Métodos de presentación
 void Transaccion::mostrarInformacionBasica() const {
-    cout << CYAN << "ID: " << id << " | Tipo: " << tipo << " | Total: $" << Formatos::formatearMoneda(total) 
-              << " | Fecha: " << fechaRegistro << " | Items: " << cantidadItemsDiferentes << RESET << endl;
+    cout << CYAN << left;
+    cout << setw(5) << id;
+    cout << setw(10) << tipo;
+    cout << setw(15) << Formatos::formatearMoneda(total);
+    cout << setw(12) << fechaRegistro;
+    cout << setw(5) << cantidadItemsDiferentes << RESET << endl;
 }
 
 void Transaccion::mostrarInformacionCompleta() const {
+    string descripcionTruncada = Formatos::trucarTexto(descripcion, 30);
+
     cout << CYAN;
-    cout << "ID: " << id << endl;
-    cout << "Tipo: " << tipo << endl;
-    cout << "ID Relacionado: " << idRelacionado << endl;
-    cout << "Total: $" << Formatos::formatearMoneda(total) << endl;
-    cout << "Descripción: " << descripcion << endl;
-    cout << "Fecha Registro: " << fechaRegistro << endl;
-    cout << "Cantidad Items Diferentes: " << cantidadItemsDiferentes << endl;
-    cout << "Fecha Última Modificación: " << fechaUltimaModificacion << endl;
-    cout << "Estado: " << (eliminado ? "Eliminada" : "Activa") << RESET << endl;
+    cout << left;
+    cout << setw(5) << id;
+    cout << setw(10) << tipo;
+    cout << setw(5) << idRelacionado;
+    cout << setw(15) << Formatos::formatearMoneda(total);
+    cout << setw(30) << descripcionTruncada;
+    cout << setw(12) << fechaRegistro;
+    cout << setw(5) << cantidadItemsDiferentes;
+    cout << setw(12) << fechaUltimaModificacion;
+    cout << setw(15) << (eliminado ? "Eliminada" : "Activa") << RESET << endl;
 }
 
 // Métodos de negocio

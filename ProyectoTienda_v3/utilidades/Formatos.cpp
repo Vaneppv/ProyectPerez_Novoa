@@ -136,6 +136,14 @@ void Formatos::alinearCentro(int ancho) {
     cout << setw(ancho);
 }
 
+string truncarTexto(string texto, int limite) {
+    if (texto.length() > limite) {
+        // Corta el texto y deja espacio para los 3 puntos
+        return texto.substr(0, limite - 3) + "...";
+    }
+    return texto;
+}
+
 void Formatos::EncabezadoBasicoProducto() {
     cout << CYAN << setw(5) << "ID" << setw(15) << "Código" << setw(30) << "Nombre" 
          << setw(10) << "Precio" << setw(10) << "Stock" << RESET << endl;
@@ -174,7 +182,7 @@ void Formatos::EncabezadoCompletoProveedor() {
     cout << setw(50) << "Direccion";
     cout << setw(20) << "Email";
     cout << setw(15) << "Cantidad de Productos";
-    cout << setw(5) << "Total de Compras";
+    cout << setw(15) << "Total de Compras";
     cout << setw(5) << "Cantidad de Transacciones";
     cout << setw(15) << "Fecha Registro";
     cout << setw(15) << "Fecha Última Modificación";
@@ -194,11 +202,45 @@ void Formatos::EncabezadoCompletoCliente() {
     cout << setw(10) << "Telefono";
     cout << setw(50) << "Direccion";
     cout << setw(20) << "Email";
-    cout << setw(5) << "Total de Compras";
+    cout << setw(15) << "Total de Compras";
     cout << setw(5) << "Cantidad de Transacciones";
     cout << setw(15) << "Fecha Registro";
     cout << setw(15) << "Fecha Última Modificación";
     cout << setw(15) << "Estado" << RESET << endl;
+}
+
+void Formatos::EncabezadoBasicoTransacciones() {
+    cout << CYAN;
+    cout << left;
+    cout << setw(5) << "ID TRANS";
+    cout << setw(10) << "Tipo";
+    cout << setw(15) << "Total";
+    cout << setw(12) << "Fecha Reg";
+    cout << setw(5) << "Items" << RESET << endl;
+}
+
+void Formatos::EncabezadoCompletoTransacciones() {
+    cout << CYAN;
+    cout << left;
+    cout << setw(5) << "ID TRANS";
+    cout << setw(10) << "Tipo";
+    cout << setw(5) << "ID";
+    cout << setw(15) << "Total";
+    cout << setw(30) << "Descripción";
+    cout << setw(12) << "Fecha Reg";
+    cout << setw(5) << "Items";
+    cout << setw(12) << "Fecha Mod";
+    cout << setw(15) << "Estado" << RESET << endl;
+}
+
+void Formatos::EncabezadoDetalles() {
+    cout << CYAN;
+    cout << left;
+    cout << setw(5) << "ID Producto";
+    cout << setw(10) << "Cantidad";
+    cout << setw(15) << "Precio Unitario";
+    cout << setw(5) << "ID Transacción";
+    cout << setw(15) << "Subtotal" << RESET << endl;
 }
 
 void Formatos::imprimirPieTabla() {
