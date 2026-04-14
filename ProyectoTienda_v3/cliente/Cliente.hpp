@@ -69,6 +69,7 @@ public:
     // Métodos de presentación
     void mostrarInformacionBasica() const;
     void mostrarInformacionCompleta() const;
+    void mostrarInformacionBasicaTabla() const;
     
     // Método estático
     static int obtenerTamano();

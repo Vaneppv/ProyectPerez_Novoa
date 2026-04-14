@@ -5,6 +5,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cstring>
+#include <string>
 #include "../persistencia/Constantes.hpp"
 
 using namespace std;
@@ -40,7 +41,11 @@ public:
     static void EncabezadoCompletoProducto();
     static void EncabezadoBasicoProveedor();
     static void EncabezadoCompletoProveedor();
-    static void EncabezadoTransacciones();
+    static void EncabezadoBasicoCliente();
+    static void EncabezadoCompletoCliente();
+    static void EncabezadoBasicoTransacciones();
+    static void EncabezadoCompletoTransacciones();
+    static void EncabezadoDetalles();
     static void imprimirPieTabla();
     
     // Colores y estilos

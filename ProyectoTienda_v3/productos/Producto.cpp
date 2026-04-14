@@ -1,6 +1,8 @@
 #include "Producto.hpp"
 #include "../utilidades/Validaciones.hpp"
 #include "../utilidades/Formatos.hpp"
+#include "../persistencia/GestorArchivos.hpp"
+#include "../proveedores/Proveedor.hpp"
 #include <cstring>
 #include <iostream>
 
@@ -162,7 +164,9 @@ bool Producto::stockValido(int stock) const {
 
 // Métodos de presentación
 void Producto::mostrarInformacionBasica() const {
-    cout << CYAN << setw(5) << id << setw(15) << codigo << setw(30) << nombre 
+    string nombreTruncado = Formatos::truncarTexto(nombre, 20);
+
+    cout << CYAN << setw(5) << id << setw(15) << codigo << setw(20) << nombreTruncado 
          << setw(10) << Formatos::formatearMoneda(precio) << setw(10) << stock << RESET << endl;
 }
 
@@ -172,19 +176,22 @@ void Producto::mostrarInformacionCompleta() const {
     if (indice != -1) {
         proveedor = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, indice);
     }
+    string descripcionTruncada = Formatos::truncarTexto(descripcion, 30);
+    string nombreTruncado = Formatos::truncarTexto(nombre, 20);
+
     cout << CYAN;
     cout << setw(5) << id;
     cout << setw(15) << codigo;
-    cout << setw(30) << nombre;
-    cout << setw(50) << descripcion;
-    cout << setw(5) << proveedor.getNombre();
+    cout << setw(20) << nombreTruncado;
+    cout << setw(30) << descripcionTruncada;
+    cout << setw(15) << proveedor.getNombre();
     cout << setw(10) << Formatos::formatearMoneda(precio);
     cout << setw(10) << stock;
-    cout << setw(10) << stockMinimo;
+    cout << setw(5) << stockMinimo;
     cout << setw(15) << totalVendido;
-    cout << setw(15) << fechaRegistro;
-    cout << setw(15) << fechaUltimaModificacion;
-    cout << setw(20) << (eliminado ? "Eliminado" : "Activo") << RESET << endl;
+    cout << setw(12) << fechaRegistro;
+    cout << setw(12) << fechaUltimaModificacion;
+    cout << setw(15) << (eliminado ? "Eliminado" : "Activo") << RESET << endl;
     
     if (estaBajoStockMinimo()) {
         cout << AMARILLO << "⚠ ADVERTENCIA: Stock por debajo del mínimo" << RESET << endl;

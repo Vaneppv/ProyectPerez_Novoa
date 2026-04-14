@@ -136,7 +136,7 @@ void Formatos::alinearCentro(int ancho) {
     cout << setw(ancho);
 }
 
-string truncarTexto(string texto, int limite) {
+string Formatos::truncarTexto(string texto, int limite) {
     if (texto.length() > limite) {
         // Corta el texto y deja espacio para los 3 puntos
         return texto.substr(0, limite - 3) + "...";
@@ -145,7 +145,7 @@ string truncarTexto(string texto, int limite) {
 }
 
 void Formatos::EncabezadoBasicoProducto() {
-    cout << CYAN << setw(5) << "ID" << setw(15) << "Código" << setw(30) << "Nombre" 
+    cout << CYAN << setw(5) << "ID" << setw(15) << "Código" << setw(20) << "Nombre" 
          << setw(10) << "Precio" << setw(10) << "Stock" << RESET << endl;
 }
 
@@ -155,42 +155,43 @@ void Formatos::EncabezadoCompletoProducto() {
     cout << left;
     cout << setw(5) << "ID";
     cout << setw(15) << "CÓDIGO";
-    cout << setw(30) << "NOMBRE";
-    cout << setw(50) << "DESCRIPCIÓN";
-    cout << setw(5) << "PROVEEDOR";
+    cout << setw(20) << "NOMBRE";
+    cout << setw(30) << "DESCRIPCIÓN";
+    cout << setw(15) << "PROVEEDOR";
     cout << setw(10) << "PRECIO";
     cout << setw(10) << "STOCK ACT";
-    cout << setw(10) << "STOCK MIN";
+    cout << setw(5) << "STOCK MIN";
     cout << setw(15) << "TOTAL VENDIDO";
-    cout << setw(15) << "FECHA REG";
-    cout << setw(15) << "FECHA MOD";
-    cout << setw(20) << "ESTADO" << RESET << endl;
+    cout << setw(12) << "FECHA REG";
+    cout << setw(12) << "FECHA MOD";
+    cout << setw(15) << "ESTADO" << RESET << endl;
     imprimirSeparador(160, '-');
 }
 
 void Formatos::EncabezadoBasicoProveedor() {
-    cout << CYAN << setw(5) << "ID" << setw(15) << "RIF" << setw(30) << "Nombre" << setw(10) << "Telefono" << setw(50) << "Direccion" << RESET << endl;
+    cout << CYAN << setw(5) << "ID" << setw(15) << "RIF" << setw(20) << "Nombre" << setw(10) << "Telefono" << setw(50) << "Direccion" << RESET << endl;
 }
 
 void Formatos::EncabezadoCompletoProveedor() {
+
     cout << CYAN;
     cout << left;
     cout << setw(5) << "ID";
     cout << setw(15) << "Rif";
-    cout << setw(30) << "Nombre";
-    cout << setw(10) << "Telefono";
-    cout << setw(50) << "Direccion";
+    cout << setw(20) << "Nombre";
+    cout << setw(12) << "Telefono";
+    cout << setw(30) << "Direccion";
     cout << setw(20) << "Email";
-    cout << setw(15) << "Cantidad de Productos";
-    cout << setw(15) << "Total de Compras";
-    cout << setw(5) << "Cantidad de Transacciones";
-    cout << setw(15) << "Fecha Registro";
-    cout << setw(15) << "Fecha Última Modificación";
+    cout << setw(8) << "Cantidad de Productos";
+    cout << setw(12) << "Total de Compras";
+    cout << setw(8) << "Cantidad de Transacciones";
+    cout << setw(12) << "Fecha Registro";
+    cout << setw(12) << "Fecha Última Modificación";
     cout << setw(15) << "Estado" << RESET << endl;
 }
 
 void Formatos::EncabezadoBasicoCliente() {
-    cout << CYAN << setw(5) << "ID" << setw(15) << "Cedula" << setw(30) << "Nombre" << setw(10) << "Telefono" << setw(50) << "Direccion" << RESET << endl;
+    cout << CYAN << setw(5) << "ID" << setw(15) << "Cedula" << setw(20) << "Nombre" << setw(12) << "Telefono" << setw(30) << "Direccion" << RESET << endl;
 }
 
 void Formatos::EncabezadoCompletoCliente() {
@@ -198,14 +199,14 @@ void Formatos::EncabezadoCompletoCliente() {
     cout << left;
     cout << setw(5) << "ID";
     cout << setw(15) << "Cedula";
-    cout << setw(30) << "Nombre";
-    cout << setw(10) << "Telefono";
-    cout << setw(50) << "Direccion";
+    cout << setw(20) << "Nombre";
+    cout << setw(12) << "Telefono";
+    cout << setw(30) << "Direccion";
     cout << setw(20) << "Email";
-    cout << setw(15) << "Total de Compras";
-    cout << setw(5) << "Cantidad de Transacciones";
-    cout << setw(15) << "Fecha Registro";
-    cout << setw(15) << "Fecha Última Modificación";
+    cout << setw(12) << "Total de Compras";
+    cout << setw(8) << "Cantidad de Transacciones";
+    cout << setw(12) << "Fecha Registro";
+    cout << setw(12) << "Fecha Última Modificación";
     cout << setw(15) << "Estado" << RESET << endl;
 }
 

@@ -156,24 +156,39 @@ bool Cliente::tieneDatosCompletos() const {
 }
 
 // Métodos de presentación
+void Cliente::mostrarInformacionBasica() const {
+    string nombreTruncado = Formatos::truncarTexto(nombre, 20);
+    string direccionTruncada = Formatos::truncarTexto(direccion, 30);
+
+    cout << CYAN << setw(5) << id << setw(15) << cedula << setw(20) << nombreTruncado 
+              << setw(12) << telefono << setw(30) << direccionTruncada << RESET << endl;
+}
+
 void Cliente::mostrarInformacionBasicaTabla() const {
-    cout << CYAN << setw(5) << id << setw(15) << cedula << setw(30) << nombre 
-              << setw(10) << telefono << setw(50) << direccion << RESET << endl;
+    string nombreTruncado = Formatos::truncarTexto(nombre, 20);
+    string direccionTruncada = Formatos::truncarTexto(direccion, 30);
+
+    cout << CYAN << setw(5) << id << setw(15) << cedula << setw(20) << nombreTruncado 
+              << setw(12) << telefono << setw(30) << direccionTruncada << RESET << endl;
 }
 
 void Cliente::mostrarInformacionCompleta() const {
+    string nombreTruncado = Formatos::truncarTexto(nombre, 20);
+    string direccionTruncada = Formatos::truncarTexto(direccion, 30);
+    string emailTruncado = Formatos::truncarTexto(email, 20);
+    
     cout << CYAN;
     cout << left;
     cout << setw(5) << id;
-    cout << setw(15) << rif;
-    cout << setw(30) << nombre;
-    cout << setw(10) << telefono;
-    cout << setw(50) << direccion;
-    cout << setw(20) << email;
-    cout << setw(5) << totalCompras;
-    cout << setw(5) << cantidadTransacciones;
-    cout << setw(15) << fechaRegistro;
-    cout << setw(15) << fechaUltimaModificacion;
+    cout << setw(15) << cedula;
+    cout << setw(20) << nombreTruncado;
+    cout << setw(12) << telefono;
+    cout << setw(30) << direccionTruncada;
+    cout << setw(20) << emailTruncado;
+    cout << setw(12) << totalCompras;
+    cout << setw(8) << cantidadTransacciones;
+    cout << setw(12) << fechaRegistro;
+    cout << setw(12) << fechaUltimaModificacion;
     cout << setw(15) << (eliminado ? "Eliminado" : "Activo") << RESET << endl;
 }
 

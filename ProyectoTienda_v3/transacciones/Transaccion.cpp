@@ -140,7 +140,7 @@ void Transaccion::mostrarInformacionBasica() const {
 }
 
 void Transaccion::mostrarInformacionCompleta() const {
-    string descripcionTruncada = Formatos::trucarTexto(descripcion, 30);
+    string descripcionTruncada = Formatos::truncarTexto(descripcion, 30);
 
     cout << CYAN;
     cout << left;

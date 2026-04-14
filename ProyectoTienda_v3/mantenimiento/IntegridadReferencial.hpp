@@ -1,0 +1,6 @@
+#ifndef INTEGRIDADREFERENCIAL_HPP
+#define INTEGRIDADREFERENCIAL_HPP
+
+void verificarIntegridadReferencial();
+
+#endif // INTEGRIDADREFERENCIAL_HPP

@@ -304,7 +304,7 @@ void listarClientes(Tienda& tienda) {
     }
     
     Formatos::imprimirSubtitulo("LISTADO DE CLIENTES");
-    Formatos::imprimirEncabezadoTabla();
+    Formatos::EncabezadoBasicoCliente();
     
     ifstream archivo(ARCHIVO_CLIENTES, ios::binary);
     if (archivo.is_open()) {

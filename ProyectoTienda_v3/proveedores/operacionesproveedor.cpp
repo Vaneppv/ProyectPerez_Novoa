@@ -303,7 +303,7 @@ void listarProveedores(Tienda& tienda) {
     }
     
     Formatos::imprimirSubtitulo("LISTADO DE PROVEEDORES");
-    Formatos::imprimirEncabezadoTabla();
+    Formatos::EncabezadoBasicoProveedor();
     
     ifstream archivo(ARCHIVO_PROVEEDORES, ios::binary);
     if (archivo.is_open()) {
