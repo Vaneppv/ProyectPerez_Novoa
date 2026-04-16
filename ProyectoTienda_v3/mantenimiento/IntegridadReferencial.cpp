@@ -47,29 +47,43 @@ void verificarIntegridadReferencial() {
         }
     }
 
-    // Clientes -> Valida ID transacción
-    cout << "\n" << CYAN << "Verificando relaciones Clientes -> Transacciones..." << RESET << endl;
-    ArchivoHeader headerClientes = GestorArchivos::leerHeader(ARCHIVO_CLIENTES);
+    // Transacciones -> Valida ID Productos y ID Clientes/Proveedores
+    cout << "\n" << CYAN << "Verificando relaciones Transacciones -> Productos/Clientes/Proveedores..." << RESET << endl;
+    ArchivoHeader headerTransacciones = GestorArchivos::leerHeader(ARCHIVO_TRANSACCIONES);
     
-    for (int i = 0; i < headerClientes.cantidadRegistros; i++) {
-        Cliente cliente = GestorArchivos::obtenerRegistroPorIndice<Cliente>(ARCHIVO_CLIENTES, i);
-        if (!cliente.isEliminado()) {
-            // Obtener las transacciones del cliente (necesita método en clase Cliente)
-            int* transaccionesIds = cliente.getTransaccionesIds();
-            int cantidadTransacciones = cliente.getCantidadTransacciones();
+    for (int i = 0; i < headerTransacciones.cantidadRegistros; i++) {
+        Transaccion transaccion = GestorArchivos::obtenerRegistroPorIndice<Transaccion>(ARCHIVO_TRANSACCIONES, i);
+        
+        if (!transaccion.isEliminado()) {
+            // Verificar que el tipo de transacción sea válido
+            const char* tipo = transaccion.getTipo();
+            int idRelacionado = transaccion.getIdRelacionado();
             
-            for (int j = 0; j < cantidadTransacciones; j++) {
-                int idBusq = transaccionesIds[j];
-                if (!GestorArchivos::existeEntidad<Transaccion>(ARCHIVO_TRANSACCIONES, idBusq)) {
-                    cout << ROJO << "[ERROR] Cliente ID " << cliente.getId() << " refiere a Transacción ID " 
-                         << idBusq << " inexistente." << RESET << endl;
+            if (strcmp(tipo, "VENTA") == 0) {
+                // Para ventas, verificar que el cliente exista
+                if (!GestorArchivos::existeEntidad<Cliente>(ARCHIVO_CLIENTES, idRelacionado)) {
+                    cout << ROJO << "[ERROR] Transacción VENTA ID " << transaccion.getId() 
+                         << " refiere a Cliente ID " << idRelacionado << " inexistente." << RESET << endl;
                     errores++;
-                } else {
-                    // Valida que la transacción asociada sea una "Venta"
-                    Transaccion transaccion = GestorArchivos::obtenerRegistroPorId<Transaccion>(ARCHIVO_TRANSACCIONES, idBusq);
-                    if (strcmp(transaccion.getTipo(), "VENTA") != 0) {
-                        cout << ROJO << "[ERROR] Cliente ID " << cliente.getId() << " tiene en su histórial la Transacción ID " 
-                             << idBusq << " que NO es una VENTA." << RESET << endl;
+                }
+            } else if (strcmp(tipo, "COMPRA") == 0) {
+                // Para compras, verificar que el proveedor exista
+                if (!GestorArchivos::existeEntidad<Proveedor>(ARCHIVO_PROVEEDORES, idRelacionado)) {
+                    cout << ROJO << "[ERROR] Transacción COMPRA ID " << transaccion.getId() 
+                         << " refiere a Proveedor ID " << idRelacionado << " inexistente." << RESET << endl;
+                    errores++;
+                }
+            }
+            
+            // Verificar que los detalles de la transacción tengan productos válidos
+            ArchivoHeader headerDetalles = GestorArchivos::leerHeader(ARCHIVO_DETALLES);
+            for (int j = 0; j < headerDetalles.cantidadRegistros; j++) {
+                DetalleTransaccion detalle = GestorArchivos::obtenerRegistroPorIndice<DetalleTransaccion>(ARCHIVO_DETALLES, j);
+                
+                if (detalle.getIdTransaccion() == transaccion.getId()) {
+                    if (!GestorArchivos::existeEntidad<Producto>(ARCHIVO_PRODUCTOS, detalle.getIdProducto())) {
+                        cout << ROJO << "[ERROR] Transacción ID " << transaccion.getId() 
+                             << " tiene detalle con Producto ID " << detalle.getIdProducto() << " inexistente." << RESET << endl;
                         errores++;
                     }
                 }
@@ -77,49 +91,7 @@ void verificarIntegridadReferencial() {
         }
     }
 
-    // Proveedores -> Validar ID transacción(Compras) y ID Productos
-    cout << "\n" << CYAN << "Verificando relaciones Proveedores -> Transacciones/Productos..." << RESET << endl;
-    ArchivoHeader headerProveedores = GestorArchivos::leerHeader(ARCHIVO_PROVEEDORES);
     
-    for (int i = 0; i < headerProveedores.cantidadRegistros; i++) {
-        Proveedor proveedor = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, i);
-        if (!proveedor.isEliminado()) {
-            // Validación del historial de transacciones
-            int* transaccionesIds = proveedor.getTransaccionesIds();
-            int cantidadTransacciones = proveedor.getCantidadTransacciones();
-            
-            for (int j = 0; j < cantidadTransacciones; j++) {
-                int idBusq = transaccionesIds[j];
-                if (!GestorArchivos::existeEntidad<Transaccion>(ARCHIVO_TRANSACCIONES, idBusq)) {
-                    cout << ROJO << "[ERROR] Proveedor ID " << proveedor.getId() << " refiere a Transacción ID " 
-                         << idBusq << " inexistente." << RESET << endl;
-                    errores++;
-                } else {
-                    // Valida que la transacción sea una COMPRA
-                    Transaccion transaccion = GestorArchivos::obtenerRegistroPorId<Transaccion>(ARCHIVO_TRANSACCIONES, idBusq);
-                    if (strcmp(transaccion.getTipo(), "COMPRA") != 0) {
-                        cout << ROJO << "[ERROR] Proveedor ID " << proveedor.getId() << " tiene en su historial la Transacción ID " 
-                             << idBusq << " que es una " << transaccion.getTipo() << " (deberia ser COMPRA)." << RESET << endl;
-                        errores++;
-                    }
-                }
-            }
-            
-            // Valida la lista de productos suministrados
-            int* productosIds = proveedor.getProductosIds();
-            int cantidadProductos = proveedor.getCantidadProductos();
-            
-            for (int k = 0; k < cantidadProductos; k++) {
-                int idProdBusq = productosIds[k];
-                if (!GestorArchivos::existeEntidad<Producto>(ARCHIVO_PRODUCTOS, idProdBusq)) {
-                    cout << ROJO << "[ERROR] Proveedor ID " << proveedor.getId() << " ofrece el Producto ID " 
-                         << idProdBusq << " que no existe en el inventario." << RESET << endl;
-                    errores++;
-                }
-            }
-        }
-    }
-
     // Reporte final
     cout << "\n" << AMARILLO << "========================================" << RESET << endl;
     if (errores == 0) {

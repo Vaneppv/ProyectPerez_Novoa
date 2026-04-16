@@ -4,8 +4,10 @@
 #include "../transacciones/Transaccion.hpp"
 #include "../transacciones/DetalleTransaccion.hpp"
 #include "../utilidades/Formatos.hpp"
+#include "../interfaz/Interfaz.hpp"
 #include <iostream>
 #include <iomanip>
+#include <string>
 
 using namespace std;
 
@@ -56,8 +58,8 @@ void historialCliente() {
     
     Cliente cliente = GestorArchivos::obtenerRegistroPorIndice<Cliente>(ARCHIVO_CLIENTES, indClient);
     
-    Formatos::imprimirSubtitulo("HISTORIAL DEL CLIENTE: " + cliente.getNombre());
-    cout << CYAN << "Cédula/RIF: " << cliente.getCedula() << " | Total Compras: $" << fixed << setprecision(2) << cliente.getTotalCompras() << RESET << endl;
+    cout << CYAN << "HISTORIAL DEL CLIENTE: " << cliente.getNombre() << RESET << endl;
+    cout << CYAN << "Cédula/RIF: " << cliente.getCedula() << " | Total Compras: $" << fixed << setprecision(2) << cliente.getTotalcompras() << RESET << endl;
     cout << string(60, '-') << endl;
 
     if (cliente.getCantidadTransacciones() == 0) {
@@ -65,22 +67,44 @@ void historialCliente() {
         return;
     }
 
-    int* transaccionesIds = cliente.getTransaccionesIds();
+    // Buscar todas las transacciones de tipo VENTA para este cliente
+    ArchivoHeader headerTransacciones = GestorArchivos::leerHeader(ARCHIVO_TRANSACCIONES);
+    int transaccionesEncontradas = 0;
     
-    for (int j = 0; j < cliente.getCantidadTransacciones(); j++) {
-        int idTrans = transaccionesIds[j];
-        int indTrans = GestorArchivos::buscarPorId<Transaccion>(ARCHIVO_TRANSACCIONES, idTrans);
+    for (int i = 0; i < headerTransacciones.cantidadRegistros; i++) {
+        Transaccion transaccion = GestorArchivos::obtenerRegistroPorIndice<Transaccion>(ARCHIVO_TRANSACCIONES, i);
+        
+        if (!transaccion.isEliminado() && 
+            strcmp(transaccion.getTipo(), "VENTA") == 0 && 
+            transaccion.getIdRelacionado() == cliente.getId()) {
             
-        if (indTrans != -1) {
-            Transaccion trans = GestorArchivos::obtenerRegistroPorIndice<Transaccion>(ARCHIVO_TRANSACCIONES, indTrans);
-            if (!trans.isEliminado()) {
-                cout << CYAN << "\nTransacción ID " << trans.getId() << " | Fecha: " << trans.getFechaRegistro() 
-                     << " | Total: $" << fixed << setprecision(2) << trans.getTotal() << RESET << endl;
-                mostrarDetalleTransaccion(trans.getId());
-            } else {
-                cout << AMARILLO << "\nTransacción ID " << trans.getId() << " [ANULADA]" << RESET << endl;
+            transaccionesEncontradas++;
+            cout << CYAN << "\nTransacción ID " << transaccion.getId() 
+                 << " | Fecha: " << transaccion.getFechaRegistro()
+                 << " | Total: $" << fixed << setprecision(2) << transaccion.getTotal() << RESET << endl;
+            
+            // Mostrar detalles de la transacción
+            ArchivoHeader headerDetalles = GestorArchivos::leerHeader(ARCHIVO_DETALLES);
+            cout << CYAN << "  Detalles:" << RESET << endl;
+            
+            for (int j = 0; j < headerDetalles.cantidadRegistros; j++) {
+                DetalleTransaccion detalle = GestorArchivos::obtenerRegistroPorIndice<DetalleTransaccion>(ARCHIVO_DETALLES, j);
+                
+                if (detalle.getIdTransaccion() == transaccion.getId()) {
+                    Producto producto = GestorArchivos::obtenerRegistroPorId<Producto>(ARCHIVO_PRODUCTOS, detalle.getIdProducto());
+                    if (producto.getId() != -1) {
+                        cout << "    - " << producto.getNombre() 
+                             << " | Cantidad: " << detalle.getCantidad()
+                             << " | Precio Unitario: $" << fixed << setprecision(2) << detalle.getPrecioUnitario()
+                             << " | Subtotal: $" << fixed << setprecision(2) << detalle.calcularSubtotal() << endl;
+                    }
+                }
             }
         }
+    }
+    
+    if (transaccionesEncontradas == 0) {
+        cout << AMARILLO << "No se encontraron transacciones de venta para este cliente." << RESET << endl;
     }
 }
 
@@ -89,9 +113,11 @@ void estadisticasVentasTotalesPorCliente() {
     
     // Obtener todos los clientes
     ArchivoHeader headerClientes = GestorArchivos::leerHeader(ARCHIVO_CLIENTES);
-    vector<EstadisticaCliente> estadisticas;
+    const int MAX_ESTADISTICAS = 100;
+    EstadisticaCliente estadisticas[MAX_ESTADISTICAS];
+    int cantidadEstadisticas = 0;
     
-    for (int i = 0; i < headerClientes.cantidadRegistros; i++) {
+    for (int i = 0; i < headerClientes.cantidadRegistros && cantidadEstadisticas < MAX_ESTADISTICAS; i++) {
         Cliente cliente = GestorArchivos::obtenerRegistroPorIndice<Cliente>(ARCHIVO_CLIENTES, i);
         
         if (!cliente.isEliminado() && cliente.getCantidadTransacciones() > 0) {
@@ -100,23 +126,26 @@ void estadisticasVentasTotalesPorCliente() {
             estadistica.nombreCliente = cliente.getNombre();
             estadistica.cedula = cliente.getCedula();
             estadistica.cantidadVentas = cliente.getCantidadTransacciones();
-            estadistica.totalVentas = cliente.getTotalCompras();
+            estadistica.totalVentas = cliente.getTotalcompras();
             estadistica.promedioVenta = estadistica.totalVentas / estadistica.cantidadVentas;
             
-            estadisticas.push_back(estadistica);
+            estadisticas[cantidadEstadisticas] = estadistica;
+            cantidadEstadisticas++;
         }
     }
     
-    if (estadisticas.empty()) {
+    if (cantidadEstadisticas == 0) {
         cout << AMARILLO << "No hay clientes con transacciones registradas." << RESET << endl;
         return;
     }
     
     // Ordenar por total de ventas (mayor a menor)
-    for (size_t i = 0; i < estadisticas.size() - 1; i++) {
-        for (size_t j = i + 1; j < estadisticas.size(); j++) {
+    for (int i = 0; i < cantidadEstadisticas - 1; i++) {
+        for (int j = i + 1; j < cantidadEstadisticas; j++) {
             if (estadisticas[j].totalVentas > estadisticas[i].totalVentas) {
-                swap(estadisticas[i], estadisticas[j]);
+                EstadisticaCliente temp = estadisticas[i];
+                estadisticas[i] = estadisticas[j];
+                estadisticas[j] = temp;
             }
         }
     }
@@ -129,7 +158,8 @@ void estadisticasVentasTotalesPorCliente() {
     double totalGeneral = 0;
     int totalVentasGeneral = 0;
     
-    for (const auto& est : estadisticas) {
+    for (int i = 0; i < cantidadEstadisticas; i++) {
+        const EstadisticaCliente& est = estadisticas[i];
         cout << left << setw(8) << est.idCliente
              << setw(25) << (est.nombreCliente.length() > 24 ? est.nombreCliente.substr(0, 21) + "..." : est.nombreCliente)
              << setw(15) << est.cedula
@@ -147,5 +177,5 @@ void estadisticasVentasTotalesPorCliente() {
          << setw(15) << fixed << setprecision(2) << totalGeneral
          << setw(15) << fixed << setprecision(2) << (totalVentasGeneral > 0 ? totalGeneral / totalVentasGeneral : 0) << RESET << endl;
     
-    cout << "\n" << VERDE << "Total de clientes con compras: " << estadisticas.size() << RESET << endl;
+    cout << "\n" << VERDE << "Total de clientes con compras: " << cantidadEstadisticas << RESET << endl;
 }

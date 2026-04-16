@@ -2,13 +2,11 @@
 #include "../utilidades/Formatos.hpp"
 #include <iostream>
 #include <fstream>
-#include <filesystem>
 #include <ctime>
 #include <iomanip>
+#include <cstdlib>
 
 using namespace std;
-
-namespace fs = std::filesystem;
 
 void copiarArchivo(const char* origen, const char* destino) {
     ifstream src(origen, ios::binary);
@@ -37,15 +35,14 @@ void crearBackup() {
     // Crear carpeta de backup
     string nombreCarpeta = fechaHora;
     
-    try {
-        if (fs::create_directory(nombreCarpeta)) {
-            cout << VERDE << "Carpeta de respaldo creada: " << nombreCarpeta << RESET << endl;
-        } else {
-            cout << AMARILLO << "Actualizando respaldo en carpeta existente: " << nombreCarpeta << RESET << endl;
-        }
-    } catch (const fs::filesystem_error& e) {
-        cout << ROJO << "Error al crear carpeta de backup: " << e.what() << RESET << endl;
-        return;
+    // Crear carpeta de backup usando comando del sistema
+    string comando = "mkdir \"" + nombreCarpeta + "\"";
+    int resultado = system(comando.c_str());
+    
+    if (resultado == 0) {
+        cout << VERDE << "Carpeta de respaldo creada: " << nombreCarpeta << RESET << endl;
+    } else {
+        cout << AMARILLO << "La carpeta ya existe o hubo un error: " << nombreCarpeta << RESET << endl;
     }
     
     // Archivos a respaldar
