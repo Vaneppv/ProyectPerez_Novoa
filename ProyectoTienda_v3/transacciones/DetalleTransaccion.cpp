@@ -72,12 +72,12 @@ bool DetalleTransaccion::precioValido(float precio) const {
 // Métodos de presentación
 
 void DetalleTransaccion::mostrarInformacion() const {
-    cout << CYAN;
-    cout << setw(5) << idProducto;
+    cout << RESET;
+    cout << setw(8) << idProducto;
     cout << setw(10) << cantidad;
     cout << setw(15) << Formatos::formatearMoneda(precioUnitario);
-    cout << setw(5) << idTransaccion;
-    cout << setw(15) << Formatos::formatearMoneda(calcularSubtotal()) << RESET << endl;
+    cout << setw(8) << idTransaccion;
+    cout << setw(15) << Formatos::formatearMoneda(calcularSubtotal()) << endl;
 }
 
 // Métodos de negocio

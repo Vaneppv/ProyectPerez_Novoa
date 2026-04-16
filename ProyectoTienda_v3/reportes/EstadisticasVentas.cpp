@@ -1,6 +1,6 @@
 #include "../persistencia/GestorArchivos.hpp"
 #include "../productos/Producto.hpp"
-#include "../cliente/Cliente.hpp"
+#include "../clientes/Cliente.hpp"
 #include "../transacciones/Transaccion.hpp"
 #include "../transacciones/DetalleTransaccion.hpp"
 #include "../utilidades/Formatos.hpp"

@@ -161,15 +161,15 @@ void Cliente::mostrarInformacionBasica() const {
     string direccionTruncada = Formatos::truncarTexto(direccion, 30);
 
     cout << CYAN << setw(5) << id << setw(15) << cedula << setw(20) << nombreTruncado 
-              << setw(12) << telefono << setw(30) << direccionTruncada << RESET << endl;
+              << setw(15) << telefono << setw(30) << direccionTruncada << RESET << endl;
 }
 
 void Cliente::mostrarInformacionBasicaTabla() const {
     string nombreTruncado = Formatos::truncarTexto(nombre, 20);
     string direccionTruncada = Formatos::truncarTexto(direccion, 30);
 
-    cout << CYAN << setw(5) << id << setw(15) << cedula << setw(20) << nombreTruncado 
-              << setw(12) << telefono << setw(30) << direccionTruncada << RESET << endl;
+    cout << RESET << setw(5) << id << setw(15) << cedula << setw(20) << nombreTruncado 
+              << setw(15) << telefono << setw(30) << direccionTruncada << endl;
 }
 
 void Cliente::mostrarInformacionCompleta() const {
@@ -177,19 +177,19 @@ void Cliente::mostrarInformacionCompleta() const {
     string direccionTruncada = Formatos::truncarTexto(direccion, 30);
     string emailTruncado = Formatos::truncarTexto(email, 20);
     
-    cout << CYAN;
+    cout << RESET;
     cout << left;
     cout << setw(5) << id;
-    cout << setw(15) << cedula;
-    cout << setw(20) << nombreTruncado;
-    cout << setw(12) << telefono;
-    cout << setw(30) << direccionTruncada;
-    cout << setw(20) << emailTruncado;
-    cout << setw(12) << totalCompras;
+    cout << setw(13) << cedula;
+    cout << setw(18) << nombreTruncado;
+    cout << setw(13) << telefono;
+    cout << setw(20) << direccionTruncada;
+    cout << setw(18) << emailTruncado;
+    cout << setw(10) << totalCompras;
     cout << setw(8) << cantidadTransacciones;
     cout << setw(12) << fechaRegistro;
     cout << setw(12) << fechaUltimaModificacion;
-    cout << setw(15) << (eliminado ? "Eliminado" : "Activo") << RESET << endl;
+    cout << setw(10) << (eliminado ? "Eliminado" : "Activo") << endl;
 }
 
 // Método estático

@@ -131,28 +131,28 @@ bool Transaccion::totalValido(float total) const {
 
 // Métodos de presentación
 void Transaccion::mostrarInformacionBasica() const {
-    cout << CYAN << left;
-    cout << setw(5) << id;
+    cout << RESET << left;
+    cout << setw(8) << id;
     cout << setw(10) << tipo;
     cout << setw(15) << Formatos::formatearMoneda(total);
-    cout << setw(12) << fechaRegistro;
+    cout << setw(15) << fechaRegistro;
     cout << setw(5) << cantidadItemsDiferentes << RESET << endl;
 }
 
 void Transaccion::mostrarInformacionCompleta() const {
-    string descripcionTruncada = Formatos::truncarTexto(descripcion, 30);
+    string descripcionTruncada = Formatos::truncarTexto(descripcion, 26);
 
-    cout << CYAN;
+    cout << RESET;
     cout << left;
-    cout << setw(5) << id;
-    cout << setw(10) << tipo;
+    cout << setw(8) << id;
+    cout << setw(12) << tipo;
     cout << setw(5) << idRelacionado;
-    cout << setw(15) << Formatos::formatearMoneda(total);
-    cout << setw(30) << descripcionTruncada;
-    cout << setw(12) << fechaRegistro;
+    cout << setw(12) << Formatos::formatearMoneda(total);
+    cout << setw(26) << descripcionTruncada;
+    cout << setw(15) << fechaRegistro;
     cout << setw(5) << cantidadItemsDiferentes;
-    cout << setw(12) << fechaUltimaModificacion;
-    cout << setw(15) << (eliminado ? "Eliminada" : "Activa") << RESET << endl;
+    cout << setw(15) << fechaUltimaModificacion;
+    cout << setw(10) << (eliminado ? "Eliminada" : "Activa") << endl;
 }
 
 // Métodos de negocio

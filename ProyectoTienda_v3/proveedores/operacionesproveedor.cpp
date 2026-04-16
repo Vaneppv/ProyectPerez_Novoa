@@ -303,15 +303,15 @@ void listarProveedores(Tienda& tienda) {
     }
     
     Formatos::imprimirSubtitulo("LISTADO DE PROVEEDORES");
-    Formatos::EncabezadoBasicoProveedor();
+    cout << endl;
     
     ifstream archivo(ARCHIVO_PROVEEDORES, ios::binary);
     if (archivo.is_open()) {
         archivo.seekg(sizeof(ArchivoHeader), ios::beg);
-        
+        Formatos::EncabezadoCompletoProveedor();
+
         Proveedor proveedor;
         int count = 0;
-        Formatos::EncabezadoCompletoProveedor();
         while (archivo.read(reinterpret_cast<char*>(&proveedor), sizeof(Proveedor)) && count < header.cantidadRegistros) {
             if (!proveedor.isEliminado()) {
                 proveedor.mostrarInformacionCompleta();
@@ -368,7 +368,7 @@ void menuProveedores(Tienda& tienda) {
     
     do {
         Formatos::limpiarPantalla();
-        Formatos::imprimirSubtitulo("GESTIÓN DE PROVEEDORES");
+        Formatos::imprimirTitulo("GESTIÓN DE PROVEEDORES");
         
         cout << CYAN
                   << "1. Registrar nuevo Proveedor" << endl

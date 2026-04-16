@@ -100,8 +100,8 @@ void registrarProducto(Tienda& tienda) {
     
     // Mostrar resumen
     Formatos::imprimirSubtitulo("RESUMEN DEL PRODUCTO");
-    Formatos::EncabezadoCompletoProducto();
-    nuevoProducto.mostrarInformacionCompleta();
+    Formatos::EncabezadoBasicoProducto();
+    nuevoProducto.mostrarInformacionBasica();
     
     if (interfaz.solicitarConfirmacion("¿Desea guardar este producto?")) {
         if (GestorArchivos::guardarNuevoRegistro<Producto>(ARCHIVO_PRODUCTOS, nuevoProducto)) {
@@ -645,7 +645,7 @@ void menuProductos(Tienda& tienda) {
     
     do {
         Formatos::limpiarPantalla();
-        Formatos::imprimirSubtitulo("GESTIÓN DE PRODUCTOS");
+        Formatos::imprimirTitulo("GESTIÓN DE PRODUCTOS");
         
         cout << CYAN
                   << "1. Registrar Nuevo Producto" << endl

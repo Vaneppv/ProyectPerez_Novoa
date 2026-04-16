@@ -180,29 +180,29 @@ bool Proveedor::tieneDatosCompletos() const {
 void Proveedor::mostrarInformacionBasica() const {
     string nombreTruncado = Formatos::truncarTexto(nombre, 20);
     string direccionTruncada = Formatos::truncarTexto(direccion, 30);
-    cout << CYAN << setw(5) << id << setw(15) << rif << setw(20) << nombreTruncado 
-         << setw(12) << telefono << setw(30) << direccionTruncada << RESET << endl;
+    cout << RESET << setw(5) << id << setw(15) << rif << setw(20) << nombreTruncado 
+         << setw(15) << telefono << setw(30) << direccionTruncada << endl;
 }
 
 void Proveedor::mostrarInformacionCompleta() const {
-    string nombreTruncado = Formatos::truncarTexto(nombre, 20);
-    string direccionTruncada = Formatos::truncarTexto(direccion, 30);
-    string emailTruncado = Formatos::truncarTexto(email, 20);
+    
+    string nombreTruncado = Formatos::truncarTexto(nombre, 17);
+    string direccionTruncada = Formatos::truncarTexto(direccion, 19);
+    string emailTruncado = Formatos::truncarTexto(email, 17);
 
-    cout << CYAN;
-    cout << left;
-    cout << setw(5) << id;
-    cout << setw(15) << rif;
-    cout << setw(20) << nombreTruncado;
-    cout << setw(12) << telefono;
-    cout << setw(30) << direccionTruncada;
-    cout << setw(20) << emailTruncado;
-    cout << setw(8) << cantidadProductos;
-    cout << setw(12) << totalCompras;
-    cout << setw(8) << cantidadTransacciones;
+    cout << RESET << left; 
+    cout << setw(5)  << id;
+    cout << setw(13) << rif;
+    cout << setw(18) << nombreTruncado;
+    cout << setw(13) << telefono;
+    cout << setw(20) << direccionTruncada;
+    cout << setw(18) << emailTruncado;
+    cout << setw(6)  << cantidadProductos;
+    cout << setw(10) << (int)totalCompras; // (int) para quitar decimales y ahorrar espacio
+    cout << setw(8)  << cantidadTransacciones;
     cout << setw(12) << fechaRegistro;
     cout << setw(12) << fechaUltimaModificacion;
-    cout << setw(15) << (eliminado ? "Eliminado" : "Activo") << RESET << endl;
+    cout << setw(10) << (eliminado ? "Elim." : "Activo") << endl;
 }
 
 // Método estático

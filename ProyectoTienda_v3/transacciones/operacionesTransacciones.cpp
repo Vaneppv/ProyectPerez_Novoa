@@ -8,7 +8,7 @@
 #include "DetalleTransaccion.hpp"
 #include "../productos/Producto.hpp"
 #include "../proveedores/Proveedor.hpp"
-#include "../cliente/Cliente.hpp"
+#include "../clientes/Cliente.hpp"
 #include "../tienda/Tienda.hpp"
 #include <iostream>
 #include <string>
@@ -87,14 +87,6 @@ void registrarCompra(Tienda& tienda) {
         
         if (!interfaz.solicitarFloat("Ingrese costo unitario", costo)) {
             break;
-        }
-        
-        // Validar stock disponible
-        if (cantidad > producto.getStock()) {
-            string errorMsg = "Stock insuficiente. Disponible: " + to_string(producto.getStock());
-            Formatos::imprimirError(errorMsg.c_str());
-            Formatos::pausar();
-            continue;
         }
         
         // Agregar al carrito
@@ -357,12 +349,17 @@ void registrarVenta(Tienda& tienda) {
     
     if (interfaz.solicitarConfirmacion("¿Desea confirmar y guardar esta venta?")) {
         // Crear transacción principal
+
+        char descripcion[MAX_DESCRIPCION];
+        interfaz.solicitarTexto("Ingrese descripcion de la compra:", descripcion, sizeof(descripcion));
+        
         Transaccion transaccion;
         transaccion.setId(tienda.generarSiguienteIdTransaccion());
         transaccion.setIdRelacionado(clienteId);
         transaccion.setTipo("VENTA");
         transaccion.setCantidadItemsDiferentes(cantItems);
         transaccion.setTotal(totalVenta);
+        transaccion.setDescripcion(descripcion);
         
         // Guardar transacción principal
         if (GestorArchivos::guardarNuevoRegistro<Transaccion>(ARCHIVO_TRANSACCIONES, transaccion)) {
@@ -373,7 +370,6 @@ void registrarVenta(Tienda& tienda) {
                 detalle.setIdProducto(carrito[i].getIdProducto());
                 detalle.setCantidad(carrito[i].getCantidad());
                 detalle.setPrecioUnitario(carrito[i].getPrecioUnitario());
-                
                 if (!GestorArchivos::guardarNuevoRegistro<DetalleTransaccion>(ARCHIVO_DETALLES, detalle)) {
                     string errorMsg = "Error al guardar detalle de transacción";
                     Formatos::imprimirError(errorMsg.c_str());
@@ -688,7 +684,7 @@ void menuTransacciones(Tienda& tienda) {
     
     do {
         Formatos::limpiarPantalla();
-        Formatos::imprimirSubtitulo("MENÚ DE TRANSACCIONES");
+        Formatos::imprimirTitulo("MENÚ DE TRANSACCIONES");
         
         cout << CYAN
                   << "1. Registrar Compra" << endl

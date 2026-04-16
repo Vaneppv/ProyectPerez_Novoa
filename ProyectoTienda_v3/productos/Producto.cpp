@@ -166,8 +166,8 @@ bool Producto::stockValido(int stock) const {
 void Producto::mostrarInformacionBasica() const {
     string nombreTruncado = Formatos::truncarTexto(nombre, 20);
 
-    cout << CYAN << setw(5) << id << setw(15) << codigo << setw(20) << nombreTruncado 
-         << setw(10) << Formatos::formatearMoneda(precio) << setw(10) << stock << RESET << endl;
+    cout << RESET << setw(5) << id << setw(15) << codigo << setw(20) << nombreTruncado 
+         << setw(10) << Formatos::formatearMoneda(precio) << setw(10) << stock << endl;
 }
 
 void Producto::mostrarInformacionCompleta() const {
@@ -176,23 +176,23 @@ void Producto::mostrarInformacionCompleta() const {
     if (indice != -1) {
         proveedor = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, indice);
     }
-    string descripcionTruncada = Formatos::truncarTexto(descripcion, 30);
-    string nombreTruncado = Formatos::truncarTexto(nombre, 20);
+    string descripcionTruncada = Formatos::truncarTexto(descripcion, 25); 
+    string nombreTruncado = Formatos::truncarTexto(nombre, 15);           
 
-    cout << CYAN;
-    cout << setw(5) << id;
-    cout << setw(15) << codigo;
-    cout << setw(20) << nombreTruncado;
-    cout << setw(30) << descripcionTruncada;
-    cout << setw(15) << proveedor.getNombre();
+    cout << RESET << left; 
+    cout << setw(4)  << id;
+    cout << setw(10) << codigo;
+    cout << setw(16) << nombreTruncado;
+    cout << setw(26) << descripcionTruncada;
+    cout << setw(16) << Formatos::truncarTexto(proveedor.getNombre(), 15); 
     cout << setw(10) << Formatos::formatearMoneda(precio);
-    cout << setw(10) << stock;
-    cout << setw(5) << stockMinimo;
-    cout << setw(15) << totalVendido;
+    cout << setw(10)  << stock;
+    cout << setw(10)  << stockMinimo;
+    cout << setw(10) << totalVendido;
     cout << setw(12) << fechaRegistro;
     cout << setw(12) << fechaUltimaModificacion;
-    cout << setw(15) << (eliminado ? "Eliminado" : "Activo") << RESET << endl;
-    
+    cout << setw(10) << (eliminado ? "Elim." : "Act.") << endl;
+     
     if (estaBajoStockMinimo()) {
         cout << AMARILLO << "⚠ ADVERTENCIA: Stock por debajo del mínimo" << RESET << endl;
     }

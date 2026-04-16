@@ -27,9 +27,17 @@ void Formatos::formatearFechaActual(char* buffer) {
 
 string Formatos::formatearMoneda(float cantidad) {
     stringstream ss;
-    ss.imbue(locale("es_VE.UTF-8"));
+    ss.imbue(locale("C")); 
     ss << fixed << setprecision(2) << cantidad;
-    return ss.str();
+    
+    string s = ss.str();
+    
+    size_t punto = s.find('.');
+    if (punto != string::npos) {
+        s.replace(punto, 1, ",");
+    }
+    
+    return "$" + s;
 }
 
 void Formatos::convertirAMayusculas(char* cadena) {
@@ -153,94 +161,91 @@ void Formatos::EncabezadoCompletoProducto() {
     imprimirSeparador(160, '=');
     cout << CYAN << NEGRITA;
     cout << left;
-    cout << setw(5) << "ID";
-    cout << setw(15) << "CÓDIGO";
-    cout << setw(20) << "NOMBRE";
-    cout << setw(30) << "DESCRIPCIÓN";
-    cout << setw(15) << "PROVEEDOR";
+    cout << setw(4) << "ID";
+    cout << setw(10) << "CÓDIGO";
+    cout << setw(16) << "NOMBRE";
+    cout << setw(26) << "DESCRIPCIÓN";
+    cout << setw(16) << "PROVEEDOR";
     cout << setw(10) << "PRECIO";
     cout << setw(10) << "STOCK ACT";
-    cout << setw(5) << "STOCK MIN";
-    cout << setw(15) << "TOTAL VENDIDO";
-    cout << setw(12) << "FECHA REG";
-    cout << setw(12) << "FECHA MOD";
-    cout << setw(15) << "ESTADO" << RESET << endl;
+    cout << setw(10) << "STOCK MIN";
+    cout << setw(10) << "T.VENTAS";
+    cout << setw(12) << "REGISTRO";
+    cout << setw(12) << "ULT.MOD";
+    cout << setw(10) << "ESTADO" << RESET << endl;
     imprimirSeparador(160, '-');
 }
 
 void Formatos::EncabezadoBasicoProveedor() {
-    cout << CYAN << setw(5) << "ID" << setw(15) << "RIF" << setw(20) << "Nombre" << setw(10) << "Telefono" << setw(50) << "Direccion" << RESET << endl;
+    cout << CYAN << setw(5) << "ID" << setw(15) << "RIF" << setw(20) << "Nombre" << setw(15) << "Telefono" << setw(30) << "Direccion" << RESET << endl;
 }
 
 void Formatos::EncabezadoCompletoProveedor() {
-
-    cout << CYAN;
-    cout << left;
-    cout << setw(5) << "ID";
-    cout << setw(15) << "Rif";
-    cout << setw(20) << "Nombre";
-    cout << setw(12) << "Telefono";
-    cout << setw(30) << "Direccion";
-    cout << setw(20) << "Email";
-    cout << setw(8) << "Cantidad de Productos";
-    cout << setw(12) << "Total de Compras";
-    cout << setw(8) << "Cantidad de Transacciones";
-    cout << setw(12) << "Fecha Registro";
-    cout << setw(12) << "Fecha Última Modificación";
-    cout << setw(15) << "Estado" << RESET << endl;
+    cout << CYAN << left;
+    cout << setw(5)  << "ID";
+    cout << setw(13) << "Rif";
+    cout << setw(18) << "Nombre";
+    cout << setw(13) << "Telefono";
+    cout << setw(20) << "Direccion";
+    cout << setw(18) << "Email"; 
+    cout << setw(6)  << "Prod.";      
+    cout << setw(10) << "Compras";    
+    cout << setw(8)  << "Trans.";     
+    cout << setw(12) << "Registro";   
+    cout << setw(12) << "Ult.Mod";    
+    cout << setw(10) << "Estado" << endl;
+    cout << string(150, '=') << endl << RESET;
 }
-
 void Formatos::EncabezadoBasicoCliente() {
-    cout << CYAN << setw(5) << "ID" << setw(15) << "Cedula" << setw(20) << "Nombre" << setw(12) << "Telefono" << setw(30) << "Direccion" << RESET << endl;
+    cout << CYAN << setw(5) << "ID" << setw(15) << "Cedula" << setw(20) << "Nombre" << setw(15) << "Telefono" << setw(30) << "Direccion" << RESET << endl;
 }
 
 void Formatos::EncabezadoCompletoCliente() {
-    cout << CYAN;
-    cout << left;
+    cout << CYAN << left;
     cout << setw(5) << "ID";
-    cout << setw(15) << "Cedula";
-    cout << setw(20) << "Nombre";
-    cout << setw(12) << "Telefono";
-    cout << setw(30) << "Direccion";
-    cout << setw(20) << "Email";
-    cout << setw(12) << "Total de Compras";
-    cout << setw(8) << "Cantidad de Transacciones";
-    cout << setw(12) << "Fecha Registro";
-    cout << setw(12) << "Fecha Última Modificación";
-    cout << setw(15) << "Estado" << RESET << endl;
+    cout << setw(13) << "Cedula";
+    cout << setw(18) << "Nombre";
+    cout << setw(13) << "Telefono";
+    cout << setw(20) << "Direccion";
+    cout << setw(18) << "Email"; 
+    cout << setw(10) << "Compras";    
+    cout << setw(8)  << "Trans.";     
+    cout << setw(12) << "Registro";   
+    cout << setw(12) << "Ult.Mod";    
+    cout << setw(10) << "Estado" << endl;
+    cout << string(150, '=') << endl << RESET;
+     
 }
 
 void Formatos::EncabezadoBasicoTransacciones() {
-    cout << CYAN;
-    cout << left;
-    cout << setw(5) << "ID TRANS";
+    cout << CYAN << left;
+    cout << setw(8) << "ID TRANS";
     cout << setw(10) << "Tipo";
     cout << setw(15) << "Total";
-    cout << setw(12) << "Fecha Reg";
+    cout << setw(15) << "Fecha Reg";
     cout << setw(5) << "Items" << RESET << endl;
 }
 
 void Formatos::EncabezadoCompletoTransacciones() {
-    cout << CYAN;
-    cout << left;
-    cout << setw(5) << "ID TRANS";
+    cout << CYAN << left;
+    cout << setw(8) << "ID TRANS";
     cout << setw(10) << "Tipo";
     cout << setw(5) << "ID";
-    cout << setw(15) << "Total";
-    cout << setw(30) << "Descripción";
-    cout << setw(12) << "Fecha Reg";
+    cout << setw(12) << "Total";
+    cout << setw(26) << "Descripción";
+    cout << setw(15) << "Fecha Reg";
     cout << setw(5) << "Items";
-    cout << setw(12) << "Fecha Mod";
-    cout << setw(15) << "Estado" << RESET << endl;
+    cout << setw(15) << "Fecha Mod";
+    cout << setw(10) << "Estado" << endl;
+    cout << string(160, '=') << endl << RESET;
 }
 
 void Formatos::EncabezadoDetalles() {
-    cout << CYAN;
-    cout << left;
-    cout << setw(5) << "ID Producto";
+    cout << CYAN << left;
+    cout << setw(8) << "ID Prod.";
     cout << setw(10) << "Cantidad";
     cout << setw(15) << "Precio Unitario";
-    cout << setw(5) << "ID Transacción";
+    cout << setw(8) << "ID Trans.";
     cout << setw(15) << "Subtotal" << RESET << endl;
 }
 

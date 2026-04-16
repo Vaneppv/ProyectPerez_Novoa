@@ -369,7 +369,7 @@ void menuClientes(Tienda& tienda) {
     
     do {
         Formatos::limpiarPantalla();
-        Formatos::imprimirSubtitulo("GESTIÓN DE CLIENTES");
+        Formatos::imprimirTitulo("GESTIÓN DE CLIENTES");
         
         cout << CYAN
                   << "1. Registrar nuevo Cliente" << endl

@@ -3,10 +3,18 @@
 #include "tienda/Tienda.hpp"
 #include "interfaz/Interfaz.hpp"
 #include <iostream>
+#include <windows.h>
 
 using namespace std;
 
 int main() {
+    SetConsoleOutputCP(CP_UTF8);
+    try {
+        locale::global(locale("C"));
+    } catch (...) {
+        // en caso de falla el programa no se cierra
+    }
+
     // Inicializar el sistema de archivos
     if (!GestorArchivos::inicializarSistemaArchivos()) {
         cerr << "Error crítico: No se pudo inicializar el sistema de archivos" << endl;

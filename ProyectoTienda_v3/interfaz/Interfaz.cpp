@@ -1,7 +1,7 @@
 #include "Interfaz.hpp"
 #include "../productos/operacionesProductos.hpp"
 #include "../proveedores/operacionesproveedor.hpp"
-#include "../cliente/operacionescliente.hpp"
+#include "../clientes/operacionescliente.hpp"
 #include "../transacciones/operacionesTransacciones.hpp"
 #include "../persistencia/GestorArchivos.hpp"
 #include "../utilidades/Formatos.hpp"
@@ -93,14 +93,13 @@ void Interfaz::menuMantenimiento(Tienda& tienda) {
     
     do {
         Formatos::limpiarPantalla();
-        Formatos::imprimirTitulo("MENÚ DE MANTENIMIENTO DEL SISTEMA");
-        Formatos::imprimirSeparador(60, '=');
+        Formatos::imprimirTitulo("MENÚ DE MANTENIMIENTO E INTEGRIDAD DEL SISTEMA");
         cout << CYAN
              << "1. Verificar Integridad Referencial" << endl
              << "2. Crear Respaldo (Backup)" << endl
              << "3. Estadisticas de ventas totales por Cliente" << endl
+             << "4. Reporte de Stock Crítico" << endl
              << "0. Volver al Menú Principal" << endl << RESET;
-        Formatos::imprimirSeparador(60, '=');
         
         if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
             opcion = -1;
@@ -117,6 +116,10 @@ void Interfaz::menuMantenimiento(Tienda& tienda) {
                 break;
             case 3:
                 estadisticasVentasTotalesPorCliente();
+                Formatos::pausar();
+                break;
+            case 4:
+                productosStockCritico(tienda);
                 Formatos::pausar();
                 break;
             case 0:
