@@ -1,4 +1,26 @@
-bin/
+# --- Directorios de salida ---
 bin/
 build/
+obj/
+datos/
+
+# --- Ejecutables y objetos ---
+*.exe
+*.obj
+*.o
+*.out
+
+# --- Configuración de IDE (Local) ---
 .vscode/
+.history/
+*.workspace
+*.user
+
+# --- Versiones anteriores o respaldos ---
+ProyectoTienda_v2/
+*.bak
+*.old
+
+# --- Archivos de Base de Datos (si son archivos locales de prueba) ---
+*.dat
+*.bin
