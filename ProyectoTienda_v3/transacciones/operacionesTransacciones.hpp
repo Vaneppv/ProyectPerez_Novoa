@@ -10,7 +10,5 @@ void buscarTransacciones(Tienda& tienda);
 void listarTransacciones(Tienda& tienda);
 void cancelarTransaccion(Tienda& tienda);
 
-// Menús de transacciones
-void menuTransacciones(Tienda& tienda);
 
 #endif // OPERACIONESTRANSACCIONES_HPP

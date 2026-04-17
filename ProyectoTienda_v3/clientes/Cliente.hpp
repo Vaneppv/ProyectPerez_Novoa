@@ -41,7 +41,7 @@ public:
     const char* getEmail() const;
     const char* getDireccion() const;
     float getTotalcompras() const;
-    int getTransaccionesIds() const;
+    const int* getTransaccionesIds() const;
     int getCantidadTransacciones() const;
     const char* getFechaRegistro() const;
     bool isEliminado() const;
@@ -70,6 +70,10 @@ public:
     void mostrarInformacionBasica() const;
     void mostrarInformacionCompleta() const;
     void mostrarInformacionBasicaTabla() const;
+    
+    // Métodos adicionales para manejo de arreglos
+    void agregarTransaccionID(int idTransaccion);
+    bool tieneTransaccionID(int idTransaccion) const;
     
     // Método estático
     static int obtenerTamano();

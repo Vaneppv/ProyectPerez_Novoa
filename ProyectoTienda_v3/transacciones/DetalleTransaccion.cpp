@@ -94,11 +94,11 @@ void DetalleTransaccion::setId(int id) { this->idProducto = id; } // Corregido p
 const char* DetalleTransaccion::getDescripcion() const { return ""; } // No aplica para detalles
 
 // Métodos adicionales para compatibilidad con template
-void DetalleTransaccion::setFechaRegistro(const char* fecha) {
+void DetalleTransaccion::setFechaRegistro(const char* /* fecha */) {
     // DetalleTransaccion no tiene fechaRegistro, método vacío para compatibilidad
 }
 
-void DetalleTransaccion::setFechaUltimaModificacion(const char* fecha) {
+void DetalleTransaccion::setFechaUltimaModificacion(const char* /* fecha */) {
     // DetalleTransaccion no tiene fechaUltimaModificacion, método vacío para compatibilidad
 }
 

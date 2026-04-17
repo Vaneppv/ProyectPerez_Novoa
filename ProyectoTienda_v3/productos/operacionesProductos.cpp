@@ -9,10 +9,10 @@
 #include <iostream>
 #include <string>
 
+using namespace std;
+
 // Función auxiliar
 bool productoTieneTransacciones(int idProducto) {
-    // TODO: Implementar cuando exista la clase DetalleTransaccion
-    // Buscar en archivo de detalles de transacciones
     
     ArchivoHeader headerDetalles = GestorArchivos::leerHeader(ARCHIVO_DETALLES);
     
@@ -20,10 +20,10 @@ bool productoTieneTransacciones(int idProducto) {
         return false; // No hay detalles, por lo tanto no hay transacciones
     }
     
-    std::ifstream archivo(ARCHIVO_DETALLES, std::ios::binary);
+    ifstream archivo(ARCHIVO_DETALLES, ios::binary);
     if (!archivo.is_open()) return false;
     
-    archivo.seekg(sizeof(ArchivoHeader), std::ios::beg);
+    archivo.seekg(sizeof(ArchivoHeader), ios::beg);
     
     DetalleTransaccion detalle;
     int count = 0;
@@ -32,16 +32,15 @@ bool productoTieneTransacciones(int idProducto) {
            count < headerDetalles.cantidadRegistros) {
         if (detalle.getIdProducto() == idProducto) {
             archivo.close();
-            return true; // Encontró una transacción con este producto
+            return true; // Encontró un detalle con este producto
         }
         count++;
     }
     
     archivo.close();
-    return false; // No hay transacciones
+    return false; // No hay detalles
 }
 
-using namespace std;
 
 void registrarProducto(Tienda& tienda) {
     Formatos::imprimirSubtitulo("REGISTRAR NUEVO PRODUCTO");
@@ -252,21 +251,20 @@ void actualizarProducto(Tienda& tienda) {
     int stock, idProveedor, stockMinimo;
     int seleccion; 
 
-    bool verStockMinimo = false, verNombre = false, verCodigo = false, verDescrip = false, verPrecio = false, verStock = false, verIdProveedor = false;
+    bool verNombre = false, verCodigo = false, verDescrip = false, verPrecio = false, verStock = false, verIdProveedor = false;
     
     // Menú de campos editables
     do {
         Formatos::imprimirSubtitulo("¿Qué desea editar?");
-        cout << CYAN
-                  << "1. Código" << endl
-                  << "2. Nombre" << endl
-                  << "3. Descripción" << endl
-                  << "4. Proveedor" << endl
-                  << "5. Precio" << endl
-                  << "6. Stock" << endl
-                  << "7. Stock Mínimo (Alerta)" << endl
-                  << "8. Guardar cambios" << endl
-                  << "0. Cancelar sin guardar" << endl << RESET;
+        cout << "1. Código" << endl
+             << "2. Nombre" << endl
+             << "3. Descripción" << endl
+             << "4. Proveedor" << endl
+             << "5. Precio" << endl
+             << "6. Stock" << endl
+             << "7. Stock Mínimo (Alerta)" << endl
+             << "8. Guardar cambios" << endl
+             << "0. Cancelar sin guardar" << endl << RESET;
         
         if (!interfaz.solicitarEntero("Seleccione una opción", seleccion)) continue;
 
@@ -352,7 +350,6 @@ void actualizarProducto(Tienda& tienda) {
                         break;
                     } else {
                         producto.setStockMinimo(stockMinimo);
-                        verStockMinimo = true;
                     }
                 }
                 break;
@@ -384,7 +381,7 @@ void actualizarProducto(Tienda& tienda) {
     } while (seleccion != 0);
 }
 
-void actualizarStockProducto(Tienda& tienda) {
+void actualizarStockProducto(/* Tienda& tienda */) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PRODUCTOS);
     if (header.registrosActivos == 0){
@@ -467,7 +464,7 @@ void actualizarStockProducto(Tienda& tienda) {
     Formatos::pausar();
 }
 
-void listarProductos(Tienda& tienda) {
+void listarProductos(/* Tienda& tienda */) {
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PRODUCTOS);
     if (header.registrosActivos == 0) {
         Formatos::imprimirAdvertencia("No hay productos registrados en el sistema");
@@ -497,7 +494,7 @@ void listarProductos(Tienda& tienda) {
     Formatos::pausar();
 }
 
-void eliminarProducto(Tienda& tienda) {
+void eliminarProducto(/* Tienda& tienda */) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PRODUCTOS);
     if (header.registrosActivos == 0){
@@ -538,7 +535,7 @@ void eliminarProducto(Tienda& tienda) {
     Formatos::pausar();
 }
 
-void productosStockCritico(Tienda& tienda) {
+void productosStockCritico(/* Tienda& tienda */) {
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PRODUCTOS);
     if (header.registrosActivos == 0){
         Formatos::imprimirAdvertencia("No hay productos en el Sistema.");
@@ -588,7 +585,7 @@ void productosStockCritico(Tienda& tienda) {
     Formatos::pausar();
 }
 
-void listarPorProveedor(Tienda& tienda, int idProveedor) {
+void listarPorProveedor(Tienda& /* tienda */, int idProveedor) {
     // Verificar que el proveedor exista
     if (!GestorArchivos::existeEntidad<Proveedor>(ARCHIVO_PROVEEDORES, idProveedor)) {
         Formatos::imprimirError("El proveedor no existe");
@@ -639,57 +636,3 @@ void listarPorProveedor(Tienda& tienda, int idProveedor) {
     Formatos::pausar();
 }
 
-void menuProductos(Tienda& tienda) {
-    Interfaz interfaz;
-    int opcion;
-    
-    do {
-        Formatos::limpiarPantalla();
-        Formatos::imprimirTitulo("GESTIÓN DE PRODUCTOS");
-        
-        cout << CYAN
-                  << "1. Registrar Nuevo Producto" << endl
-                  << "2. Buscar Producto" << endl
-                  << "3. Actualizar Producto" << endl
-                  << "4. Actualizar Stock" << endl
-                  << "5. Listar Todos los Productos" << endl
-                  << "6. Eliminar Producto" << endl
-                  << "7. Reporte de Stock Crítico" << endl
-                  << "0. Volver al Menú Principal" << endl << RESET;
-        
-        if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
-            opcion = -1;
-        }
-        
-        switch (opcion) {
-            case 1:
-                registrarProducto(tienda);
-                break;
-            case 2:
-                buscarProducto(tienda);
-                break;
-            case 3:
-                actualizarProducto(tienda);
-                break;
-            case 4:
-                actualizarStockProducto(tienda);
-                break;
-            case 5:
-                listarProductos(tienda);
-                break;
-            case 6:
-                eliminarProducto(tienda);
-                break;
-            case 7:
-                productosStockCritico(tienda);
-                break;
-            case 0:
-                break;
-            default:
-                Formatos::imprimirError("Opción no válida");
-                Formatos::pausar();
-                break;
-        }
-        
-    } while (opcion != 0);
-}

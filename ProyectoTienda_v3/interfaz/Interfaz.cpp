@@ -45,13 +45,12 @@ void Interfaz::menuPrincipal(Tienda& tienda) {
         
         cout << AZUL << NEGRITA << "MENÚ PRINCIPAL" << RESET << endl;
         Formatos::imprimirSeparador(60, '=');
-        cout << CYAN
-                  << "1. Gestión de Productos" << endl
-                  << "2. Gestión de Proveedores" << endl
-                  << "3. Gestión de Clientes" << endl
-                  << "4. Gestión de Transacciones" << endl
-                  << "5. Mantenimiento del Sistema" << endl
-                  << "0. Salir del Sistema" << endl << RESET;
+        cout << "1. Gestión de Productos" << endl
+             << "2. Gestión de Proveedores" << endl
+             << "3. Gestión de Clientes" << endl
+             << "4. Gestión de Transacciones" << endl
+             << "5. Mantenimiento del Sistema" << endl
+             << "0. Salir del Sistema" << endl << RESET;
         Formatos::imprimirSeparador(60, '=');
         
         if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
@@ -94,8 +93,7 @@ void Interfaz::menuMantenimiento(Tienda& tienda) {
     do {
         Formatos::limpiarPantalla();
         Formatos::imprimirTitulo("MENÚ DE MANTENIMIENTO E INTEGRIDAD DEL SISTEMA");
-        cout << CYAN
-             << "1. Verificar Integridad Referencial" << endl
+        cout << "1. Verificar Integridad Referencial" << endl
              << "2. Crear Respaldo (Backup)" << endl
              << "3. Estadisticas de ventas totales por Cliente" << endl
              << "4. Reporte de Stock Crítico" << endl
@@ -129,6 +127,199 @@ void Interfaz::menuMantenimiento(Tienda& tienda) {
                 Formatos::pausar();
                 break;
         }
+    } while (opcion != 0);
+}
+
+// Submenús de entidades
+void Interfaz::menuProductos(Tienda& tienda) {
+    Interfaz interfaz;
+    int opcion;
+    
+    do {
+        Formatos::limpiarPantalla();
+        Formatos::imprimirTitulo("MENÚ DE PRODUCTOS");
+        
+        cout << "1. Registrar Producto" << endl
+             << "2. Buscar Producto" << endl
+             << "3. Actualizar Producto" << endl
+             << "4. Actualizar Stock" << endl
+             << "5. Listar Todos los Productos" << endl
+             << "6. Eliminar Producto" << endl
+             << "7. Productos con Stock Crítico" << endl
+             << "0. Volver al menú principal" << endl << RESET;
+        
+        if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
+            opcion = -1;
+        }
+        
+        switch (opcion) {
+            case 1:
+                registrarProducto(tienda);
+                break;
+            case 2:
+                buscarProducto(tienda);
+                break;
+            case 3:
+                actualizarProducto(tienda);
+                break;
+            case 4:
+                actualizarStockProducto(tienda);
+                break;
+            case 5:
+                listarProductos(tienda);
+                break;
+            case 6:
+                eliminarProducto(tienda);
+                break;
+            case 7:
+                productosStockCritico(tienda);
+                break;
+            case 0:
+                break;
+            default:
+                Formatos::imprimirError("Opción no válida");
+                Formatos::pausar();
+                break;
+        }
+        
+    } while (opcion != 0);
+}
+
+void Interfaz::menuProveedores(Tienda& tienda) {
+    Interfaz interfaz;
+    int opcion;
+    
+    do {
+        Formatos::limpiarPantalla();
+        Formatos::imprimirTitulo("MENÚ DE PROVEEDORES");
+        
+        cout << "1. Registrar nuevo Proveedor" << endl
+             << "2. Buscar Proveedor" << endl
+             << "3. Actualizar Proveedor" << endl
+             << "4. Listar todos los Proveedores" << endl
+             << "5. Eliminar Proveedor" << endl
+             << "0. Volver al menú principal" << endl << RESET;
+        
+        if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
+            opcion = -1;
+        }
+        
+        switch (opcion) {
+            case 1:
+                registrarProveedor(tienda);
+                break;
+            case 2:
+                buscarProveedor(tienda);
+                break;
+            case 3:
+                actualizarProveedor(tienda);
+                break;
+            case 4:
+                listarProveedores(tienda);
+                break;
+            case 5:
+                eliminarProveedor(tienda);
+                break;
+            case 0:
+                break;
+            default:
+                Formatos::imprimirError("Opción no válida");
+                Formatos::pausar();
+                break;
+        }
+        
+    } while (opcion != 0);
+}
+
+void Interfaz::menuClientes(Tienda& tienda) {
+    Interfaz interfaz;
+    int opcion;
+    
+    do {
+        Formatos::limpiarPantalla();
+        Formatos::imprimirTitulo("MENÚ DE CLIENTES");
+        
+        cout << "1. Registrar nuevo Cliente" << endl
+             << "2. Buscar Cliente" << endl
+             << "3. Actualizar Cliente" << endl
+             << "4. Listar todos los Clientes" << endl
+             << "5. Eliminar Cliente" << endl
+             << "0. Volver al menú principal" << endl << RESET;
+        
+        if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
+            opcion = -1;
+        }
+        
+        switch (opcion) {
+            case 1:
+                registrarCliente(tienda);
+                break;
+            case 2:
+                buscarCliente(tienda);
+                break;
+            case 3:
+                actualizarCliente(tienda);
+                break;
+            case 4:
+                listarClientes(tienda);
+                break;
+            case 5:
+                eliminarCliente(tienda);
+                break;
+            case 0:
+                break;
+            default:
+                Formatos::imprimirError("Opción no válida");
+                Formatos::pausar();
+                break;
+        }
+        
+    } while (opcion != 0);
+}
+
+void Interfaz::menuTransacciones(Tienda& tienda) {
+    Interfaz interfaz;
+    int opcion;
+    
+    do {
+        Formatos::limpiarPantalla();
+        Formatos::imprimirTitulo("MENÚ DE TRANSACCIONES");
+        
+        cout << "1. Registrar Compra" << endl
+             << "2. Registrar Venta" << endl
+             << "3. Buscar Transacciones" << endl
+             << "4. Listar Todas las Transacciones" << endl
+             << "5. Cancelar Transacción" << endl
+             << "0. Volver al menú principal" << endl << RESET;
+        
+        if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
+            opcion = -1;
+        }
+        
+        switch (opcion) {
+            case 1:
+                registrarCompra(tienda);
+                break;
+            case 2:
+                registrarVenta(tienda);
+                break;
+            case 3:
+                buscarTransacciones(tienda);
+                break;
+            case 4:
+                listarTransacciones(tienda);
+                break;
+            case 5:
+                cancelarTransaccion(tienda);
+                break;
+            case 0:
+                break;
+            default:
+                Formatos::imprimirError("Opción no válida");
+                Formatos::pausar();
+                break;
+        }
+        
     } while (opcion != 0);
 }
 

@@ -44,9 +44,9 @@ public:
     const char* getEmail() const;
     const char* getDireccion() const;
     int getCantidadproductos() const;
-    int getProductosIDs() const;
+    const int* getProductosIDs() const;
     float getTotalcompras() const;
-    int getTransaccionesIds() const;
+    const int* getTransaccionesIds() const;
     int getCantidadTransacciones() const;
     const char* getFechaRegistro() const;
     bool isEliminado() const;
@@ -76,6 +76,12 @@ public:
     // Métodos de presentación
     void mostrarInformacionBasica() const;
     void mostrarInformacionCompleta() const;
+    
+    // Métodos adicionales para manejo de arreglos
+    void agregarProductoID(int idProducto);
+    void agregarTransaccionID(int idTransaccion);
+    bool tieneProductoID(int idProducto) const;
+    bool tieneTransaccionID(int idTransaccion) const;
     
     // Método estático
     static int obtenerTamano();

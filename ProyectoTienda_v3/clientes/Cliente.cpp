@@ -33,7 +33,8 @@ Cliente::Cliente() {
 
 // Constructor parametrizado
 Cliente::Cliente(int id, const char* cedula, const char* nombre, const char* telefono, 
-             const char* email, const char* direccion, float totalCompras, const int* transaccionesIds, int cantidadTransacciones) {
+             const char* email, const char* direccion, float totalCompras, 
+			 const int* transaccionesIds, int cantidadTransacciones) {
 			 	
     this->id = id;
     strncpy(this->cedula, cedula, MAX_CEDULA - 1);
@@ -71,7 +72,7 @@ const char* Cliente::getEmail() const { return email; }
 const char* Cliente::getDireccion() const { return direccion; }
 float Cliente::getTotalcompras() const { return totalCompras; }
 const char* Cliente::getFechaRegistro() const { return fechaRegistro; }
-int Cliente::getTransaccionesIds() const { return transaccionesIds[MAX_TRANSACCIONES_ENTIDAD]; }
+const int* Cliente::getTransaccionesIds() const { return transaccionesIds; }
 int Cliente::getCantidadTransacciones() const { return cantidadTransacciones; }
 bool Cliente::isEliminado() const { return eliminado; }
 const char* Cliente::getFechaUltimaModificacion() const { return fechaUltimaModificacion; }
@@ -190,6 +191,23 @@ void Cliente::mostrarInformacionCompleta() const {
     cout << setw(12) << fechaRegistro;
     cout << setw(12) << fechaUltimaModificacion;
     cout << setw(10) << (eliminado ? "Eliminado" : "Activo") << endl;
+}
+
+// Métodos adicionales para manejo de arreglos
+void Cliente::agregarTransaccionID(int idTransaccion) {
+    if (cantidadTransacciones < MAX_TRANSACCIONES_ENTIDAD && !tieneTransaccionID(idTransaccion)) {
+        transaccionesIds[cantidadTransacciones] = idTransaccion;
+        cantidadTransacciones++;
+    }
+}
+
+bool Cliente::tieneTransaccionID(int idTransaccion) const {
+    for (int i = 0; i < cantidadTransacciones; i++) {
+        if (transaccionesIds[i] == idTransaccion) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // Método estático

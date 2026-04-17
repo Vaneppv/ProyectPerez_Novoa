@@ -22,7 +22,7 @@ bool Validaciones::validarRIF(const char* rif) {
         if (rif[0] == 'J' || rif[0] == 'V' || rif[0] == 'E' || rif[0] == 'G') {
             if (rif[1] == '-') {
                 // Verificar que los caracteres después del guión son numéricos
-                for (int i = 2; i < strlen(rif); i++) {
+                for (size_t i = 2; i < strlen(rif); i++) {
                     if (rif[i] == '-' && i > 2) continue; // Permitir segundo guión
                     if (!isdigit(rif[i])) return false;
                 }
@@ -60,7 +60,7 @@ bool Validaciones::validarCedula(const char* cedula) {
         if (cedula[0] == 'V' || cedula[0] == 'E') {
             if (cedula[1] == '-') {
                 // Verificar que los caracteres después del guión son numéricos
-                for (int i = 2; i < strlen(cedula); i++) {
+                for (size_t i = 2; i < strlen(cedula); i++) {
                     if (!isdigit(cedula[i])) return false;
                 }
                 return true;

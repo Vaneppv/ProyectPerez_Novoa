@@ -10,7 +10,5 @@ void actualizarProveedor(Tienda& tienda);
 void listarProveedores(Tienda& tienda);
 void eliminarProveedor(Tienda& tienda);
 
-// Menús de Proveedores
-void menuProveedores(Tienda& tienda);
 
 #endif // OPERACIONESPROVEEDORES_HPP

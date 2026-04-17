@@ -14,6 +14,10 @@ public:
     // Submenús
     void menuMantenimiento(Tienda& tienda);
     void menuReportes(Tienda& tienda);
+    void menuProductos(Tienda& tienda);
+    void menuProveedores(Tienda& tienda);
+    void menuClientes(Tienda& tienda);
+    void menuTransacciones(Tienda& tienda);
     
     // Utilidades de interfaz
     void mostrarBienvenida();

@@ -28,17 +28,18 @@ Proveedor::Proveedor() {
     strncpy(fechaUltimaModificacion, "", MAX_FECHA - 1);
     fechaUltimaModificacion[MAX_FECHA - 1] = '\0';
     for (int i = 0; i < MAX_PRODUCTOS_PROVEEDOR; i++) {
-    	productosIDs[MAX_PRODUCTOS_PROVEEDOR - 1] = 0;
+    	productosIDs[i] = 0;
 	}
 	for (int i = 0; i < MAX_TRANSACCIONES_ENTIDAD; i++) {
-    	transaccionesIds[MAX_TRANSACCIONES_ENTIDAD - 1] = 0;
+    	transaccionesIds[i] = 0;
 	}
 }
 
 // Constructor parametrizado
 Proveedor::Proveedor(int id, const char* rif, const char* nombre, const char* telefono, 
              const char* email, const char* direccion, int cantidadProductos,
-			 const int* productosIDs, float totalCompras, const int* transaccionesIds, int cantidadTransacciones) {
+			 const int* productosIDs, float totalCompras, 
+			 const int* transaccionesIds, int cantidadTransacciones) {
 			 	
     this->id = id;
     strncpy(this->rif, rif, MAX_RIF - 1);
@@ -60,10 +61,10 @@ Proveedor::Proveedor(int id, const char* rif, const char* nombre, const char* te
     strncpy(fechaUltimaModificacion, "", MAX_FECHA - 1);
     fechaUltimaModificacion[MAX_FECHA - 1] = '\0';
     for (int i = 0; i < MAX_PRODUCTOS_PROVEEDOR; i++) {
-    	this->productosIDs[MAX_PRODUCTOS_PROVEEDOR - 1] = 0;
+    	this->productosIDs[i] = 0;
 	}
 	for (int i = 0; i < MAX_TRANSACCIONES_ENTIDAD; i++) {
-    	this->transaccionesIds[MAX_TRANSACCIONES_ENTIDAD - 1] = 0;
+    	this->transaccionesIds[i] = 0;
 	}
 }
 
@@ -79,10 +80,10 @@ const char* Proveedor::getTlf() const { return telefono; }
 const char* Proveedor::getEmail() const { return email; }
 const char* Proveedor::getDireccion() const { return direccion; }
 int Proveedor::getCantidadproductos() const { return cantidadProductos; }
-int Proveedor::getProductosIDs() const { return productosIDs[MAX_PRODUCTOS_PROVEEDOR]; }
+const int* Proveedor::getProductosIDs() const { return productosIDs; }
 float Proveedor::getTotalcompras() const { return totalCompras; }
 const char* Proveedor::getFechaRegistro() const { return fechaRegistro; }
-int Proveedor::getTransaccionesIds() const { return transaccionesIds[MAX_TRANSACCIONES_ENTIDAD]; }
+const int* Proveedor::getTransaccionesIds() const { return transaccionesIds; }
 int Proveedor::getCantidadTransacciones() const { return cantidadTransacciones; }
 bool Proveedor::isEliminado() const { return eliminado; }
 const char* Proveedor::getFechaUltimaModificacion() const { return fechaUltimaModificacion; }
@@ -203,6 +204,39 @@ void Proveedor::mostrarInformacionCompleta() const {
     cout << setw(12) << fechaRegistro;
     cout << setw(12) << fechaUltimaModificacion;
     cout << setw(10) << (eliminado ? "Elim." : "Activo") << endl;
+}
+
+// Métodos adicionales para manejo de arreglos
+void Proveedor::agregarProductoID(int idProducto) {
+    if (cantidadProductos < MAX_PRODUCTOS_PROVEEDOR && !tieneProductoID(idProducto)) {
+        productosIDs[cantidadProductos] = idProducto;
+        cantidadProductos++;
+    }
+}
+
+void Proveedor::agregarTransaccionID(int idTransaccion) {
+    if (cantidadTransacciones < MAX_TRANSACCIONES_ENTIDAD && !tieneTransaccionID(idTransaccion)) {
+        transaccionesIds[cantidadTransacciones] = idTransaccion;
+        cantidadTransacciones++;
+    }
+}
+
+bool Proveedor::tieneProductoID(int idProducto) const {
+    for (int i = 0; i < cantidadProductos; i++) {
+        if (productosIDs[i] == idProducto) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Proveedor::tieneTransaccionID(int idTransaccion) const {
+    for (int i = 0; i < cantidadTransacciones; i++) {
+        if (transaccionesIds[i] == idTransaccion) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // Método estático

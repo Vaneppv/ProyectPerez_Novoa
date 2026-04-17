@@ -10,7 +10,5 @@ void actualizarCliente(Tienda& tienda);
 void listarClientes(Tienda& tienda);
 void eliminarCliente(Tienda& tienda);
 
-// Menús de Clientes
-void menuClientes(Tienda& tienda);
 
 #endif // OPERACIONESCLIENTES_HPP

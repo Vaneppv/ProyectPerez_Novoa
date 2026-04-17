@@ -132,7 +132,7 @@ void Formatos::imprimirAdvertencia(const char* mensaje) {
 }
 
 void Formatos::imprimirInformacion(const char* mensaje) {
-    cout << CYAN << "INFO: " << mensaje << RESET << endl;
+    cout << CYAN << "Información: " << mensaje << RESET << endl;
 }
 
 // Formatos de presentación de datos
@@ -145,7 +145,7 @@ void Formatos::alinearCentro(int ancho) {
 }
 
 string Formatos::truncarTexto(string texto, int limite) {
-    if (texto.length() > limite) {
+    if (static_cast<int>(texto.length()) > limite) {
         // Corta el texto y deja espacio para los 3 puntos
         return texto.substr(0, limite - 3) + "...";
     }

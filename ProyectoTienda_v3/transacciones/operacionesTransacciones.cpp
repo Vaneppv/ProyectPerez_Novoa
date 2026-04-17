@@ -89,6 +89,12 @@ void registrarCompra(Tienda& tienda) {
             break;
         }
         
+        // Validar espacio en carrito antes de agregar
+        if (cantItems >= 100) {
+            Formatos::imprimirError("Carrito lleno. No se pueden agregar más productos.");
+            break;
+        }
+        
         // Agregar al carrito
         carrito[cantItems].setIdProducto(productoId);
         carrito[cantItems].setCantidad(cantidad);
@@ -173,30 +179,15 @@ void registrarCompra(Tienda& tienda) {
             Proveedor prov = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, indiceProveedor);
             prov.setTotalCompras(prov.getTotalcompras() + totalCompra);       // Acumula el gasto/inversion
             
-            // Note: The getter methods in Proveedor class need to be fixed to return proper arrays
-            // For now, we'll work around this by using the setter methods directly
-            if (prov.getCantidadTransacciones() < 100){
-                // Add transaction ID to provider's transaction list
-                // This requires proper getter implementation in Proveedor class
-                prov.setCantidadTransacciones(prov.getCantidadTransacciones() + 1);
-            }
+            // Agregar ID de transacción al proveedor
+            prov.agregarTransaccionID(transaccion.getId());
 
             for (int i = 0; i < cantItems; i++) {
                 int idProdActual = carrito[i].getIdProducto();
-                bool yaExiste = false;
-
-                // Verifica si el producto ya estaba en la lista del proveedor 
-                // This requires proper getter implementation in Proveedor class
-                for (int j = 0; j < prov.getCantidadproductos(); j++) {
-                    // This requires proper getter implementation in Proveedor class
-                    if (false) { // Placeholder until getters are fixed
-                        yaExiste = true;
-                        break;
-                    }
-                }
-                // Si no esta en la lista del proveedor, se agrega
-                if (!yaExiste && prov.getCantidadproductos() < 100) {
-                    prov.setCantidadProductos(prov.getCantidadproductos() + 1);
+                
+                // Verificar si el producto ya está en la lista del proveedor
+                if (!prov.tieneProductoID(idProdActual)) {
+                    prov.agregarProductoID(idProdActual);
                 }
             }
             
@@ -302,6 +293,12 @@ void registrarVenta(Tienda& tienda) {
             break;
         }
                 
+        // Validar espacio en carrito antes de agregar
+        if (cantItems >= 100) {
+            Formatos::imprimirError("Carrito lleno. No se pueden agregar más productos.");
+            break;
+        }
+        
         // Agregar al carrito
         DetalleTransaccion nuevoDetalle;
         nuevoDetalle.setIdProducto(productoId);
@@ -392,11 +389,8 @@ void registrarVenta(Tienda& tienda) {
             Cliente client = GestorArchivos::obtenerRegistroPorIndice<Cliente>(ARCHIVO_CLIENTES, indiceCliente);
             client.setTotalCompras(client.getTotalcompras() + totalVenta);      // Sumar gasto del cliente (Venta)
 
-            if (client.getCantidadTransacciones() < 100){
-                // Add transaction ID to client's transaction list
-                // This requires proper getter implementation in Cliente class
-                client.setCantidadTransacciones(client.getCantidadTransacciones() + 1);
-            }
+            // Agregar ID de transacción al cliente
+            client.agregarTransaccionID(transaccion.getId());
             GestorArchivos::actualizarRegistro<Cliente>(ARCHIVO_CLIENTES, indiceCliente, client);
 
             string successMsg = "Venta registrada correctamente. ID Transacción: " + to_string(transaccion.getId());
@@ -411,7 +405,7 @@ void registrarVenta(Tienda& tienda) {
     Formatos::pausar();
 }
 
-void buscarTransacciones(Tienda& tienda) {
+void buscarTransacciones(/* Tienda& tienda */) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_TRANSACCIONES);
     if (header.registrosActivos == 0) {
@@ -581,7 +575,7 @@ void buscarTransacciones(Tienda& tienda) {
     } while (opcion != 0);
 }
 
-void listarTransacciones(Tienda& tienda) {
+void listarTransacciones(/* Tienda& tienda */) {
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_TRANSACCIONES);
     if (header.registrosActivos == 0) {
         Formatos::imprimirAdvertencia("No hay transacciones registradas en el sistema");
@@ -636,7 +630,7 @@ void listarTransacciones(Tienda& tienda) {
     Formatos::pausar();
 }
 
-void cancelarTransaccion(Tienda& tienda) {
+void cancelarTransaccion(/* Tienda& tienda */) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_TRANSACCIONES);
     if (header.registrosActivos == 0) {
@@ -678,49 +672,3 @@ void cancelarTransaccion(Tienda& tienda) {
     Formatos::pausar();
 }
 
-void menuTransacciones(Tienda& tienda) {
-    Interfaz interfaz;
-    int opcion;
-    
-    do {
-        Formatos::limpiarPantalla();
-        Formatos::imprimirTitulo("MENÚ DE TRANSACCIONES");
-        
-        cout << CYAN
-                  << "1. Registrar Compra" << endl
-                  << "2. Registrar Venta" << endl
-                  << "3. Buscar Transacciones" << endl
-                  << "4. Listar Todas las Transacciones" << endl
-                  << "5. Cancelar Transacción" << endl
-                  << "0. Volver al menú principal" << endl << RESET;
-        
-        if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
-            opcion = -1;
-        }
-        
-        switch (opcion) {
-            case 1:
-                registrarCompra(tienda);
-                break;
-            case 2:
-                registrarVenta(tienda);
-                break;
-            case 3:
-                buscarTransacciones(tienda);
-                break;
-            case 4:
-                listarTransacciones(tienda);
-                break;
-            case 5:
-                cancelarTransaccion(tienda);
-                break;
-            case 0:
-                break;
-            default:
-                Formatos::imprimirError("Opción no válida");
-                Formatos::pausar();
-                break;
-        }
-        
-    } while (opcion != 0);
-}

@@ -10,7 +10,7 @@
 
 using namespace std;
 
-void registrarProveedor(Tienda& tienda) {
+void registrarProveedor(/* Tienda& tienda */) {
     Formatos::imprimirSubtitulo("REGISTRAR NUEVO PROVEEDOR");
     
     Interfaz interfaz;
@@ -20,8 +20,6 @@ void registrarProveedor(Tienda& tienda) {
     
     Proveedor nuevoProveedor;
     char buffer[200];
-    int valorEntero;
-    float valorFloat;
     
     // Solicitar datos del proveedor
     if (!interfaz.solicitarTexto("Ingrese nombre del proveedor", buffer, MAX_NOMBRE)) return;
@@ -70,7 +68,7 @@ void registrarProveedor(Tienda& tienda) {
     Formatos::pausar();
 }
 
-void buscarProveedor(Tienda& tienda) {
+void buscarProveedor(/* Tienda& tienda */) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PROVEEDORES);
     if (header.registrosActivos == 0) {
@@ -165,7 +163,7 @@ void buscarProveedor(Tienda& tienda) {
     } while (opcion != 0);
 }
 
-void actualizarProveedor(Tienda& tienda) {
+void actualizarProveedor(/* Tienda& tienda */) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PROVEEDORES);
     if (header.registrosActivos == 0){
@@ -198,14 +196,13 @@ void actualizarProveedor(Tienda& tienda) {
     // Menú de campos editables
     do {
         Formatos::imprimirSubtitulo("¿Qué desea editar?");
-        cout << CYAN
-                  << "1. Rif" << endl
-                  << "2. Nombre" << endl
-                  << "3. Telefono" << endl
-                  << "4. Email" << endl
-                  << "5. Direccion" << endl
-                  << "6. Guardar cambios" << endl
-                  << "0. Cancelar sin guardar" << endl << RESET;
+        cout << "1. Rif" << endl
+             << "2. Nombre" << endl
+             << "3. Telefono" << endl
+             << "4. Email" << endl
+             << "5. Direccion" << endl
+             << "6. Guardar cambios" << endl
+             << "0. Cancelar sin guardar" << endl << RESET;
         
         if (!interfaz.solicitarEntero("Seleccione una opción", seleccion)) continue;
 
@@ -294,7 +291,7 @@ void actualizarProveedor(Tienda& tienda) {
 }
 
 
-void listarProveedores(Tienda& tienda) {
+void listarProveedores(/* Tienda& tienda */) {
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PROVEEDORES);
     if (header.registrosActivos == 0) {
         Formatos::imprimirAdvertencia("No hay proveedores registrados en el sistema");
@@ -325,7 +322,7 @@ void listarProveedores(Tienda& tienda) {
     Formatos::pausar();
 }
 
-void eliminarProveedor(Tienda& tienda) {
+void eliminarProveedor(/* Tienda& tienda */) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PROVEEDORES);
     if (header.registrosActivos == 0){
@@ -362,49 +359,3 @@ void eliminarProveedor(Tienda& tienda) {
 }
 
 
-void menuProveedores(Tienda& tienda) {
-    Interfaz interfaz;
-    int opcion;
-    
-    do {
-        Formatos::limpiarPantalla();
-        Formatos::imprimirTitulo("GESTIÓN DE PROVEEDORES");
-        
-        cout << CYAN
-                  << "1. Registrar nuevo Proveedor" << endl
-                        << "2. Buscar Proveedor" << endl
-                        << "3. Actualizar Proveedor" << endl
-                        << "4. Listar todos los Proveedores" << endl
-                        << "5. Eliminar Proveedor" << endl
-                        << "0. Volver al menú principal" << endl << RESET;
-        
-        if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
-            opcion = -1;
-        }
-        
-        switch (opcion) {
-            case 1:
-                registrarProveedor(tienda);
-                break;
-            case 2:
-                buscarProveedor(tienda);
-                break;
-            case 3:
-                actualizarProveedor(tienda);
-                break;
-            case 4:
-                listarProveedores(tienda);
-                break;
-            case 5:
-                eliminarProveedor(tienda);
-                break;
-            case 0:
-                break;
-            default:
-                Formatos::imprimirError("Opción no válida");
-                Formatos::pausar();
-                break;
-        }
-        
-    } while (opcion != 0);
-}

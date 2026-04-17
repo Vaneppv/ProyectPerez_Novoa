@@ -13,7 +13,5 @@ void eliminarProducto(Tienda& tienda);
 void productosStockCritico(Tienda& tienda);
 void listarPorProveedor(Tienda& tienda, int idProveedor);
 
-// Menús de productos
-void menuProductos(Tienda& tienda);
 
 #endif // OPERACIONESPRODUCTOS_HPP

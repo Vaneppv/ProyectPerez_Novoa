@@ -10,7 +10,7 @@
 
 using namespace std;
 
-void registrarCliente(Tienda& tienda) {
+void registrarCliente(/* Tienda& tienda */) {
     Interfaz interfaz;
     Formatos::imprimirSubtitulo("REGISTRAR NUEVO CLIENTE");
     
@@ -20,8 +20,6 @@ void registrarCliente(Tienda& tienda) {
     
     Cliente nuevoCliente;
     char buffer[200];
-    int valorEntero;
-    float valorFloat;
     
     // Solicitar datos del cliente
     if (!interfaz.solicitarTexto("Ingrese nombre del cliente", buffer, MAX_NOMBRE)) return;
@@ -71,7 +69,7 @@ void registrarCliente(Tienda& tienda) {
     Formatos::pausar();
 }
 
-void buscarCliente(Tienda& tienda) {
+void buscarCliente(/* Tienda& tienda */) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_CLIENTES);
     if (header.registrosActivos == 0) {
@@ -166,7 +164,7 @@ void buscarCliente(Tienda& tienda) {
     } while (opcion != 0);
 }
 
-void actualizarCliente(Tienda& tienda) {
+void actualizarCliente(/* Tienda& tienda */) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_CLIENTES);
     if (header.registrosActivos == 0){
@@ -199,14 +197,13 @@ void actualizarCliente(Tienda& tienda) {
     // Menú de campos editables
     do {
         Formatos::imprimirSubtitulo("¿Qué desea editar?");
-        cout << CYAN
-                  << "1. Rif" << endl
-                  << "2. Nombre" << endl
-                  << "3. Telefono" << endl
-                  << "4. Email" << endl
-                  << "5. Direccion" << endl
-                  << "6. Guardar cambios" << endl
-                  << "0. Cancelar sin guardar" << endl << RESET;
+        cout << "1. Rif" << endl
+             << "2. Nombre" << endl
+             << "3. Telefono" << endl
+             << "4. Email" << endl
+             << "5. Direccion" << endl
+             << "6. Guardar cambios" << endl
+             << "0. Cancelar sin guardar" << endl << RESET;
         
         if (!interfaz.solicitarEntero("Seleccione una opción", seleccion)) continue;
 
@@ -295,7 +292,7 @@ void actualizarCliente(Tienda& tienda) {
 }
 
 
-void listarClientes(Tienda& tienda) {
+void listarClientes(/* Tienda& tienda */) {
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_CLIENTES);
     if (header.registrosActivos == 0) {
         Formatos::imprimirAdvertencia("No hay clientes registrados en el sistema");
@@ -326,7 +323,7 @@ void listarClientes(Tienda& tienda) {
     Formatos::pausar();
 }
 
-void eliminarCliente(Tienda& tienda) {
+void eliminarCliente(/* Tienda& tienda */) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_CLIENTES);
     if (header.registrosActivos == 0){
@@ -363,49 +360,3 @@ void eliminarCliente(Tienda& tienda) {
 }
 
 
-void menuClientes(Tienda& tienda) {
-    Interfaz interfaz;
-    int opcion;
-    
-    do {
-        Formatos::limpiarPantalla();
-        Formatos::imprimirTitulo("GESTIÓN DE CLIENTES");
-        
-        cout << CYAN
-                  << "1. Registrar nuevo Cliente" << endl
-                        << "2. Buscar Cliente" << endl
-                        << "3. Actualizar Cliente" << endl
-                        << "4. Listar todos los Clientes" << endl
-                        << "5. Eliminar Cliente" << endl
-                        << "0. Volver al menú principal" << endl << RESET;
-        
-        if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
-            opcion = -1;
-        }
-        
-        switch (opcion) {
-            case 1:
-                registrarCliente(tienda);
-                break;
-            case 2:
-                buscarCliente(tienda);
-                break;
-            case 3:
-                actualizarCliente(tienda);
-                break;
-            case 4:
-                listarClientes(tienda);
-                break;
-            case 5:
-                eliminarCliente(tienda);
-                break;
-            case 0:
-                break;
-            default:
-                Formatos::imprimirError("Opción no válida");
-                Formatos::pausar();
-                break;
-        }
-        
-    } while (opcion != 0);
-}
