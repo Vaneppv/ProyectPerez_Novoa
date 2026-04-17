@@ -1,3 +1,7 @@
+![Status](https://img.shields.io/badge/Status-En%20Desarrollo-green)
+![Language](https://img.shields.io/badge/Language-C%2B%2B-blue)
+![Architecture](https://img.shields.io/badge/Architecture-Binary%20Files-orange)
+
 # Tienda JSport - Sistema de Inventario V3.0
 
 ## Descripción
@@ -413,6 +417,7 @@ bool guardarRegistro(const char* archivo, T& registro);
 
 Este proyecto es desarrollado como parte de la asignatura Programación 2 de la Universidad Rafael Urdaneta.
 
+**Autores:** Luis Novoa & Ing. Vanessa Perez.
 **Profesor:** Ing. Victor Kneider  
 **Versión:** 3.0 - POO y Modularización  
 **Año:** 2026
