@@ -5,6 +5,8 @@ obj/
 datos/
 
 # --- Ejecutables y objetos ---
+ProyectoTienda_v3/obj/
+ProyectoTienda_v3/TiendaJsportV3.exe
 *.exe
 *.obj
 *.o
