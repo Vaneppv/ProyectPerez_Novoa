@@ -381,7 +381,7 @@ void actualizarProducto(Tienda& tienda) {
     } while (seleccion != 0);
 }
 
-void actualizarStockProducto(/* Tienda& tienda */) {
+void actualizarStockProducto(Tienda& tienda) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PRODUCTOS);
     if (header.registrosActivos == 0){
@@ -464,7 +464,7 @@ void actualizarStockProducto(/* Tienda& tienda */) {
     Formatos::pausar();
 }
 
-void listarProductos(/* Tienda& tienda */) {
+void listarProductos(Tienda& tienda) {
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PRODUCTOS);
     if (header.registrosActivos == 0) {
         Formatos::imprimirAdvertencia("No hay productos registrados en el sistema");
@@ -494,7 +494,7 @@ void listarProductos(/* Tienda& tienda */) {
     Formatos::pausar();
 }
 
-void eliminarProducto(/* Tienda& tienda */) {
+void eliminarProducto(Tienda& tienda) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PRODUCTOS);
     if (header.registrosActivos == 0){
@@ -535,7 +535,7 @@ void eliminarProducto(/* Tienda& tienda */) {
     Formatos::pausar();
 }
 
-void productosStockCritico(/* Tienda& tienda */) {
+void productosStockCritico(Tienda& tienda) {
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PRODUCTOS);
     if (header.registrosActivos == 0){
         Formatos::imprimirAdvertencia("No hay productos en el Sistema.");

@@ -176,25 +176,25 @@ void Producto::mostrarInformacionCompleta() const {
     if (indice != -1) {
         proveedor = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, indice);
     }
-    string descripcionTruncada = Formatos::truncarTexto(descripcion, 25); 
-    string nombreTruncado = Formatos::truncarTexto(nombre, 15);           
+string nombreTruncado = Formatos::truncarTexto(nombre, 16);      // setw(18)
+    string descripcionTruncada = Formatos::truncarTexto(descripcion, 23); // setw(25)
+    string proveedorTruncado = Formatos::truncarTexto(proveedor.getNombre(), 13); // setw(15)
 
     cout << RESET << left; 
-    cout << setw(4)  << id;
+    cout << setw(5)  << id;
     cout << setw(10) << codigo;
-    cout << setw(16) << nombreTruncado;
-    cout << setw(26) << descripcionTruncada;
-    cout << setw(16) << Formatos::truncarTexto(proveedor.getNombre(), 15); 
+    cout << setw(18) << nombreTruncado;
+    cout << setw(25) << descripcionTruncada;
+    cout << setw(15) << proveedorTruncado;
     cout << setw(10) << Formatos::formatearMoneda(precio);
-    cout << setw(10)  << stock;
-    cout << setw(10)  << stockMinimo;
-    cout << setw(10) << totalVendido;
-    cout << setw(12) << fechaRegistro;
-    cout << setw(12) << fechaUltimaModificacion;
-    cout << setw(10) << (eliminado ? "Elim." : "Act.") << endl;
+    cout << setw(6)  << stock;
+    cout << setw(6)  << stockMinimo;
+    cout << setw(11) << fechaRegistro;
+    cout << setw(11) << fechaUltimaModificacion;
+    cout << setw(8)  << (eliminado ? "Elim." : "Act.") << endl;
      
     if (estaBajoStockMinimo()) {
-        cout << AMARILLO << "⚠ ADVERTENCIA: Stock por debajo del mínimo" << RESET << endl;
+        cout << AMARILLO << "  " << (char)175 << " Stock Bajo: " << stock << RESET << endl;
     }
 }
 

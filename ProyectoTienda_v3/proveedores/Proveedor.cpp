@@ -187,23 +187,22 @@ void Proveedor::mostrarInformacionBasica() const {
 
 void Proveedor::mostrarInformacionCompleta() const {
     
-    string nombreTruncado = Formatos::truncarTexto(nombre, 17);
-    string direccionTruncada = Formatos::truncarTexto(direccion, 19);
-    string emailTruncado = Formatos::truncarTexto(email, 17);
+    string nombreTruncado = Formatos::truncarTexto(nombre, 15);
+    string direccionTruncada = Formatos::truncarTexto(direccion, 16);
+    string emailTruncado = Formatos::truncarTexto(email, 15);
 
     cout << RESET << left; 
     cout << setw(5)  << id;
-    cout << setw(13) << rif;
-    cout << setw(18) << nombreTruncado;
-    cout << setw(13) << telefono;
-    cout << setw(20) << direccionTruncada;
-    cout << setw(18) << emailTruncado;
+    cout << setw(11) << rif;
+    cout << setw(17) << nombreTruncado;
+    cout << setw(11) << telefono;
+    cout << setw(18) << direccionTruncada;
+    cout << setw(17) << emailTruncado;
     cout << setw(6)  << cantidadProductos;
-    cout << setw(10) << (int)totalCompras; // (int) para quitar decimales y ahorrar espacio
-    cout << setw(8)  << cantidadTransacciones;
-    cout << setw(12) << fechaRegistro;
-    cout << setw(12) << fechaUltimaModificacion;
-    cout << setw(10) << (eliminado ? "Elim." : "Activo") << endl;
+    cout << setw(9)  << (int)totalCompras; 
+    cout << setw(11) << fechaRegistro;
+    cout << setw(11) << fechaUltimaModificacion;
+    cout << setw(8)  << (eliminado ? "Elim." : "Act.") << endl;
 }
 
 // Métodos adicionales para manejo de arreglos

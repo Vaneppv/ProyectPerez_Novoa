@@ -405,7 +405,7 @@ void registrarVenta(Tienda& tienda) {
     Formatos::pausar();
 }
 
-void buscarTransacciones(/* Tienda& tienda */) {
+void buscarTransacciones(Tienda& tienda) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_TRANSACCIONES);
     if (header.registrosActivos == 0) {
@@ -575,7 +575,7 @@ void buscarTransacciones(/* Tienda& tienda */) {
     } while (opcion != 0);
 }
 
-void listarTransacciones(/* Tienda& tienda */) {
+void listarTransacciones(Tienda& tienda) {
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_TRANSACCIONES);
     if (header.registrosActivos == 0) {
         Formatos::imprimirAdvertencia("No hay transacciones registradas en el sistema");
@@ -630,7 +630,7 @@ void listarTransacciones(/* Tienda& tienda */) {
     Formatos::pausar();
 }
 
-void cancelarTransaccion(/* Tienda& tienda */) {
+void cancelarTransaccion(Tienda& tienda) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_TRANSACCIONES);
     if (header.registrosActivos == 0) {

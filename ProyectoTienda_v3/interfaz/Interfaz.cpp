@@ -43,13 +43,13 @@ void Interfaz::menuPrincipal(Tienda& tienda) {
         Formatos::limpiarPantalla();
         mostrarEncabezadoSistema();
         
-        cout << AZUL << NEGRITA << "MENÚ PRINCIPAL" << RESET << endl;
+        Formatos::imprimirTitulo("MENÚ PRINCIPAL");
         Formatos::imprimirSeparador(60, '=');
         cout << "1. Gestión de Productos" << endl
              << "2. Gestión de Proveedores" << endl
              << "3. Gestión de Clientes" << endl
              << "4. Gestión de Transacciones" << endl
-             << "5. Mantenimiento del Sistema" << endl
+             << "5. Mantenimiento e Integridad del Sistema" << endl
              << "0. Salir del Sistema" << endl << RESET;
         Formatos::imprimirSeparador(60, '=');
         
@@ -97,7 +97,7 @@ void Interfaz::menuMantenimiento(Tienda& tienda) {
              << "2. Crear Respaldo (Backup)" << endl
              << "3. Estadisticas de ventas totales por Cliente" << endl
              << "4. Reporte de Stock Crítico" << endl
-             << "0. Volver al Menú Principal" << endl << RESET;
+             << "0. Volver al Menú PriSncipal" << endl << RESET;
         
         if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
             opcion = -1;
@@ -332,6 +332,7 @@ void Interfaz::mostrarBienvenida() {
     cout << setw(28) << "" << "TIENDA JSPORT - VERSIÓN 3.0" << endl;
     cout << RESET;
     Formatos::imprimirSeparador(80, '=');
+    cout << endl;
     Formatos::pausar();
 }
 

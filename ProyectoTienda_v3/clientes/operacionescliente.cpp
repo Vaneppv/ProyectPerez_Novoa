@@ -10,7 +10,7 @@
 
 using namespace std;
 
-void registrarCliente(/* Tienda& tienda */) {
+void registrarCliente(Tienda& tienda) {
     Interfaz interfaz;
     Formatos::imprimirSubtitulo("REGISTRAR NUEVO CLIENTE");
     
@@ -69,7 +69,7 @@ void registrarCliente(/* Tienda& tienda */) {
     Formatos::pausar();
 }
 
-void buscarCliente(/* Tienda& tienda */) {
+void buscarCliente(Tienda& tienda) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_CLIENTES);
     if (header.registrosActivos == 0) {
@@ -164,7 +164,7 @@ void buscarCliente(/* Tienda& tienda */) {
     } while (opcion != 0);
 }
 
-void actualizarCliente(/* Tienda& tienda */) {
+void actualizarCliente(Tienda& tienda) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_CLIENTES);
     if (header.registrosActivos == 0){
@@ -292,7 +292,7 @@ void actualizarCliente(/* Tienda& tienda */) {
 }
 
 
-void listarClientes(/* Tienda& tienda */) {
+void listarClientes(Tienda& tienda) {
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_CLIENTES);
     if (header.registrosActivos == 0) {
         Formatos::imprimirAdvertencia("No hay clientes registrados en el sistema");
@@ -323,7 +323,7 @@ void listarClientes(/* Tienda& tienda */) {
     Formatos::pausar();
 }
 
-void eliminarCliente(/* Tienda& tienda */) {
+void eliminarCliente(Tienda& tienda) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_CLIENTES);
     if (header.registrosActivos == 0){

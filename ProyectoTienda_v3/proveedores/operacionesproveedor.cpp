@@ -10,7 +10,7 @@
 
 using namespace std;
 
-void registrarProveedor(/* Tienda& tienda */) {
+void registrarProveedor(Tienda& tienda) {
     Formatos::imprimirSubtitulo("REGISTRAR NUEVO PROVEEDOR");
     
     Interfaz interfaz;
@@ -68,7 +68,7 @@ void registrarProveedor(/* Tienda& tienda */) {
     Formatos::pausar();
 }
 
-void buscarProveedor(/* Tienda& tienda */) {
+void buscarProveedor(Tienda& tienda) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PROVEEDORES);
     if (header.registrosActivos == 0) {
@@ -163,7 +163,7 @@ void buscarProveedor(/* Tienda& tienda */) {
     } while (opcion != 0);
 }
 
-void actualizarProveedor(/* Tienda& tienda */) {
+void actualizarProveedor(Tienda& tienda) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PROVEEDORES);
     if (header.registrosActivos == 0){
@@ -291,7 +291,7 @@ void actualizarProveedor(/* Tienda& tienda */) {
 }
 
 
-void listarProveedores(/* Tienda& tienda */) {
+void listarProveedores(Tienda& tienda) {
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PROVEEDORES);
     if (header.registrosActivos == 0) {
         Formatos::imprimirAdvertencia("No hay proveedores registrados en el sistema");
@@ -322,7 +322,7 @@ void listarProveedores(/* Tienda& tienda */) {
     Formatos::pausar();
 }
 
-void eliminarProveedor(/* Tienda& tienda */) {
+void eliminarProveedor(Tienda& tienda) {
     Interfaz interfaz;
     ArchivoHeader header = GestorArchivos::leerHeader(ARCHIVO_PROVEEDORES);
     if (header.registrosActivos == 0){

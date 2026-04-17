@@ -179,18 +179,17 @@ void Cliente::mostrarInformacionCompleta() const {
     string emailTruncado = Formatos::truncarTexto(email, 20);
     
     cout << RESET;
-    cout << left;
-    cout << setw(5) << id;
-    cout << setw(13) << cedula;
+    cout << setw(5)  << id;
+    cout << setw(11) << cedula;
     cout << setw(18) << nombreTruncado;
-    cout << setw(13) << telefono;
+    cout << setw(12) << telefono;
     cout << setw(20) << direccionTruncada;
     cout << setw(18) << emailTruncado;
-    cout << setw(10) << totalCompras;
-    cout << setw(8) << cantidadTransacciones;
-    cout << setw(12) << fechaRegistro;
-    cout << setw(12) << fechaUltimaModificacion;
-    cout << setw(10) << (eliminado ? "Eliminado" : "Activo") << endl;
+    cout << setw(9)  << (int)totalCompras; // (int) para ahorrar espacio en tabla
+    cout << setw(6)  << cantidadTransacciones;
+    cout << setw(11) << fechaRegistro;
+    cout << setw(11) << fechaUltimaModificacion;
+    cout << setw(9)  << (eliminado ? "Elim." : "Act.") << endl;
 }
 
 // Métodos adicionales para manejo de arreglos
