@@ -53,6 +53,12 @@ public:
     template<typename T>
     static int* buscarRegistroPorNombre(const char* nombreArchivo, const char* consulta, int* numResultados);
     
+    template<typename T>
+    static int buscarPorRif(const char* nombreArchivo, const char* rif);
+    
+    template<typename T>
+    static int buscarPorCedula(const char* nombreArchivo, const char* cedula);
+    
     // Operaciones específicas para transacciones
     static Transaccion* buscarTransaccionesPorTipo(const char* nombreArchivo, const char* tipo, int* numResultados);
     static Transaccion* buscarTransaccionesPorFecha(const char* nombreArchivo, const char* fecha, int* numResultados);
@@ -249,6 +255,52 @@ int* GestorArchivos::buscarRegistroPorNombre(const char* nombreArchivo, const ch
     
     archivo.close();
     return indices;
+}
+
+template<typename T>
+int GestorArchivos::buscarPorRif(const char* nombreArchivo, const char* rif) {
+    ifstream archivo(nombreArchivo, ios::binary);
+    if (!archivo.is_open()) {
+        cout << ROJO << "Error: No se pudo abrir el archivo " << nombreArchivo << endl << RESET;
+        return -1;
+    }
+
+    ArchivoHeader header;
+    archivo.read(reinterpret_cast<char*>(&header), sizeof(ArchivoHeader));
+
+    for (int i = 0; i < header.cantidadRegistros; i++) {
+        T temp;
+        archivo.read(reinterpret_cast<char*>(&temp), sizeof(T));
+        if (!temp.isEliminado() && strcmp(temp.getRif(), rif) == 0) {
+            archivo.close();
+            return i;
+        }
+    }
+    archivo.close();
+    return -1;
+}
+
+template<typename T>
+int GestorArchivos::buscarPorCedula(const char* nombreArchivo, const char* cedula) {
+    ifstream archivo(nombreArchivo, ios::binary);
+    if (!archivo.is_open()) {
+        cout << ROJO << "Error: No se pudo abrir el archivo " << nombreArchivo << endl << RESET;
+        return -1;
+    }
+
+    ArchivoHeader header;
+    archivo.read(reinterpret_cast<char*>(&header), sizeof(ArchivoHeader));
+
+    for (int i = 0; i < header.cantidadRegistros; i++) {
+        T temp;
+        archivo.read(reinterpret_cast<char*>(&temp), sizeof(T));
+        if (!temp.isEliminado() && strcmp(temp.getCedula(), cedula) == 0) {
+            archivo.close();
+            return i;
+        }
+    }
+    archivo.close();
+    return -1;
 }
 
 template<typename T>

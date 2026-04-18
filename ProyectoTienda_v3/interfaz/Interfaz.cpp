@@ -97,7 +97,7 @@ void Interfaz::menuMantenimiento(Tienda& tienda) {
              << "2. Crear Respaldo (Backup)" << endl
              << "3. Estadisticas de ventas totales por Cliente" << endl
              << "4. Reporte de Stock Crítico" << endl
-             << "0. Volver al Menú PriSncipal" << endl << RESET;
+             << "0. Volver al Menú Principal" << endl << RESET;
         
         if (!interfaz.solicitarEntero("Seleccione una opción", opcion)) {
             opcion = -1;

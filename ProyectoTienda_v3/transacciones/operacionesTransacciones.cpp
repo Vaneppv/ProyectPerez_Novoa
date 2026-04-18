@@ -85,9 +85,8 @@ void registrarCompra(Tienda& tienda) {
             break;
         }
         
-        if (!interfaz.solicitarFloat("Ingrese costo unitario", costo)) {
-            break;
-        }
+        // Usar el precio del producto almacenado
+        costo = producto.getPrecio();
         
         // Validar espacio en carrito antes de agregar
         if (cantItems >= 100) {
@@ -288,10 +287,6 @@ void registrarVenta(Tienda& tienda) {
             Formatos::pausar();
             continue;
         }
-        
-        if (!interfaz.solicitarFloat("Ingrese precio unitario", precio)) {
-            break;
-        }
                 
         // Validar espacio en carrito antes de agregar
         if (cantItems >= 100) {
@@ -303,10 +298,9 @@ void registrarVenta(Tienda& tienda) {
         DetalleTransaccion nuevoDetalle;
         nuevoDetalle.setIdProducto(productoId);
         nuevoDetalle.setCantidad(cantidad);
-        nuevoDetalle.setPrecioUnitario(precio);
         carrito[cantItems] = nuevoDetalle;
                 
-        totalVenta += cantidad * precio;
+        totalVenta += cantidad * producto.getPrecio();
         cantItems++;
                 
         Formatos::imprimirExito("Producto agregado al carrito.");
@@ -339,7 +333,7 @@ void registrarVenta(Tienda& tienda) {
         
         cout << left << setw(20) << producto.getNombre() 
              << setw(8) << carrito[i].getCantidad() 
-             << setw(12) << carrito[i].getPrecioUnitario() * carrito[i].getCantidad() << endl;
+             << setw(12) << producto.getPrecio() * carrito[i].getCantidad() << endl;
     }
     
     cout << "TOTAL DE VENTA: $" << fixed << setprecision(2) << totalVenta << endl;
@@ -366,7 +360,11 @@ void registrarVenta(Tienda& tienda) {
                 detalle.setIdTransaccion(transaccion.getId());
                 detalle.setIdProducto(carrito[i].getIdProducto());
                 detalle.setCantidad(carrito[i].getCantidad());
-                detalle.setPrecioUnitario(carrito[i].getPrecioUnitario());
+                
+                // Obtener el producto correcto para guardar su precio
+                Producto prodDetalle = GestorArchivos::obtenerRegistroPorId<Producto>(ARCHIVO_PRODUCTOS, carrito[i].getIdProducto());
+                detalle.setPrecioUnitario(prodDetalle.getPrecio());
+                
                 if (!GestorArchivos::guardarNuevoRegistro<DetalleTransaccion>(ARCHIVO_DETALLES, detalle)) {
                     string errorMsg = "Error al guardar detalle de transacción";
                     Formatos::imprimirError(errorMsg.c_str());
@@ -584,7 +582,6 @@ void listarTransacciones(Tienda& tienda) {
     }
     
     Formatos::imprimirSubtitulo("LISTADO DE TRANSACCIONES");
-    Formatos::EncabezadoCompletoTransacciones();
     
     // Leer y mostrar todas las transacciones
     ifstream archivo(ARCHIVO_TRANSACCIONES, ios::binary);
@@ -602,6 +599,7 @@ void listarTransacciones(Tienda& tienda) {
     while (archivo.read(reinterpret_cast<char*>(&transaccion), sizeof(Transaccion)) && 
            count < header.cantidadRegistros) {
         if (!transaccion.isEliminado()) {
+            Formatos::EncabezadoCompletoTransacciones();
             transaccion.mostrarInformacionCompleta();
             count++;
             

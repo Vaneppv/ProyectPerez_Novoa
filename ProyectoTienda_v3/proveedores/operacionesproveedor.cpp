@@ -133,16 +133,13 @@ void buscarProveedor(Tienda& tienda) {
             case 3: {
                 char rif[20];
                 if (interfaz.solicitarTexto("Ingrese el rif a buscar", rif, MAX_RIF)) {
-                    int numResultados = 0;
-                    int* indices = GestorArchivos::buscarRegistroPorNombre<Proveedor>(ARCHIVO_PROVEEDORES, rif, &numResultados);
-                    if (indices != nullptr) {
-                        Formatos::imprimirExito("Se encontraron coincidencias:");
+                    // Buscar por RIF específico
+                    int indice = GestorArchivos::buscarPorRif<Proveedor>(ARCHIVO_PROVEEDORES, rif);
+                    if (indice != -1) {
+                        Formatos::imprimirExito("Proveedor encontrado:");
                         Formatos::EncabezadoBasicoProveedor();
-                        for (int i = 0; i < numResultados; i++) {
-                            Proveedor proveedor = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, indices[i]);
-                            proveedor.mostrarInformacionBasica();
-                        }
-                        delete[] indices;
+                        Proveedor proveedor = GestorArchivos::obtenerRegistroPorIndice<Proveedor>(ARCHIVO_PROVEEDORES, indice);
+                        proveedor.mostrarInformacionBasica();
                     } else {
                         Formatos::imprimirAdvertencia("No se encontraron coincidencias");
                     }

@@ -1,0 +1,5 @@
+=== INFORMACIÓN DE RESPALDO ===
+Fecha y hora: BACKUP_17-04-2026_13-47-48
+Archivos respaldados: 5 de 5
+Versión del sistema: ProyectoTienda_v3
+================================

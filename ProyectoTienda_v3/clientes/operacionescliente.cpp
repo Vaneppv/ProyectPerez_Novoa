@@ -43,8 +43,8 @@ void registrarCliente(Tienda& tienda) {
     
     if (!interfaz.solicitarTexto("Ingrese el email del cliente", buffer, MAX_EMAIL)) return;
     
-    if (Validaciones::validarEmail(buffer)) {
-        Formatos::imprimirError("El email necesita una @");
+    if (!Validaciones::validarEmail(buffer)) {
+        Formatos::imprimirError("El email no tiene un formato válido (ej: usuario@dominio.com)");
         Formatos::pausar();
         return;
     }
@@ -133,17 +133,14 @@ void buscarCliente(Tienda& tienda) {
             
             case 3: {
                 char cedulaBusqueda[20];
-                if (interfaz.solicitarTexto("Ingrese el cedula a buscar", cedulaBusqueda, MAX_CEDULA)) {
-                    int numResultados = 0;
-                    int* indices = GestorArchivos::buscarRegistroPorNombre<Cliente>(ARCHIVO_CLIENTES, cedulaBusqueda, &numResultados);
-                    if (indices != nullptr) {
-                        Formatos::imprimirExito("Se encontraron coincidencias:");
+                if (interfaz.solicitarTexto("Ingrese la cedula a buscar", cedulaBusqueda, MAX_CEDULA)) {
+                    // Buscar por cédula específica
+                    int indice = GestorArchivos::buscarPorCedula<Cliente>(ARCHIVO_CLIENTES, cedulaBusqueda);
+                    if (indice != -1) {
+                        Formatos::imprimirExito("Cliente encontrado:");
                         Formatos::EncabezadoBasicoCliente();
-                        for (int i = 0; i < numResultados; i++) {
-                            Cliente cliente = GestorArchivos::obtenerRegistroPorIndice<Cliente>(ARCHIVO_CLIENTES, indices[i]);
-                            cliente.mostrarInformacionBasica();
-                        }
-                        delete[] indices;
+                        Cliente cliente = GestorArchivos::obtenerRegistroPorIndice<Cliente>(ARCHIVO_CLIENTES, indice);
+                        cliente.mostrarInformacionBasica();
                     } else {
                         Formatos::imprimirAdvertencia("No se encontraron coincidencias");
                     }
@@ -197,7 +194,7 @@ void actualizarCliente(Tienda& tienda) {
     // Menú de campos editables
     do {
         Formatos::imprimirSubtitulo("¿Qué desea editar?");
-        cout << "1. Rif" << endl
+        cout << "1. Cedula" << endl
              << "2. Nombre" << endl
              << "3. Telefono" << endl
              << "4. Email" << endl
